@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { env } from '../../config/env'
 import { tokenStorage } from '../../utils/storage'
+import { getApiErrorMessage } from './httpError'
 
 export const apiClient = axios.create({
   baseURL: env.apiBaseUrl,
@@ -35,10 +36,9 @@ apiClient.interceptors.response.use(
 
       tokenStorage.clear()
 
-      const message =
-        typeof error?.response?.data === 'string' && error.response.data.trim()
-          ? error.response.data
-          : 'Sessão expirada. Faça login novamente.'
+      const message = getApiErrorMessage(error, {
+        fallback: 'Sua sessão expirou. Faça login novamente.',
+      })
 
       sessionStorage.setItem('auth:redirectReason', message)
 
