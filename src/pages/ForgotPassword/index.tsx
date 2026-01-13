@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { authService } from '../../services/auth/auth.service'
 import type { ForgotPasswordDTO } from '../../interfaces/auth'
-import { getApiErrorMessage } from '../../services/http/httpError'
+import { notify } from '../../utils/notify'
 
 export default function ForgotPassword() {
   const [formData, setFormData] = useState<ForgotPasswordDTO>({
@@ -26,9 +25,9 @@ export default function ForgotPassword() {
     try {
       const response = await authService.forgotPassword(formData)
       setResetToken(response.reset_token)
-      toast.success('Solicitação recebida. Token gerado!')
+      notify.success('Solicitação recebida. Token gerado.')
     } catch (error) {
-      toast.error(getApiErrorMessage(error))
+      notify.apiError(error)
     } finally {
       setLoading(false)
     }
@@ -39,9 +38,9 @@ export default function ForgotPassword() {
 
     try {
       await navigator.clipboard.writeText(resetToken)
-      toast.success('Token copiado!')
+      notify.success('Token copiado.')
     } catch {
-      toast.error('Não foi possível copiar o token')
+      notify.error('Não foi possível copiar o token.')
     }
   }
 

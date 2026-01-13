@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { useAuth } from '../../hooks/useAuth'
+import { notify } from '../../utils/notify'
 
 export default function Home() {
   const { isAuthenticated, token, logout } = useAuth()
 
   const handleLogout = () => {
     logout()
-    toast.info('Você saiu da sua conta.')
+    notify.info('Você saiu da sua conta.')
   }
 
   return (

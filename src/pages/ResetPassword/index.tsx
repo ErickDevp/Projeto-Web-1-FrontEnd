@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import { authService } from '../../services/auth/auth.service'
 import type { ResetPasswordDTO } from '../../interfaces/auth'
-import { getApiErrorMessage } from '../../services/http/httpError'
+import { notify } from '../../utils/notify'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
@@ -34,10 +33,10 @@ export default function ResetPassword() {
 
     try {
       const message = await authService.resetPassword(formData)
-      toast.success(message || 'Senha alterada com sucesso!')
+      notify.success(message || 'Senha alterada com sucesso.')
       navigate('/login')
     } catch (error) {
-      toast.error(getApiErrorMessage(error))
+      notify.apiError(error)
     } finally {
       setLoading(false)
     }

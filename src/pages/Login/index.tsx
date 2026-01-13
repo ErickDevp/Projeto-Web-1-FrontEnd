@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react'
 import type { FormEvent, ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import type { LoginDTO } from '../../interfaces/auth'
 import { useAuth } from '../../hooks/useAuth'
-import { getApiErrorMessage } from '../../services/http/httpError'
+import { notify } from '../../utils/notify'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -15,7 +14,7 @@ export default function Login() {
     const reason = sessionStorage.getItem('auth:redirectReason')
     if (reason) {
       sessionStorage.removeItem('auth:redirectReason')
-      toast.info(reason)
+      notify.info(reason)
     }
   }, [])
 
@@ -36,10 +35,10 @@ export default function Login() {
 
     try {
       await login(formData)
-      toast.success('Login realizado com sucesso!')
+      notify.success('Login realizado com sucesso.')
       navigate('/')
     } catch (error) {
-      toast.error(getApiErrorMessage(error))
+      notify.apiError(error)
     } finally {
       setLoading(false)
     }

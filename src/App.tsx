@@ -21,7 +21,15 @@ function App() {
         </Route>
       </Routes>
 
-      <ToastContainer autoClose={3000} />
+      <ToastContainer
+        position="top-right"
+        theme="colored"
+        autoClose={3000}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
     </>
   );
 }

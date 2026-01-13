@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
 import type { RegisterDTO } from '../../interfaces/auth'
 import { useAuth } from '../../hooks/useAuth'
-import { getApiErrorMessage } from '../../services/http/httpError'
+import { notify } from '../../utils/notify'
 
 export default function Register() {
   const navigate = useNavigate();
@@ -28,10 +27,10 @@ export default function Register() {
 
     try {
       await register(formData)
-      toast.success('Conta criada com sucesso!')
+      notify.success('Conta criada com sucesso.')
       navigate('/')
     } catch (error) {
-      toast.error(getApiErrorMessage(error))
+      notify.apiError(error)
     } finally {
       setLoading(false)
     }
