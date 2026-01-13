@@ -1,0 +1,36 @@
+/* Design Tokens (CSS Variables)
+   - Padrão: dark
+   - Override: [data-theme="light"]
+*/
+
+:root {
+  /* Backgrounds (dark) */
+  --bg-primary: #051522; /* preto primario */
+  --bg-secondary: #021422; /* preto secundario */
+
+  /* Text (dark) */
+  --text-primary: #ffffff; /* branco puro */
+  --text-secondary: #66727b; /* cinza azulado */
+
+  /* Accents */
+  --accent-pool: #49c5b6; /* azul piscina */
+  --accent-sky: #2779a7; /* azul ceu */
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* Backgrounds (light) */
+  --bg-primary: #f8f8ff; /* branco primario */
+  --bg-secondary: #f8f8ff; /* branco secundario */
+
+  /* Text (light) */
+  --text-primary: #000000; /* preto puro */
+  --text-secondary: #66727b; /* cinza azulado */
+
+  /* Accents (mesmos do dark) */
+  --accent-pool: #49c5b6;
+  --accent-sky: #2779a7;
+
+  color-scheme: light;
+}

@@ -1,0 +1,21 @@
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  a {
+    color: var(--accent-sky);
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent-pool) 35%, transparent);
+  }
+}
