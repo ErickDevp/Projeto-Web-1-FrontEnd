@@ -20,4 +20,24 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // Evita espalhar chamadas HTTP pelas páginas/componentes.
+    // A regra NÃO se aplica a src/services/**, onde o apiClient é permitido.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/services/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/services/http/client', '**/services/api'],
+              message:
+                'Não importe o apiClient diretamente fora de src/services. Use os services (camada fina) para acessar a API.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])
