@@ -7,18 +7,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Runtime / cache
+.vite
+node_modules/.vite
+.eslintcache
+*.tsbuildinfo
+
 node_modules
 dist
 dist-ssr
+
+# Env files (keep examples)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Local overrides
 *.local
+
+# Coverage
+coverage
 
 # Editor directories and files
 .vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Hosting / deployment
+.vercel
+.netlify
