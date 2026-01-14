@@ -1,23 +1,21 @@
-@layer base {
-  html,
-  body {
-    height: 100%;
-  }
+html,
+body {
+  height: 100%;
+}
 
-  body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Montserrat', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-      Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Montserrat', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+    Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  a {
-    color: var(--accent-sky);
-  }
+a {
+  color: var(--accent-sky);
+}
 
-  ::selection {
-    background: color-mix(in srgb, var(--accent-pool) 35%, transparent);
-  }
+::selection {
+  background: color-mix(in srgb, var(--accent-pool) 35%, transparent);
 }

@@ -1,66 +1,67 @@
-import { Link } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
-import { notify } from '../../utils/notify'
+import { useRef } from 'react'
+import HomeMainContent from '../../components/home/HomeMainContent'
+import HomeHero from '../../components/home/Home'
 
 export default function Home() {
-  const { isAuthenticated, token, logout } = useAuth()
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const wheelUpLockRef = useRef(false)
 
-  const handleLogout = () => {
-    logout()
-    notify.info('Você saiu da sua conta.')
+  const scrollToId = (id: string, durationMs = 220) => {
+    const el = document.getElementById(id)
+    const container = containerRef.current
+    if (!el || !container) return
+
+    const startY = container.scrollTop
+    const targetY = el.offsetTop
+    const delta = targetY - startY
+    const start = performance.now()
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs)
+      container.scrollTo({ top: startY + delta * easeOutCubic(t) })
+      if (t < 1) requestAnimationFrame(step)
+    }
+
+    requestAnimationFrame(step)
   }
 
+  const scrollToMain = () => scrollToId('home-main')
+  const scrollToHero = () => scrollToId('home-hero')
+
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-lg">
-        <h1 className="text-2xl font-bold mb-4">Home</h1>
+    <div
+      ref={containerRef}
+      className="h-screen overflow-y-auto bg-bg-primary scroll-smooth snap-y snap-mandatory"
+    >
+      <div id="home-hero" className="snap-start">
+        <HomeHero onNext={scrollToMain} />
+      </div>
 
-        <div className="p-3 border rounded bg-gray-50">
-          <p className="font-semibold">
-            Status: {isAuthenticated ? 'Autenticado' : 'Não autenticado'}
-          </p>
-          {isAuthenticated && token && (
-            <p className="text-xs text-gray-600 mt-2 break-all">
-              Token (início): <span className="font-mono">{token.slice(0, 20)}...</span>
-            </p>
-          )}
-        </div>
+      <div
+        id="home-main"
+        className="snap-start"
+        onWheel={(e) => {
+          if (wheelUpLockRef.current) return
+          if (e.deltaY >= 0) return
 
-        <div className="mt-4 flex gap-2">
-          {isAuthenticated ? (
-            <button
-              type="button"
-              className="flex-1 bg-red-600 text-white p-2 rounded hover:bg-red-700"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-          ) : (
-            <>
-              <Link
-                className="flex-1 text-center bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-                to="/login"
-              >
-                Login
-              </Link>
-              <Link
-                className="flex-1 text-center border p-2 rounded hover:bg-gray-50"
-                to="/register"
-              >
-                Criar conta
-              </Link>
-            </>
-          )}
-        </div>
+          const container = containerRef.current
+          const el = document.getElementById('home-main')
+          if (!container || !el) return
 
-        <div className="mt-4 text-sm flex justify-between">
-          <Link className="text-blue-600 hover:underline" to="/forgot-password">
-            Esqueci a senha
-          </Link>
-          <Link className="text-blue-600 hover:underline" to="/reset-password">
-            Resetar senha
-          </Link>
-        </div>
+          // Só "puxa" para o Hero quando o scroll está no início do conteúdo.
+          if (Math.abs(container.scrollTop - el.offsetTop) > 16) return
+
+          wheelUpLockRef.current = true
+          scrollToHero()
+
+          setTimeout(() => {
+            wheelUpLockRef.current = false
+          }, 600)
+        }}
+      >
+        <HomeMainContent />
       </div>
     </div>
   )
