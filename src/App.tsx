@@ -6,6 +6,15 @@ import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Home from './pages/Home'
+import ProtectedRoute from './routes/ProtectedRoute'
+import DashboardLayout from './pages/Dashboard'
+import DashboardHome from './pages/Dashboard/Home'
+import DashboardPerfil from './pages/Dashboard/Perfil'
+import DashboardCartoes from './pages/Dashboard/Cartoes'
+import DashboardRegistrarPontos from './pages/Dashboard/RegistrarPontos'
+import DashboardNotificacoes from './pages/Dashboard/Notificacoes'
+import DashboardRelatorios from './pages/Dashboard/Relatorios'
+import DashboardConfiguracoes from './pages/Dashboard/Configuracoes'
 import Modal from './components/ui/Modal'
 import Terms from './pages/Legal/Terms'
 import Privacy from './pages/Legal/Privacy'
@@ -62,6 +71,18 @@ function App() {
       <Routes location={backgroundLocation ?? location}>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="/dashboard/home" replace />} />
+            <Route path="home" element={<DashboardHome />} />
+            <Route path="perfil" element={<DashboardPerfil />} />
+            <Route path="cartoes" element={<DashboardCartoes />} />
+            <Route path="registrar-pontos" element={<DashboardRegistrarPontos />} />
+            <Route path="notificacoes" element={<DashboardNotificacoes />} />
+            <Route path="relatorios" element={<DashboardRelatorios />} />
+            <Route path="configuracoes" element={<DashboardConfiguracoes />} />
+          </Route>
+        </Route>
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/register" element={<Register />} />

@@ -84,11 +84,7 @@ export default function Register({ embedded }: Props) {
     try {
       await register(payload)
       notify.success('Conta criada com sucesso.')
-      if (embedded) {
-        navigate(-1)
-      } else {
-        navigate('/')
-      }
+      navigate('/dashboard/home', { replace: true })
     } catch (error) {
       notify.apiError(error)
     } finally {

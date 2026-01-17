@@ -84,11 +84,7 @@ export default function Login({ embedded }: Props) {
     try {
       await login(payload)
       notify.success('Login realizado com sucesso.')
-      if (embedded) {
-        navigate(-1)
-      } else {
-        navigate('/')
-      }
+      navigate('/dashboard/home', { replace: true })
     } catch (error) {
       notify.apiError(error)
     } finally {
