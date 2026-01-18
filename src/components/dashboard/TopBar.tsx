@@ -1,8 +1,41 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useTheme } from '../../hooks/useTheme'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notificacaoService } from '../../services/notificacao/notificacao.service'
+
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === 'dark'
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-fg-primary hover:bg-white/10 transition-all duration-300"
+      aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+    >
+      {isDark ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
+          <circle cx="12" cy="12" r="4" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 20v2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.93 4.93l1.41 1.41" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17.66 17.66l1.41 1.41" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2 12h2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20 12h2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.93 19.07l1.41-1.41" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17.66 6.34l1.41-1.41" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+      )}
+    </button>
+  )
+}
 
 type Props = {
   unreadNotifications?: number
@@ -33,7 +66,7 @@ export default function TopBar({
 
     const section = location.pathname.split('/')[2] || 'home'
     const titleMap: Record<string, string> = {
-      home: 'Home',
+      home: 'Dashboard',
       perfil: 'Meu perfil',
       cartoes: 'Cartões',
       'registrar-pontos': 'Registrar pontos',
@@ -146,7 +179,7 @@ export default function TopBar({
             ) : null}
           </button>
           {openMenu === 'notifications' ? (
-            <div className="absolute right-0 top-12 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fg-secondary">
                 Últimas notificações
               </p>
@@ -185,7 +218,7 @@ export default function TopBar({
             </svg>
           </NavLink>
           {openMenu === 'settings' ? (
-            <div className="absolute right-0 top-12 w-60 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="absolute right-0 top-12 z-50 w-60 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fg-secondary">
                 Atalhos de configuração
               </p>
@@ -204,23 +237,7 @@ export default function TopBar({
           ) : null}
         </div>
 
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-fg-primary hover:bg-white/10"
-          aria-label="Alternar tema"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-            <circle cx="12" cy="12" r="4" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v2" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 20v2" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.93 4.93l1.41 1.41" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17.66 17.66l1.41 1.41" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2 12h2" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20 12h2" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.93 19.07l1.41-1.41" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17.66 6.34l1.41-1.41" />
-          </svg>
-        </button>
+        <ThemeToggleButton />
 
         <div className="relative">
           <button
@@ -236,7 +253,7 @@ export default function TopBar({
             />
           </button>
           {openMenu === 'profile' ? (
-            <div className="absolute right-0 top-12 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-fg-primary">{displayName}</p>
                 <p className="text-xs text-fg-secondary">{displayEmail}</p>

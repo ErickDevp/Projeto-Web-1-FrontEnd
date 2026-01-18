@@ -2,7 +2,7 @@ export default function Relatorios() {
   return (
     <section className="space-y-4">
       <header>
-        <h1 className="text-2xl font-bold">Relatórios</h1>
+        <h1 className="titulo-grafico text-2xl font-bold">Relatórios</h1>
         <p className="mt-1 text-sm text-fg-secondary">Acompanhe a evolução dos seus pontos.</p>
       </header>
 

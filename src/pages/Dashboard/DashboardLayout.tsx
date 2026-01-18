@@ -13,12 +13,14 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    label: 'Home',
+    label: 'Dashboard',
     to: '/dashboard/home',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5L12 3l9 7.5" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 9.5V21h12V9.5" />
+        <rect x="3" y="3" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="14" y="3" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="3" y="14" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="14" y="14" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },

@@ -4,4 +4,5 @@ export interface MovimentacaoPontosDTO {
   cartaoId: number
   programaId: number
   valor: number | string
+  data?: string // ISO date string (YYYY-MM-DD)
 }

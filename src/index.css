@@ -9,4 +9,479 @@
 	.titulo-grafico {
 		@apply bg-gradient-to-r from-[#2779a7] to-[#49c5b6] bg-clip-text text-transparent;
 	}
+
+	/* Secondary button that works in both themes */
+	.btn-secondary {
+		@apply flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold transition-all duration-300;
+		background-color: var(--glass-bg);
+		border: 1px solid var(--glass-border);
+		color: var(--text-primary);
+	}
+
+	.btn-secondary:hover {
+		background-color: rgba(73, 197, 182, 0.1);
+		border-color: rgba(73, 197, 182, 0.3);
+		box-shadow: 0 0 20px rgba(73, 197, 182, 0.15);
+	}
+
+	/* Primary button with gradient */
+	.btn-primary {
+		@apply flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold text-white transition-all duration-300;
+		background: var(--gradient-primary);
+	}
+
+	.btn-primary:hover {
+		box-shadow: 0 0 25px rgba(73, 197, 182, 0.4);
+		transform: scale(1.02);
+	}
+}
+
+/* =========================================
+   Modern Dashboard Animations & Components
+   ========================================= */
+
+/* Keyframes */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+@keyframes pulse-glow {
+
+	0%,
+	100% {
+		box-shadow: var(--shadow-glow-pool);
+	}
+
+	50% {
+		box-shadow: 0 0 30px rgba(73, 197, 182, 0.5), 0 0 60px rgba(73, 197, 182, 0.25);
+	}
+}
+
+@keyframes float {
+
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(-4px);
+	}
+}
+
+@keyframes progress-fill {
+	from {
+		width: 0%;
+	}
+}
+
+/* Dashboard Card Base */
+.dashboard-card {
+	position: relative;
+	min-height: 240px;
+	border-radius: 1rem;
+	padding: 1.5rem;
+	background: var(--glass-bg);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--shadow-md);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	animation: fadeInUp 0.6s ease-out both;
+	overflow: hidden;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.dashboard-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	padding: 1px;
+	background: var(--gradient-border);
+	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	mask-composite: xor;
+	-webkit-mask-composite: xor;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.dashboard-card:hover {
+	transform: translateY(-4px);
+	box-shadow: var(--shadow-lg), var(--shadow-glow-pool);
+}
+
+.dashboard-card:hover::before {
+	opacity: 1;
+}
+
+/* Staggered animations */
+.dashboard-card:nth-child(1) {
+	animation-delay: 0ms;
+}
+
+.dashboard-card:nth-child(2) {
+	animation-delay: 100ms;
+}
+
+.dashboard-card:nth-child(3) {
+	animation-delay: 200ms;
+}
+
+.dashboard-card:nth-child(4) {
+	animation-delay: 300ms;
+}
+
+.dashboard-card:nth-child(5) {
+	animation-delay: 400ms;
+}
+
+.dashboard-card:nth-child(6) {
+	animation-delay: 500ms;
+}
+
+/* Stat Card (for featured stats) */
+.stat-card {
+	background: linear-gradient(145deg, rgba(39, 121, 167, 0.15) 0%, rgba(73, 197, 182, 0.1) 100%);
+	border: 1px solid rgba(73, 197, 182, 0.2);
+	box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.stat-card:hover {
+	box-shadow: var(--shadow-lg), var(--shadow-glow-pool);
+	border-color: rgba(73, 197, 182, 0.4);
+}
+
+/* Card icon container */
+.card-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(39, 121, 167, 0.2) 0%, rgba(73, 197, 182, 0.2) 100%);
+	color: var(--accent-pool);
+	transition: all 0.3s ease;
+}
+
+.dashboard-card:hover .card-icon {
+	transform: scale(1.1);
+	box-shadow: var(--shadow-glow-pool);
+}
+
+/* Progress bar modern */
+.progress-bar {
+	height: 8px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.1);
+	overflow: hidden;
+	position: relative;
+}
+
+.progress-bar-fill {
+	height: 100%;
+	border-radius: 4px;
+	background: var(--gradient-primary);
+	animation: progress-fill 1s ease-out both;
+	position: relative;
+}
+
+.progress-bar-fill::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	background-size: 200% 100%;
+	animation: shimmer 2s infinite;
+}
+
+/* Chart container */
+.chart-container {
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid var(--glass-border);
+	border-radius: 12px;
+	padding: 1rem;
+	transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+	background: rgba(0, 0, 0, 0.3);
+	border-color: rgba(73, 197, 182, 0.3);
+}
+
+/* Mini card for items inside dashboard cards */
+.mini-card {
+	border-radius: 12px;
+	border: 1px solid var(--glass-border);
+	background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+	padding: 0.75rem 1rem;
+	transition: all 0.25s ease;
+}
+
+.mini-card:hover {
+	background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+	border-color: rgba(73, 197, 182, 0.3);
+	transform: translateX(4px);
+}
+
+/* Badge/Tag styling */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	border-radius: 20px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	background: linear-gradient(135deg, rgba(73, 197, 182, 0.2) 0%, rgba(39, 121, 167, 0.2) 100%);
+	color: var(--accent-pool);
+	border: 1px solid rgba(73, 197, 182, 0.3);
+}
+
+/* Stat value with gradient */
+.stat-value {
+	font-size: 2rem;
+	font-weight: 700;
+	background: var(--gradient-primary);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	line-height: 1.2;
+}
+
+/* Section header styling */
+.section-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 1rem;
+}
+
+.section-title {
+	font-size: 1.125rem;
+	font-weight: 600;
+	background: var(--gradient-primary);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+/* Responsive grid for mini cards */
+.mini-card-grid {
+	display: grid;
+	gap: 0.75rem;
+	overflow-y: auto;
+	max-height: 300px;
+	flex: 1;
+}
+
+.mini-card-grid::-webkit-scrollbar {
+	width: 4px;
+}
+
+.mini-card-grid::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 2px;
+}
+
+.mini-card-grid::-webkit-scrollbar-thumb {
+	background: rgba(73, 197, 182, 0.3);
+	border-radius: 2px;
+}
+
+.mini-card-grid::-webkit-scrollbar-thumb:hover {
+	background: rgba(73, 197, 182, 0.5);
+}
+
+@media (min-width: 768px) {
+	.mini-card-grid.cols-2 {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.mini-card-grid.cols-3 {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+/* Dashboard grid layout - equalizes row heights */
+.dashboard-grid {
+	display: grid;
+	gap: 1.5rem;
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+	.dashboard-grid {
+		grid-template-columns: repeat(2, 1fr);
+		grid-auto-rows: 1fr;
+	}
+
+	.dashboard-grid .full-width {
+		grid-column: span 2;
+	}
+}
+
+/* =========================================
+   Light Mode Overrides
+   ========================================= */
+
+[data-theme="light"] .dashboard-card {
+	background: var(--glass-bg);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--shadow-md);
+}
+
+[data-theme="light"] .dashboard-card:hover {
+	box-shadow: var(--shadow-lg), var(--shadow-glow-pool);
+}
+
+[data-theme="light"] .stat-card {
+	background: linear-gradient(145deg, rgba(39, 121, 167, 0.08) 0%, rgba(73, 197, 182, 0.05) 100%);
+	border: 1px solid rgba(73, 197, 182, 0.2);
+}
+
+[data-theme="light"] .mini-card {
+	background: linear-gradient(145deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.01) 100%);
+	border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .mini-card:hover {
+	background: linear-gradient(145deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.02) 100%);
+	border-color: rgba(73, 197, 182, 0.3);
+}
+
+[data-theme="light"] .chart-container {
+	background: rgba(0, 0, 0, 0.02);
+	border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .chart-container:hover {
+	background: rgba(0, 0, 0, 0.04);
+	border-color: rgba(73, 197, 182, 0.3);
+}
+
+[data-theme="light"] .progress-bar {
+	background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .badge {
+	background: linear-gradient(135deg, rgba(73, 197, 182, 0.15) 0%, rgba(39, 121, 167, 0.15) 100%);
+	border: 1px solid rgba(73, 197, 182, 0.25);
+}
+
+[data-theme="light"] .card-icon {
+	background: linear-gradient(135deg, rgba(39, 121, 167, 0.12) 0%, rgba(73, 197, 182, 0.12) 100%);
+}
+
+[data-theme="light"] .mini-card-grid::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .mini-card-grid::-webkit-scrollbar-thumb {
+	background: rgba(73, 197, 182, 0.4);
+}
+
+[data-theme="light"] .mini-card-grid::-webkit-scrollbar-thumb:hover {
+	background: rgba(73, 197, 182, 0.6);
+}
+
+/* Light mode - Buttons with bg-white/5 or bg-white/10 */
+[data-theme="light"] .bg-white\/5,
+[data-theme="light"] [class*="bg-white/5"] {
+	background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .bg-white\/10,
+[data-theme="light"] [class*="bg-white/10"] {
+	background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .hover\:bg-white\/10:hover {
+	background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode - Borders with border-white */
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] [class*="border-white/10"] {
+	border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode - Form inputs and elements */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	border-color: var(--glass-border);
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+	color: var(--text-secondary);
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+	border-color: var(--accent-pool);
+	box-shadow: 0 0 0 3px rgba(73, 197, 182, 0.15);
+}
+
+/* Light mode - TopBar and sidebar specific */
+[data-theme="light"] aside {
+	background-color: var(--bg-secondary);
+	box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Light mode - Secondary buttons (like CSV export) */
+[data-theme="light"] button[class*="border-white"][class*="bg-white"] {
+	background-color: var(--bg-secondary) !important;
+	border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] button[class*="border-white"][class*="bg-white"]:hover {
+	background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Light mode - Panels and containers */
+[data-theme="light"] [class*="bg-bg-secondary"] {
+	background-color: var(--bg-secondary);
+	border-color: var(--glass-border);
+}
+
+/* Light mode - TopBar */
+[data-theme="light"] [class*="bg-bg-secondary/60"] {
+	background-color: rgba(255, 255, 255, 0.9) !important;
+	border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode - Dropdown menus */
+[data-theme="light"] [class*="bg-bg-secondary"][class*="border-white"] {
+	background-color: var(--bg-secondary);
+	border-color: rgba(0, 0, 0, 0.1) !important;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }

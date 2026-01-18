@@ -39,7 +39,7 @@ export default function Notificacoes() {
   return (
     <section className="space-y-4">
       <header>
-        <h1 className="text-2xl font-bold">Notificações</h1>
+        <h1 className="titulo-grafico text-2xl font-bold">Notificações</h1>
         <p className="mt-1 text-sm text-fg-secondary">Histórico de alertas e promoções.</p>
       </header>
 
