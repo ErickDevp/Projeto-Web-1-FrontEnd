@@ -222,9 +222,9 @@ export default function RegistrarPontos() {
           </NavLink>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-3">
+        <form onSubmit={handleSubmit} className="grid items-stretch gap-6 lg:grid-cols-3">
           {/* Left column - Form */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 flex flex-col gap-4">
             {/* Card Selection */}
             <div className="dashboard-card !min-h-0 p-5">
               <div className="section-header mb-4">
@@ -243,7 +243,7 @@ export default function RegistrarPontos() {
                 )}
               </div>
 
-              <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+              <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(12.5rem,1fr))]">
                 {cards.map((card) => {
                   const isSelected = cartaoId === String(card.id)
                   const bandeiraColor = BANDEIRA_COLORS[card.bandeira] ?? '#6366f1'
@@ -266,14 +266,14 @@ export default function RegistrarPontos() {
 
                       <div className="relative flex items-center gap-3">
                         <div
-                          className="flex h-9 w-9 items-center justify-center rounded-lg text-white font-bold text-[10px]"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-white font-bold text-[0.625rem]"
                           style={{ backgroundColor: bandeiraColor }}
                         >
                           {card.bandeira?.slice(0, 2).toUpperCase() ?? 'CC'}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm text-fg-primary truncate">{card.nome}</p>
-                          <p className="text-[10px] text-fg-secondary">
+                          <p className="text-[0.625rem] text-fg-secondary">
                             {card.multiplicadorPontos}x pts/R$
                           </p>
                         </div>
@@ -290,7 +290,7 @@ export default function RegistrarPontos() {
             </div>
 
             {/* Program + Value + Date */}
-            <div className="dashboard-card !min-h-0 p-5">
+            <div className="dashboard-card p-5 flex-1">
               <div className="section-header mb-4">
                 <div className="card-icon">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -366,7 +366,7 @@ export default function RegistrarPontos() {
           </div>
 
           {/* Right column - Preview & File Upload */}
-          <div className="space-y-4">
+          <div className="space-y-4 self-start">
             {/* Points Preview */}
             <div className="dashboard-card stat-card !min-h-0 p-5">
               <div className="section-header mb-4">
@@ -383,7 +383,7 @@ export default function RegistrarPontos() {
               <div className="text-center">
                 {/* Current value */}
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-fg-secondary">
+                  <p className="text-[0.625rem] font-bold uppercase tracking-wider text-fg-secondary">
                     Ganho estimado
                   </p>
                   <p className="mt-1 text-3xl font-bold">
@@ -419,7 +419,7 @@ export default function RegistrarPontos() {
                 )}
 
                 {!selectedCard && (
-                  <p className="mt-4 text-[10px] text-fg-secondary">
+                  <p className="mt-4 text-[0.625rem] text-fg-secondary">
                     Selecione um cartão para ver a previsão
                   </p>
                 )}
@@ -457,7 +457,7 @@ export default function RegistrarPontos() {
                 </div>
                 <div className="flex-1">
                   <h2 className="section-title text-sm">Comprovante</h2>
-                  <p className="text-[10px] text-fg-secondary">Opcional</p>
+                  <p className="text-[0.625rem] text-fg-secondary">Opcional</p>
                 </div>
               </div>
 
@@ -478,7 +478,7 @@ export default function RegistrarPontos() {
                     <svg className="h-4 w-4 text-accent-pool" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <div className="text-left min-w-0 max-w-[120px]">
+                    <div className="text-left min-w-0 max-w-[7.5rem]">
                       <p className="truncate font-medium text-xs text-fg-primary">{file.name}</p>
                     </div>
                     <button
@@ -493,7 +493,7 @@ export default function RegistrarPontos() {
                   </div>
                 ) : (
                   <>
-                    <p className="text-[10px] text-fg-secondary">
+                    <p className="text-[0.625rem] text-fg-secondary">
                       Arraste ou
                       <label className="mx-1 cursor-pointer font-semibold text-accent-pool hover:underline">
                         selecione

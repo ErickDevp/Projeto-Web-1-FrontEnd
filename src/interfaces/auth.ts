@@ -13,6 +13,7 @@ export interface UsuarioDTO {
     nome: string;
     email: string;
     senha: string;
+    role?: 'ADMIN' | 'USER';
 }
 
 // Espelha o UsuarioDTO (usado no cadastro)

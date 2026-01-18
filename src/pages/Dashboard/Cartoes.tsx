@@ -414,7 +414,7 @@ export default function Cartoes() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
+        <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
           {cards.map((card, index) => {
             const bandeiraInfo = getBandeiraInfo(card.bandeira)
             const programasList = card.programas ?? (card.programa ? [card.programa] : [])

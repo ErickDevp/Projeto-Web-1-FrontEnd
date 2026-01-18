@@ -21,7 +21,7 @@
 	.btn-secondary:hover {
 		background-color: rgba(73, 197, 182, 0.1);
 		border-color: rgba(73, 197, 182, 0.3);
-		box-shadow: 0 0 20px rgba(73, 197, 182, 0.15);
+		box-shadow: 0 0 1.25rem rgba(73, 197, 182, 0.15);
 	}
 
 	/* Primary button with gradient */
@@ -31,7 +31,7 @@
 	}
 
 	.btn-primary:hover {
-		box-shadow: 0 0 25px rgba(73, 197, 182, 0.4);
+		box-shadow: 0 0 1.5625rem rgba(73, 197, 182, 0.4);
 		transform: scale(1.02);
 	}
 }
@@ -44,7 +44,7 @@
 @keyframes fadeInUp {
 	from {
 		opacity: 0;
-		transform: translateY(20px);
+		transform: translateY(1.25rem);
 	}
 
 	to {
@@ -71,7 +71,7 @@
 	}
 
 	50% {
-		box-shadow: 0 0 30px rgba(73, 197, 182, 0.5), 0 0 60px rgba(73, 197, 182, 0.25);
+		box-shadow: 0 0 1.875rem rgba(73, 197, 182, 0.5), 0 0 3.75rem rgba(73, 197, 182, 0.25);
 	}
 }
 
@@ -83,7 +83,7 @@
 	}
 
 	50% {
-		transform: translateY(-4px);
+		transform: translateY(-0.25rem);
 	}
 }
 
@@ -96,7 +96,7 @@
 /* Dashboard Card Base */
 .dashboard-card {
 	position: relative;
-	min-height: 240px;
+	min-height: 15rem;
 	border-radius: 1rem;
 	padding: 1.5rem;
 	background: var(--glass-bg);
@@ -128,7 +128,7 @@
 }
 
 .dashboard-card:hover {
-	transform: translateY(-4px);
+	transform: translateY(-0.25rem);
 	box-shadow: var(--shadow-lg), var(--shadow-glow-pool);
 }
 
@@ -178,9 +178,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 40px;
-	height: 40px;
-	border-radius: 12px;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 0.75rem;
 	background: linear-gradient(135deg, rgba(39, 121, 167, 0.2) 0%, rgba(73, 197, 182, 0.2) 100%);
 	color: var(--accent-pool);
 	transition: all 0.3s ease;
@@ -193,8 +193,8 @@
 
 /* Progress bar modern */
 .progress-bar {
-	height: 8px;
-	border-radius: 4px;
+	height: 0.5rem;
+	border-radius: 0.25rem;
 	background: rgba(255, 255, 255, 0.1);
 	overflow: hidden;
 	position: relative;
@@ -202,7 +202,7 @@
 
 .progress-bar-fill {
 	height: 100%;
-	border-radius: 4px;
+	border-radius: 0.25rem;
 	background: var(--gradient-primary);
 	animation: progress-fill 1s ease-out both;
 	position: relative;
@@ -221,7 +221,7 @@
 .chart-container {
 	background: rgba(0, 0, 0, 0.2);
 	border: 1px solid var(--glass-border);
-	border-radius: 12px;
+	border-radius: 0.75rem;
 	padding: 1rem;
 	transition: all 0.3s ease;
 }
@@ -233,7 +233,7 @@
 
 /* Mini card for items inside dashboard cards */
 .mini-card {
-	border-radius: 12px;
+	border-radius: 0.75rem;
 	border: 1px solid var(--glass-border);
 	background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
 	padding: 0.75rem 1rem;
@@ -243,17 +243,17 @@
 .mini-card:hover {
 	background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
 	border-color: rgba(73, 197, 182, 0.3);
-	transform: translateX(4px);
+	transform: translateX(0.25rem);
 }
 
 /* Badge/Tag styling */
 .badge {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
-	padding: 4px 10px;
-	border-radius: 20px;
-	font-size: 11px;
+	gap: 0.25rem;
+	padding: 0.25rem 0.625rem;
+	border-radius: 1.25rem;
+	font-size: 0.6875rem;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
@@ -277,7 +277,7 @@
 .section-header {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 0.75rem;
 	margin-bottom: 1rem;
 }
 
@@ -295,24 +295,24 @@
 	display: grid;
 	gap: 0.75rem;
 	overflow-y: auto;
-	max-height: 300px;
+	max-height: 18.75rem;
 	flex: 1;
 	/* Ensures cards are at least 240px but fill available space */
-	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
 .mini-card-grid::-webkit-scrollbar {
-	width: 4px;
+	width: 0.25rem;
 }
 
 .mini-card-grid::-webkit-scrollbar-track {
 	background: rgba(255, 255, 255, 0.05);
-	border-radius: 2px;
+	border-radius: 0.125rem;
 }
 
 .mini-card-grid::-webkit-scrollbar-thumb {
 	background: rgba(73, 197, 182, 0.3);
-	border-radius: 2px;
+	border-radius: 0.125rem;
 }
 
 .mini-card-grid::-webkit-scrollbar-thumb:hover {
@@ -450,13 +450,13 @@
 [data-theme="light"] select:focus,
 [data-theme="light"] textarea:focus {
 	border-color: var(--accent-pool);
-	box-shadow: 0 0 0 3px rgba(73, 197, 182, 0.15);
+	box-shadow: 0 0 0 0.1875rem rgba(73, 197, 182, 0.15);
 }
 
 /* Light mode - TopBar and sidebar specific */
 [data-theme="light"] aside {
 	background-color: var(--bg-secondary);
-	box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+	box-shadow: 0.125rem 0 0.75rem rgba(0, 0, 0, 0.08);
 }
 
 /* Light mode - Secondary buttons (like CSV export) */
@@ -485,5 +485,5 @@
 [data-theme="light"] [class*="bg-bg-secondary"][class*="border-white"] {
 	background-color: var(--bg-secondary);
 	border-color: rgba(0, 0, 0, 0.1) !important;
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.12);
 }

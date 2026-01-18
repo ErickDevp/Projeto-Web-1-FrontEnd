@@ -12,7 +12,7 @@ export function AuthPanel({ embedded, children }: PanelProps) {
       className={
         embedded
           ? 'w-full'
-          : 'w-full max-w-md rounded-3xl border border-white/10 bg-bg-secondary p-8 shadow-[0_24px_60px_rgba(0,0,0,0.55)]'
+          : 'w-full max-w-md rounded-3xl border border-white/10 bg-bg-secondary p-8 shadow-[0_1.5rem_3.75rem_rgba(0,0,0,0.55)]'
       }
     >
       {children}

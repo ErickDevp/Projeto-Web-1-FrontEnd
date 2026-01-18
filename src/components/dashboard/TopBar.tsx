@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useTheme } from '../../hooks/useTheme'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notificacaoService } from '../../services/notificacao/notificacao.service'
+import type { Notificacao } from '../../interfaces/notificacao'
 
 function ThemeToggleButton() {
   const { theme, toggleTheme } = useTheme()
@@ -38,7 +39,6 @@ function ThemeToggleButton() {
 }
 
 type Props = {
-  unreadNotifications?: number
   userName?: string
   userEmail?: string
   searchTerm?: string
@@ -46,7 +46,6 @@ type Props = {
 }
 
 export default function TopBar({
-  unreadNotifications,
   userName,
   userEmail,
   searchTerm = '',
@@ -54,7 +53,7 @@ export default function TopBar({
 }: Props) {
   const [openMenu, setOpenMenu] = useState<'notifications' | 'settings' | 'profile' | null>(null)
   const [user, setUser] = useState<{ nome: string; email: string } | null>(null)
-  const [notifications, setNotifications] = useState<Array<{ id?: number; titulo?: string; mensagem?: string }>>([])
+  const [notifications, setNotifications] = useState<Notificacao[]>([])
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null)
   const { logout } = useAuth()
   const navigate = useNavigate()
@@ -101,27 +100,31 @@ export default function TopBar({
     let objectUrl: string | null = null
 
     const loadData = async () => {
+      // Load data independently to prevent one failure from blocking others
       try {
-        const [userData, notificationData, photoBlob] = await Promise.all([
-          usuarioService.getMe(),
-          notificacaoService.list<Array<{ id?: number; titulo?: string; mensagem?: string }>>(),
-          usuarioService.getFoto(),
-        ])
+        const userData = await usuarioService.getMe()
+        if (isActive) setUser({ nome: userData.nome, email: userData.email })
+      } catch {
+        // User data failed - continue
+      }
 
-        if (!isActive) return
-
-        setUser({ nome: userData.nome, email: userData.email })
-
-        if (Array.isArray(notificationData)) {
+      try {
+        const notificationData = await notificacaoService.list<Notificacao[]>()
+        if (isActive && Array.isArray(notificationData)) {
           setNotifications(notificationData)
         }
+      } catch {
+        // Notifications failed - continue
+      }
 
-        if (photoBlob) {
+      try {
+        const photoBlob = await usuarioService.getFoto()
+        if (isActive && photoBlob) {
           objectUrl = URL.createObjectURL(photoBlob)
           setUserPhotoUrl(objectUrl)
         }
       } catch {
-        // Silencioso: falhas de rede não devem quebrar a TopBar
+        // Photo failed - continue with default avatar
       }
     }
 
@@ -133,17 +136,77 @@ export default function TopBar({
     }
   }, [])
 
+  // Listen for notification events from Notificacoes page
+  useEffect(() => {
+    const handleNotificationRead = (e: Event) => {
+      const customEvent = e as CustomEvent<{ id: number }>
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === customEvent.detail.id ? { ...n, lida: true } : n))
+      )
+    }
+
+    const handleNotificationDeleted = (e: Event) => {
+      const customEvent = e as CustomEvent<{ id: number }>
+      setNotifications((prev) => prev.filter((n) => n.id !== customEvent.detail.id))
+    }
+
+    const handleAllRead = () => {
+      setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })))
+    }
+
+    const handleAllDeleted = () => {
+      setNotifications([])
+    }
+
+    const handleCreated = async () => {
+      // Reload notifications when a new one is created
+      try {
+        const data = await notificacaoService.list<Notificacao[]>()
+        if (Array.isArray(data)) setNotifications(data)
+      } catch {
+        // Silent failure
+      }
+    }
+
+    window.addEventListener('notification-read', handleNotificationRead)
+    window.addEventListener('notification-deleted', handleNotificationDeleted)
+    window.addEventListener('notifications-all-read', handleAllRead)
+    window.addEventListener('notifications-all-deleted', handleAllDeleted)
+    window.addEventListener('notification-created', handleCreated)
+
+    return () => {
+      window.removeEventListener('notification-read', handleNotificationRead)
+      window.removeEventListener('notification-deleted', handleNotificationDeleted)
+      window.removeEventListener('notifications-all-read', handleAllRead)
+      window.removeEventListener('notifications-all-deleted', handleAllDeleted)
+      window.removeEventListener('notification-created', handleCreated)
+    }
+  }, [])
+
+  // Mark as read handler for TopBar dropdown
+  const handleMarkAsRead = useCallback(async (id: number) => {
+    try {
+      await notificacaoService.markAsRead(id)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
+      )
+    } catch {
+      // Silent failure in TopBar
+    }
+  }, [])
+
   const displayName = userName ?? user?.nome ?? 'Usuário'
   const displayEmail = userEmail ?? user?.email ?? ''
-  const unreadCount = unreadNotifications ?? notifications.length
-  const recentNotifications = notifications.slice(0, 3)
+  const unreadNotifications = notifications.filter((n) => !n.lida)
+  const unreadCount = unreadNotifications.length
+  const recentNotifications = unreadNotifications.slice(0, 3)
 
   return (
     <div
       ref={containerRef}
-      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-white/10 bg-bg-secondary/60 px-5 py-3 shadow-[0_10px_24px_rgba(0,0,0,0.18)]"
+      className="flex w-full items-center justify-between gap-4 rounded-2xl border border-white/10 bg-bg-secondary/60 px-5 py-3 shadow-[0_0.625rem_1.5rem_rgba(0,0,0,0.18)]"
     >
-      <div className="min-w-[120px] text-sm font-semibold uppercase tracking-[0.2em] text-fg-secondary">
+      <div className="min-w-[7.5rem] text-sm font-semibold uppercase tracking-[0.2em] text-fg-secondary">
         {pageTitle}
       </div>
 
@@ -173,30 +236,42 @@ export default function TopBar({
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.73 21a2 2 0 01-3.46 0" />
             </svg>
             {unreadCount > 0 ? (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-accent-pool px-1 text-[10px] font-bold text-bg-primary">
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-accent-pool px-1 text-[0.625rem] font-bold text-bg-primary">
                 {unreadCount}
               </span>
             ) : null}
           </button>
           {openMenu === 'notifications' ? (
-            <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_0.75rem_1.875rem_rgba(0,0,0,0.35)]">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fg-secondary">
-                Últimas notificações
+                {unreadCount > 0 ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}` : 'Notificações'}
               </p>
               {recentNotifications.length ? (
-                <ul className="space-y-2 text-xs text-fg-secondary">
+                <ul className="space-y-2">
                   {recentNotifications.map((item) => (
-                    <li key={item.id ?? item.titulo ?? item.mensagem}>• {item.titulo ?? item.mensagem}</li>
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => handleMarkAsRead(item.id)}
+                        className="w-full flex items-start gap-2 rounded-lg bg-white/5 p-2 border border-white/5 hover:bg-white/10 transition-colors text-left"
+                      >
+                        <span className="mt-1.5 flex h-2 w-2 flex-shrink-0 rounded-full bg-accent-pool animate-pulse" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-xs text-fg-primary truncate">{item.titulo}</p>
+                          <p className="text-[0.625rem] text-fg-secondary line-clamp-1">{item.mensagem}</p>
+                        </div>
+                      </button>
+                    </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-xs text-fg-secondary">Nenhuma notificação recente.</p>
+                <p className="text-xs text-fg-secondary">Nenhuma notificação não lida.</p>
               )}
               <NavLink
                 to="/dashboard/notificacoes"
                 className="mt-3 inline-flex text-xs font-semibold text-accent-pool hover:underline"
               >
-                Ver todas
+                Ver todas →
               </NavLink>
             </div>
           ) : null}
@@ -218,7 +293,7 @@ export default function TopBar({
             </svg>
           </NavLink>
           {openMenu === 'settings' ? (
-            <div className="absolute right-0 top-12 z-50 w-60 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="absolute right-0 top-12 z-50 w-60 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_0.75rem_1.875rem_rgba(0,0,0,0.35)]">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fg-secondary">
                 Atalhos de configuração
               </p>
@@ -253,7 +328,7 @@ export default function TopBar({
             />
           </button>
           {openMenu === 'profile' ? (
-            <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+            <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_0.75rem_1.875rem_rgba(0,0,0,0.35)]">
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-fg-primary">{displayName}</p>
                 <p className="text-xs text-fg-secondary">{displayEmail}</p>

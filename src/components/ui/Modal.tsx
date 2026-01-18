@@ -69,7 +69,7 @@ export default function Modal({ title, onClose, children }: Props) {
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative w-full max-w-md rounded-2xl border border-white/10 bg-bg-secondary p-6 shadow-[0_24px_60px_rgba(0,0,0,0.65)] focus:outline-none"
+        className="relative w-full max-w-md rounded-2xl border border-white/10 bg-bg-secondary p-6 shadow-[0_1.5rem_3.75rem_rgba(0,0,0,0.65)] focus:outline-none"
       >
         <button
           type="button"
