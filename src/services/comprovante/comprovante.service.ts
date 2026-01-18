@@ -8,6 +8,14 @@ export const comprovanteService = {
     return data
   },
 
+  // GET /comprovante/{id}/arquivo (bytes)
+  async getArquivo(id: string | number): Promise<Blob> {
+    const { data } = await apiClient.get<Blob>(endpoints.comprovante.arquivo(id), {
+      responseType: 'blob',
+    })
+    return data
+  },
+
   // POST /comprovante/criar (multipart/form-data)
   async create(payload: { movimentacaoId: number; file: File }): Promise<string> {
     const formData = new FormData()
