@@ -2,18 +2,18 @@ export const endpoints = {
   auth: {
     register: '/auth/register',
     login: '/auth/login',
-    // No backend atual não existe /auth/me. Se você criar, pode habilitar aqui.
-    // me: '/auth/me',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
   },
   usuario: {
     base: '/usuario',
     me: '/usuario/me',
+    foto: '/usuario/foto',
   },
   notificacao: {
     base: '/notificacao',
     create: '/notificacao/criar',
+    publicas: '/notificacao/publicas',
   },
   promocao: {
     base: '/promocao',
@@ -30,6 +30,7 @@ export const endpoints = {
   comprovante: {
     base: '/comprovante',
     create: '/comprovante/criar',
+    arquivo: (id: string | number) => `/comprovante/${id}/arquivo`,
   },
   movimentacaoPontos: {
     base: '/movimentacao',

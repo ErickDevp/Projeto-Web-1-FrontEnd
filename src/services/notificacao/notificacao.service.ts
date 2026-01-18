@@ -9,6 +9,11 @@ export const notificacaoService = {
     return data
   },
 
+  async listPublicas<T = unknown[]>(): Promise<T> {
+    const { data } = await apiClient.get<T>(endpoints.notificacao.publicas)
+    return data
+  },
+
   async create(payload: NotificacaoDTO): Promise<string> {
     const { data } = await apiClient.post<string>(endpoints.notificacao.create, payload)
     return data

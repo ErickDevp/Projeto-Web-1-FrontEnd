@@ -16,9 +16,18 @@ export interface HistoricoMovimentacaoDTO {
   status: string
 }
 
+// Espelha EvolucaoMensalDTO
+export interface EvolucaoMensalDTO {
+  ano: number
+  mes: number
+  totalPontos: number
+}
+
 // Espelha RelatorioResponseDTO
 export interface RelatorioResponseDTO {
   pontosPorCartao: PontosPorCartaoDTO[]
   historico: HistoricoMovimentacaoDTO[]
+  evolucaoMensal?: EvolucaoMensalDTO[]
+  saldoGlobal?: number
   prazoMedio: number
 }

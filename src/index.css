@@ -4,3 +4,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	.titulo-grafico {
+		@apply bg-gradient-to-r from-[#2779a7] to-[#49c5b6] bg-clip-text text-transparent;
+	}
+}

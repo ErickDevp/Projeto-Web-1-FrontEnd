@@ -24,7 +24,7 @@ export const statusMovimentacaoService = {
     await apiClient.delete(`${endpoints.statusMovimentacao.base}/${id}`)
   },
 
-  // Não existe list no controller atual; deixo aqui caso você adicione depois.
+  // Não existe list no controller atual;
   async list<T = unknown>(): Promise<T> {
     const { data } = await apiClient.get<T>(endpoints.statusMovimentacao.base)
     return data
