@@ -290,13 +290,15 @@
 	-webkit-text-fill-color: transparent;
 }
 
-/* Responsive grid for mini cards */
+/* Responsive grid for mini cards - AUTO FIT (Density over width) */
 .mini-card-grid {
 	display: grid;
 	gap: 0.75rem;
 	overflow-y: auto;
 	max-height: 300px;
 	flex: 1;
+	/* Ensures cards are at least 240px but fill available space */
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
 .mini-card-grid::-webkit-scrollbar {
@@ -317,16 +319,6 @@
 	background: rgba(73, 197, 182, 0.5);
 }
 
-@media (min-width: 768px) {
-	.mini-card-grid.cols-2 {
-		grid-template-columns: repeat(2, 1fr);
-	}
-
-	.mini-card-grid.cols-3 {
-		grid-template-columns: repeat(3, 1fr);
-	}
-}
-
 /* Dashboard grid layout - equalizes row heights */
 .dashboard-grid {
 	display: grid;
@@ -342,6 +334,16 @@
 
 	.dashboard-grid .full-width {
 		grid-column: span 2;
+	}
+}
+
+@media (min-width: 1536px) {
+	.dashboard-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.dashboard-grid .full-width {
+		grid-column: span 3;
 	}
 }
 

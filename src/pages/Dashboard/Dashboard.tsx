@@ -252,7 +252,7 @@ export default function Dashboard() {
               </div>
             </div>
             {/* Program list */}
-            <div className="mini-card-grid cols-3 mt-6">
+            <div className="mini-card-grid mt-6">
               {programSummary.length ? (
                 programSummary.map((item) => (
                   <div key={item.label} className="mini-card flex items-center justify-between">
@@ -284,7 +284,7 @@ export default function Dashboard() {
               <span className="badge">{cards.length} ativos</span>
             </div>
             {/* Card Grid */}
-            <div className="mini-card-grid cols-2 mt-4">
+            <div className="mini-card-grid mt-4">
               {cards.length ? (
                 cards.map((card, index) => (
                   <div

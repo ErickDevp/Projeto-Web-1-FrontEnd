@@ -243,7 +243,7 @@ export default function RegistrarPontos() {
                 )}
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                 {cards.map((card) => {
                   const isSelected = cartaoId === String(card.id)
                   const bandeiraColor = BANDEIRA_COLORS[card.bandeira] ?? '#6366f1'
