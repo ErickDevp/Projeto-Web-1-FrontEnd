@@ -5,7 +5,7 @@ type Props = {
 export default function Privacy({ embedded }: Props) {
   return (
     <div className={embedded ? 'w-full' : 'min-h-screen bg-bg-primary px-4 py-10'}>
-      <div className="mx-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-bg-secondary p-8 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
+      <div className="mx-auto w-full max-w-3xl rounded-3xl border border-white/10 bg-bg-secondary p-8 shadow-[0_1.5rem_3.75rem_rgba(0,0,0,0.55)]">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-2xl font-bold text-fg-primary">Política de Privacidade</h1>
         </div>

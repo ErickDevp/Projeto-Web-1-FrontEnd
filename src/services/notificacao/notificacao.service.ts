@@ -23,7 +23,17 @@ export const notificacaoService = {
     await apiClient.put(`${endpoints.notificacao.base}/${id}`, payload)
   },
 
-  async remove(id: string | number): Promise<void> {
+  // Dismiss notification for current user only
+  async dismiss(id: string | number): Promise<void> {
     await apiClient.delete(`${endpoints.notificacao.base}/${id}`)
+  },
+
+  // Remove notification for all users (admin only)
+  async removeForAll(id: string | number): Promise<void> {
+    await apiClient.delete(`${endpoints.notificacao.base}/${id}/all`)
+  },
+
+  async markAsRead(id: string | number): Promise<void> {
+    await apiClient.put(`${endpoints.notificacao.base}/${id}/lida`)
   },
 }

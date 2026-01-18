@@ -8,7 +8,7 @@ import ResetPassword from './pages/ResetPassword'
 import Home from './pages/Home'
 import ProtectedRoute from './routes/ProtectedRoute'
 import DashboardLayout from './pages/Dashboard'
-import DashboardHome from './pages/Dashboard/Home'
+import Dashboard from './pages/Dashboard/Dashboard'
 import DashboardPerfil from './pages/Dashboard/Perfil'
 import DashboardCartoes from './pages/Dashboard/Cartoes'
 import DashboardRegistrarPontos from './pages/Dashboard/RegistrarPontos'
@@ -75,7 +75,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Navigate to="/dashboard/home" replace />} />
-            <Route path="home" element={<DashboardHome />} />
+            <Route path="home" element={<Dashboard />} />
             <Route path="perfil" element={<DashboardPerfil />} />
             <Route path="cartoes" element={<DashboardCartoes />} />
             <Route path="registrar-pontos" element={<DashboardRegistrarPontos />} />

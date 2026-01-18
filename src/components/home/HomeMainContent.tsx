@@ -17,7 +17,7 @@ export default function HomeMainContent() {
   return (
     <main className="flex min-h-screen w-full items-center">
       <section className="mx-auto w-full max-w-6xl px-6 py-10 md:py-14">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-bg-secondary shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_24px_60px_rgba(0,0,0,0.55)]">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-bg-secondary shadow-[0_0_0_0.0625rem_rgba(255,255,255,0.04),0_1.5rem_3.75rem_rgba(0,0,0,0.55)]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -top-32 -right-24 h-72 w-72 rounded-full bg-accent-pool/20 blur-3xl" />
             <div className="absolute -bottom-40 -left-24 h-80 w-80 rounded-full bg-accent-sky/20 blur-3xl" />

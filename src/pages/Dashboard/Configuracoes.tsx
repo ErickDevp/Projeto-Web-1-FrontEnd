@@ -2,7 +2,7 @@ export default function Configuracoes() {
   return (
     <section className="space-y-4">
       <header>
-        <h1 className="text-2xl font-bold">Configurações</h1>
+        <h1 className="titulo-grafico text-2xl font-bold">Configurações</h1>
         <p className="mt-1 text-sm text-fg-secondary">Preferências gerais do seu painel.</p>
       </header>
 
