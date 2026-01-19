@@ -234,6 +234,8 @@ export default function TopBar({
       </div>
 
       <div className="relative flex items-center gap-3">
+        <ThemeToggleButton />
+
         <div className="relative">
           <button
             type="button"
@@ -288,12 +290,9 @@ export default function TopBar({
         </div>
 
         <div className="relative">
-          <NavLink
-            to="/dashboard/configuracoes"
-            onClick={(e) => {
-              e.preventDefault()
-              setOpenMenu((prev) => (prev === 'settings' ? null : 'settings'))
-            }}
+          <button
+            type="button"
+            onClick={() => setOpenMenu((prev) => (prev === 'settings' ? null : 'settings'))}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-fg-primary hover:bg-white/10"
             aria-label="Configurações"
           >
@@ -301,7 +300,7 @@ export default function TopBar({
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8a4 4 0 100 8 4 4 0 000-8z" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.93 6.93l1.41-1.41 2.12 1.22a7.96 7.96 0 016.08 0l2.12-1.22 1.41 1.41-1.22 2.12a7.96 7.96 0 010 6.08l1.22 2.12-1.41 1.41-2.12-1.22a7.96 7.96 0 01-6.08 0l-2.12 1.22-1.41-1.41 1.22-2.12a7.96 7.96 0 010-6.08z" />
             </svg>
-          </NavLink>
+          </button>
           {openMenu === 'settings' ? (
             <div className="absolute right-0 top-12 z-50 w-60 rounded-2xl border border-white/10 bg-bg-secondary p-4 text-sm text-fg-primary shadow-[0_0.75rem_1.875rem_rgba(0,0,0,0.35)]">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-fg-secondary">
@@ -321,8 +320,6 @@ export default function TopBar({
             </div>
           ) : null}
         </div>
-
-        <ThemeToggleButton />
 
         <div className="relative">
           <button

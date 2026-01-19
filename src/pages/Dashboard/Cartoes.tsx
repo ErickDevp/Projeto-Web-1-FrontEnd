@@ -20,6 +20,7 @@ type Cartao = {
   pontos?: number
   programa?: Programa | null
   programas?: Programa[]
+  aparencia?: string // Local-only field for now
 }
 
 const BANDEIRAS: { value: BandeiraEnum; label: string; color: string }[] = [
@@ -62,6 +63,8 @@ const getCardVariant = (bandeira?: string): CardVariant => {
       return 'platinum'
   }
 }
+
+
 
 export default function Cartoes() {
   const [cards, setCards] = useState<Cartao[]>([])

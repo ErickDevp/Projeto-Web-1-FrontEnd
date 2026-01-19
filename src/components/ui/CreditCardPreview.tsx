@@ -4,18 +4,15 @@ import amexLogo from '../../assets/brands/amex.svg'
 import eloLogo from '../../assets/brands/elo.svg'
 import hipercardLogo from '../../assets/brands/hipercard.svg'
 
-export type CardVariant = 'black' | 'platinum' | 'gold' | 'silver' | 'mastercard' | 'hipercard' | 'elo'
+export type CardVariant = 'black' | 'platinum' | 'gold' | 'silver' | 'mastercard' | 'elo' | 'hipercard'
 
-export type CreditCardPreviewProps = {
-    /** Card holder name displayed on the card */
-    holderName?: string
-    /** Last 4 digits of card number */
-    lastDigits?: string
-    /** Card tier label (e.g., "INFINITE", "SIGNATURE") */
-    cardTier?: string
-    /** Visual variant of the card */
+interface CreditCardPreviewProps {
+    holderName: string
+    lastDigits: string
+    cardType?: string // e.g. "Black", "Gold"
+    cardTier?: string // e.g. "Infinite", "Platinum"
     variant?: CardVariant
-    /** Custom class for the container */
+    bandeira?: string // e.g. "VISA", "MASTERCARD"
     className?: string
 }
 
@@ -185,9 +182,9 @@ export default function CreditCardPreview({
         <div
             className={`relative h-44 w-full overflow-hidden rounded-xl bg-gradient-to-br ${styles.card} p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${className}`}
         >
-            {/* Animated shine effect for metallic cards */}
+            {/* Animated shine effect for metallic cards - Only visible on hover */}
             {styles.hasShine && (
-                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                     <div className="absolute -inset-full animate-[shimmer_3s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
                 </div>
             )}
