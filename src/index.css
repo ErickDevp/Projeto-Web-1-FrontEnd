@@ -487,3 +487,55 @@
 	border-color: rgba(0, 0, 0, 0.1) !important;
 	box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.12);
 }
+
+/* Light mode - Sidebar navigation items: transparent background for inactive */
+[data-theme="light"] aside nav a:not(.bg-gradient-to-r) {
+	background-color: transparent !important;
+}
+
+[data-theme="light"] aside nav a:not(.bg-gradient-to-r):hover {
+	background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Light mode - Sidebar active item should keep its gradient */
+[data-theme="light"] aside nav a.bg-gradient-to-r {
+	background: linear-gradient(to right, rgba(73, 197, 182, 0.15) 0%, rgba(39, 121, 167, 0.15) 100%) !important;
+}
+
+/* Light mode - Sidebar logout button transparent */
+[data-theme="light"] aside button[class*="bg-red"] {
+	background-color: transparent !important;
+}
+
+[data-theme="light"] aside button[class*="bg-red"]:hover {
+	background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* =========================================
+   Dark Mode - Select/Option Visibility Fix
+   ========================================= */
+
+/* Dark mode - Fix select dropdown options */
+select option {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+}
+
+/* Dark mode - Ensure select elements are visible */
+[data-theme="dark"] select,
+:root:not([data-theme="light"]) select {
+	background-color: rgba(255, 255, 255, 0.05);
+	color: var(--text-primary);
+}
+
+[data-theme="dark"] select option,
+:root:not([data-theme="light"]) select option {
+	background-color: #051522;
+	color: #ffffff;
+}
+
+/* Light mode - Select dropdown options */
+[data-theme="light"] select option {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+}
