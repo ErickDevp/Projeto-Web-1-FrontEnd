@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
+import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { movimentacaoPontosService } from '../../services/movimentacaoPontos/movimentacaoPontos.service'
 import { comprovanteService } from '../../services/comprovante/comprovante.service'
 import { notify } from '../../utils/notify'
@@ -42,17 +43,24 @@ export default function RegistrarPontos() {
   const [file, setFile] = useState<File | null>(null)
   const [dragActive, setDragActive] = useState(false)
 
-  // Load cards
+  // State for all programs
+  const [allPrograms, setAllPrograms] = useState<Programa[]>([])
+
+  // Load cards and programs
   useEffect(() => {
     let isActive = true
 
     const loadData = async () => {
       try {
-        const cardData = await cartaoUsuarioService.list<Cartao[]>()
+        const [cardData, programData] = await Promise.all([
+          cartaoUsuarioService.list<Cartao[]>(),
+          programaFidelidadeService.list<Programa[]>(),
+        ])
         if (!isActive) return
         setCards(Array.isArray(cardData) ? cardData : [])
+        setAllPrograms(Array.isArray(programData) ? programData : [])
       } catch (error) {
-        notify.apiError(error, { fallback: 'Não foi possível carregar os cartões.' })
+        notify.apiError(error, { fallback: 'Não foi possível carregar os dados.' })
       } finally {
         if (isActive) setLoading(false)
       }
@@ -68,7 +76,7 @@ export default function RegistrarPontos() {
     return cards.find((c) => c.id === Number(cartaoId)) ?? null
   }, [cartaoId, cards])
 
-  // Available programs from selected card
+  // Available programs - only from selected card
   const availablePrograms = useMemo(() => {
     return selectedCard?.programas ?? []
   }, [selectedCard])

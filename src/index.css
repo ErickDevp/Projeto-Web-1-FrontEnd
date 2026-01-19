@@ -539,3 +539,14 @@ select option {
 	background-color: var(--bg-secondary);
 	color: var(--text-primary);
 }
+
+/* Card shimmer animation for metallic effect */
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%) skewX(-12deg);
+	}
+
+	100% {
+		transform: translateX(200%) skewX(-12deg);
+	}
+}
