@@ -4,6 +4,7 @@ import type { CartaoUsuarioDTO } from '../../interfaces/cartaoUsuario'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { notify } from '../../utils/notify'
+import CreditCardPreview, { type CardVariant } from '../../components/ui/CreditCardPreview'
 
 type Programa = {
   id: number
@@ -42,6 +43,24 @@ const getBandeiraInfo = (bandeira?: string) => {
 // Get tipo label
 const getTipoLabel = (tipo?: string) => {
   return TIPOS.find((t) => t.value === tipo)?.label ?? tipo
+}
+
+// Get card visual variant based on bandeira
+const getCardVariant = (bandeira?: string): CardVariant => {
+  switch (bandeira) {
+    case 'VISA':
+      return 'black'
+    case 'MASTERCARD':
+      return 'mastercard'
+    case 'AMERICAN_EXPRESS':
+      return 'gold'
+    case 'ELO':
+      return 'elo'
+    case 'HIPERCARD':
+      return 'hipercard'
+    default:
+      return 'platinum'
+  }
 }
 
 export default function Cartoes() {
@@ -416,49 +435,33 @@ export default function Cartoes() {
       ) : (
         <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
           {cards.map((card, index) => {
-            const bandeiraInfo = getBandeiraInfo(card.bandeira)
             const programasList = card.programas ?? (card.programa ? [card.programa] : [])
+            const variant = getCardVariant(card.bandeira)
 
             return (
               <div
                 key={card.id ?? `${card.nome}-${index}`}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-bg-secondary via-bg-secondary to-bg-primary p-6 transition-all duration-300 hover:border-accent-pool/30 hover:shadow-lg hover:shadow-accent-pool/10"
+                className="group relative flex flex-col"
               >
-                {/* Bandeira color accent */}
-                <div
-                  className="absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-20 blur-2xl transition-opacity group-hover:opacity-40"
-                  style={{ backgroundColor: bandeiraInfo.color }}
-                />
+                {/* Credit Card Visual */}
+                <div className="relative">
+                  <CreditCardPreview
+                    holderName={card.nome ?? `Cartão ${index + 1}`}
+                    lastDigits={String(card.id ?? 1234).padStart(4, '0').slice(-4)}
+                    cardTier={getTipoLabel(card.tipo) ?? 'Crédito'}
+                    variant={variant}
+                    className="transition-transform duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl"
+                  />
 
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Bandeira icon */}
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-xl text-white font-bold text-xs"
-                      style={{ backgroundColor: bandeiraInfo.color }}
-                    >
-                      {bandeiraInfo.label.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-fg-primary">
-                        {card.nome ?? `Cartão ${index + 1}`}
-                      </h3>
-                      <p className="text-xs text-fg-secondary">
-                        {bandeiraInfo.label} • {getTipoLabel(card.tipo)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="relative z-10 flex gap-1">
+                  {/* Action Buttons Overlay */}
+                  <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
                         openEditForm(card)
                       }}
-                      className="rounded-lg p-2 text-fg-secondary hover:bg-white/10 hover:text-fg-primary transition-colors"
+                      className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur-sm hover:bg-black/70 hover:text-white transition-colors"
                       title="Editar"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -472,11 +475,11 @@ export default function Cartoes() {
                         card.id && handleDeleteConfirm(card.id)
                       }}
                       disabled={deletingId === card.id}
-                      className="rounded-lg p-2 text-fg-secondary hover:bg-red-500/10 hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur-sm hover:bg-red-500/80 hover:text-white transition-colors disabled:opacity-50"
                       title="Excluir"
                     >
                       {deletingId === card.id ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                       ) : (
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -484,74 +487,77 @@ export default function Cartoes() {
                       )}
                     </button>
                   </div>
-                </div>
 
-                {/* Delete Confirmation Modal */}
-                {confirmDeleteId === card.id && (
-                  <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/80 backdrop-blur-sm">
-                    <div className="text-center p-4">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
-                        <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-medium text-fg-primary">Excluir este cartão?</p>
-                      <p className="mt-1 text-xs text-fg-secondary">Esta ação não pode ser desfeita.</p>
-                      <div className="mt-4 flex justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteCancel()
-                          }}
-                          className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-fg-primary hover:bg-white/10 transition-colors"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            card.id && handleDelete(card.id)
-                          }}
-                          className="rounded-lg bg-red-500 px-4 py-2 text-xs font-semibold text-white hover:bg-red-600 transition-colors"
-                        >
-                          Excluir
-                        </button>
+                  {/* Delete Confirmation Modal */}
+                  {confirmDeleteId === card.id && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-black/80 backdrop-blur-sm">
+                      <div className="text-center p-4">
+                        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20">
+                          <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-white">Excluir este cartão?</p>
+                        <p className="mt-1 text-xs text-white/60">Esta ação não pode ser desfeita.</p>
+                        <div className="mt-4 flex justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteCancel()
+                            }}
+                            className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              card.id && handleDelete(card.id)
+                            }}
+                            className="rounded-lg bg-red-500 px-4 py-2 text-xs font-semibold text-white hover:bg-red-600 transition-colors"
+                          >
+                            Excluir
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {/* Points Factor */}
-                <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">
-                    Fator de conversão
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">
-                    <span className="titulo-grafico">{card.multiplicadorPontos ?? 1}</span>
-                    <span className="ml-1 text-sm font-normal text-fg-secondary">pts/R$</span>
-                  </p>
+                  )}
                 </div>
 
-                {/* Programas */}
-                {programasList.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">
-                      Pontua em
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {programasList.map((prog) => (
-                        <span
-                          key={prog.id}
-                          className="rounded-full bg-accent-pool/10 px-3 py-1 text-xs font-medium text-accent-pool"
-                        >
-                          {prog.nome}
-                        </span>
-                      ))}
-                    </div>
+                {/* Card Info Section */}
+                <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                  {/* Points Factor */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">
+                      Fator de conversão
+                    </span>
+                    <span className="text-lg font-bold">
+                      <span className="titulo-grafico">{card.multiplicadorPontos ?? 1}</span>
+                      <span className="ml-1 text-xs font-normal text-fg-secondary">pts/R$</span>
+                    </span>
                   </div>
-                )}
+
+                  {/* Programas */}
+                  {programasList.length > 0 && (
+                    <div className="border-t border-white/10 pt-3">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-fg-secondary">
+                        Pontua em
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {programasList.map((prog) => (
+                          <span
+                            key={prog.id}
+                            className="rounded-full bg-accent-pool/10 px-3 py-1 text-xs font-medium text-accent-pool"
+                          >
+                            {prog.nome}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}

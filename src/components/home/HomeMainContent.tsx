@@ -243,7 +243,6 @@ export default function HomeMainContent() {
                   <CreditCardPreview
                     holderName="SEU NOME"
                     lastDigits="1234"
-                    cardType="Black"
                     cardTier="INFINITE"
                     variant="black"
                     className="mb-6"
@@ -271,7 +270,7 @@ export default function HomeMainContent() {
 
                   {/* CTA hint */}
                   <p className="mt-4 text-center text-xs text-fg-secondary/80">
-                    Faça login para ver seu saldo real
+                    Registre-se para começar a gerenciar seu saldo real!
                   </p>
                 </div>
               )}
