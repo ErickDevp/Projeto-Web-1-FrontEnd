@@ -1,12 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 export default function HomeFooter() {
+    const location = useLocation()
+
     return (
         <footer className="mx-auto w-full max-w-6xl px-6 pb-8">
             <div className="flex flex-col items-center gap-4 border-t border-white/10 pt-6 text-center">
                 <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-fg-secondary">
                     <Link
                         to="/terms"
+                        state={{ backgroundLocation: location }}
                         className="transition-colors hover:text-accent-pool"
                     >
                         Termos de Uso
@@ -14,6 +17,7 @@ export default function HomeFooter() {
                     <span className="opacity-30">•</span>
                     <Link
                         to="/privacy"
+                        state={{ backgroundLocation: location }}
                         className="transition-colors hover:text-accent-pool"
                     >
                         Política de Privacidade
