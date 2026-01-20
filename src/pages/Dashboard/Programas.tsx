@@ -4,6 +4,7 @@ import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma
 import { useAuth } from '../../hooks/useAuth'
 import { notify } from '../../utils/notify'
 import CategoryBadge from '../../components/ui/CategoryBadge'
+import SensitiveValue from '../../components/ui/SensitiveValue'
 import type { RoleEnum } from '../../interfaces/enums'
 
 // ==================== TYPES ====================
@@ -77,8 +78,8 @@ function TabButton({
             type="button"
             onClick={onClick}
             className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${active
-                    ? 'bg-gradient-to-r from-accent-sky/10 to-accent-pool/10 text-accent-pool border border-accent-pool/30'
-                    : 'text-fg-secondary hover:text-fg-primary hover:bg-white/5'
+                ? 'bg-gradient-to-r from-accent-sky/10 to-accent-pool/10 text-accent-pool border border-accent-pool/30'
+                : 'text-fg-secondary hover:text-fg-primary hover:bg-white/5'
                 }`}
         >
             {children}
@@ -152,7 +153,7 @@ function ProgramCard({
                         <div>
                             <p className="text-xs text-fg-secondary">Seu saldo</p>
                             <p className="text-2xl font-bold text-accent-pool">
-                                {formatPoints(saldo)} <span className="text-sm font-normal text-fg-secondary">pts</span>
+                                <SensitiveValue>{formatPoints(saldo)}</SensitiveValue> <span className="text-sm font-normal text-fg-secondary">pts</span>
                             </p>
                         </div>
                     </div>
@@ -455,7 +456,7 @@ export default function Programas() {
                     <div className="dashboard-card !min-h-0 !p-4">
                         <p className="text-xs text-fg-secondary">Total de Pontos</p>
                         <p className="text-2xl font-bold text-accent-pool">
-                            {formatPoints(Array.from(saldoMap.values()).reduce((acc, s) => acc + s.pontos, 0))}
+                            <SensitiveValue>{formatPoints(Array.from(saldoMap.values()).reduce((acc, s) => acc + s.pontos, 0))}</SensitiveValue>
                         </p>
                     </div>
                     <div className="dashboard-card !min-h-0 !p-4">

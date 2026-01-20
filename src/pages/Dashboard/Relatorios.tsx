@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { notify } from '../../utils/notify'
 import StatusBadge from '../../components/ui/StatusBadge'
+import SensitiveValue from '../../components/ui/SensitiveValue'
+import { usePreferences } from '../../hooks/usePreferences'
 import type {
   RelatorioResponseDTO,
   EvolucaoMensalDTO,
@@ -41,6 +43,9 @@ const CHART_COLORS = [
 
 // Line Chart Component (SVG)
 function LineChart({ data }: { data: EvolucaoMensalDTO[] }) {
+  const { preferences } = usePreferences()
+  const hideValues = preferences.hideValues
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-fg-secondary">
@@ -99,7 +104,7 @@ function LineChart({ data }: { data: EvolucaoMensalDTO[] }) {
             className="fill-current text-fg-secondary"
             style={{ fontSize: '2.5px' }}
           >
-            {formatPoints(item.value)}
+            {hideValues ? '••••' : formatPoints(item.value)}
           </text>
         ))}
 
@@ -158,8 +163,8 @@ function LineChart({ data }: { data: EvolucaoMensalDTO[] }) {
 
       {/* Legend values */}
       <div className="flex justify-between mt-1 text-xs text-fg-secondary px-1">
-        <span>Mín: {formatPoints(minValue)}</span>
-        <span>Máx: {formatPoints(maxValue)}</span>
+        <span>Mín: {hideValues ? '••••••' : formatPoints(minValue)}</span>
+        <span>Máx: {hideValues ? '••••••' : formatPoints(maxValue)}</span>
       </div>
     </div>
   )
@@ -167,6 +172,9 @@ function LineChart({ data }: { data: EvolucaoMensalDTO[] }) {
 
 // Donut Chart Component (SVG)
 function DonutChart({ data }: { data: PontosPorCartaoDTO[] }) {
+  const { preferences } = usePreferences()
+  const hideValues = preferences.hideValues
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-fg-secondary">
@@ -217,7 +225,7 @@ function DonutChart({ data }: { data: PontosPorCartaoDTO[] }) {
           ))}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-fg-primary">{formatPoints(total)}</span>
+          <span className="text-2xl font-bold text-fg-primary">{hideValues ? '••••••' : formatPoints(total)}</span>
           <span className="text-[0.625rem] text-fg-secondary">Total</span>
         </div>
       </div>
@@ -231,7 +239,7 @@ function DonutChart({ data }: { data: PontosPorCartaoDTO[] }) {
               style={{ backgroundColor: seg.color }}
             />
             <span className="flex-1 text-fg-secondary truncate">{seg.nomeCartao}</span>
-            <span className="font-medium text-fg-primary">{formatPoints(seg.totalPontos)}</span>
+            <span className="font-medium text-fg-primary">{hideValues ? '••••••' : formatPoints(seg.totalPontos)}</span>
             <span className="text-fg-secondary">({(seg.percent * 100).toFixed(0)}%)</span>
           </div>
         ))}
@@ -447,7 +455,7 @@ export default function Relatorios() {
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-bold text-fg-primary">{formatPoints(stats.totalPoints)}</p>
+                <p className="text-xl font-bold text-fg-primary"><SensitiveValue>{formatPoints(stats.totalPoints)}</SensitiveValue></p>
                 <p className="text-xs text-fg-secondary">Total de Pontos</p>
               </div>
             </div>
@@ -486,7 +494,7 @@ export default function Relatorios() {
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-bold text-fg-primary">{formatPoints(stats.mediaPorMovimentacao)} pts</p>
+                <p className="text-xl font-bold text-fg-primary"><SensitiveValue>{formatPoints(stats.mediaPorMovimentacao)}</SensitiveValue> pts</p>
                 <p className="text-xs text-fg-secondary">Média por Movimentação</p>
               </div>
             </div>
@@ -515,11 +523,11 @@ export default function Relatorios() {
               <div className="flex justify-between items-end">
                 <div>
                   <span className="text-xs text-fg-secondary">Entradas</span>
-                  <p className="text-lg font-bold text-green-400">+{formatPoints(stats.totalEntradas)}</p>
+                  <p className="text-lg font-bold text-green-400">+<SensitiveValue>{formatPoints(stats.totalEntradas)}</SensitiveValue></p>
                 </div>
                 <div>
                   <span className="text-xs text-fg-secondary">Saídas</span>
-                  <p className="text-lg font-bold text-red-400">-{formatPoints(stats.totalSaidas)}</p>
+                  <p className="text-lg font-bold text-red-400">-<SensitiveValue>{formatPoints(stats.totalSaidas)}</SensitiveValue></p>
                 </div>
               </div>
 
@@ -566,7 +574,7 @@ export default function Relatorios() {
 
             <div className="flex flex-col items-center justify-center flex-1 space-y-2">
               <p className={`text-3xl font-bold ${stats.saldoLiquido >= 0 ? 'text-fg-primary' : 'text-red-400'}`}>
-                {formatPoints(stats.saldoLiquido)}
+                <SensitiveValue>{formatPoints(stats.saldoLiquido)}</SensitiveValue>
               </p>
 
               <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${stats.growthRate >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
@@ -695,7 +703,7 @@ export default function Relatorios() {
                       </td>
                       <td className={`py-3 px-4 text-right font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'
                         }`}>
-                        {isPositive ? '+' : '-'}{formatPoints(Math.abs(item.pontosCalculados))}
+                        {isPositive ? '+' : '-'}<SensitiveValue>{formatPoints(Math.abs(item.pontosCalculados))}</SensitiveValue>
                       </td>
                     </tr>
                   )

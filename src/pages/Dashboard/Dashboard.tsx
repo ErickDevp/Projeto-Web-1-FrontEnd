@@ -8,6 +8,7 @@ import type { RelatorioResponseDTO } from '../../interfaces/relatorio'
 import type { SaldoUsuarioPrograma } from '../../interfaces/saldoUsuarioPrograma'
 import type { Cartao } from '../../interfaces/cardTypes'
 import { notify } from '../../utils/notify'
+import SensitiveValue from '../../components/ui/SensitiveValue'
 
 // Brand logos for compact card list
 import visaLogo from '../../assets/brands/visa.svg'
@@ -304,7 +305,7 @@ export default function Dashboard() {
                         Saldo Total
                       </p>
                       <p className="stat-value mt-1">
-                        {totalPoints.toLocaleString('pt-BR')} <span className="text-lg">pts</span>
+                        <SensitiveValue>{totalPoints.toLocaleString('pt-BR')}</SensitiveValue> <span className="text-lg">pts</span>
                       </p>
                       {/* Trend Badge */}
                       {hasGrowthData && (
@@ -332,7 +333,7 @@ export default function Dashboard() {
                       Conversão Estimada
                     </p>
                     <p className="text-3xl font-bold titulo-grafico">
-                      R$ {estimatedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <SensitiveValue placeholder="R$ ••••••">R$ {estimatedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</SensitiveValue>
                     </p>
                     <p className="mt-1 text-xs text-fg-secondary">
                       Cotação média: R$ {avgPointValue.toFixed(2)}/pt
@@ -376,7 +377,7 @@ export default function Dashboard() {
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-fg-primary truncate">{item.label}</p>
                             <p className="text-[10px] text-fg-secondary">
-                              {item.value.toLocaleString('pt-BR')} pts • {percentage.toFixed(0)}%
+                              <SensitiveValue>{item.value.toLocaleString('pt-BR')}</SensitiveValue> pts • {percentage.toFixed(0)}%
                             </p>
                           </div>
                         </div>
@@ -498,10 +499,10 @@ export default function Dashboard() {
                   <div className="flex gap-3">
                     {/* Y-axis labels */}
                     <div className="flex flex-col justify-between text-xs h-[16rem] py-1 text-right min-w-[3rem]">
-                      <span className="titulo-grafico font-semibold">{formatYLabel(maxCardPoints)}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxCardPoints * 0.75))}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxCardPoints * 0.5))}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxCardPoints * 0.25))}</span>
+                      <span className="titulo-grafico font-semibold"><SensitiveValue>{formatYLabel(maxCardPoints)}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxCardPoints * 0.75))}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxCardPoints * 0.5))}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxCardPoints * 0.25))}</SensitiveValue></span>
                       <span className="text-fg-secondary">0</span>
                     </div>
                     {/* Bars container */}
@@ -514,7 +515,7 @@ export default function Dashboard() {
                           <div key={item.cartaoId} className="flex flex-col items-center group flex-1 h-full justify-end">
                             {/* Value on hover */}
                             <span className="titulo-grafico text-sm font-bold mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                              {value.toLocaleString('pt-BR')}
+                              <SensitiveValue>{value.toLocaleString('pt-BR')}</SensitiveValue>
                             </span>
                             {/* Vertical Bar */}
                             <div
@@ -551,7 +552,7 @@ export default function Dashboard() {
                         <div key={item.cartaoId} className="group" style={{ animationDelay: `${idx * 100}ms` }}>
                           <div className="flex items-center justify-between text-sm mb-2">
                             <span className="text-fg-secondary group-hover:text-fg-primary transition-colors">{item.nomeCartao}</span>
-                            <span className="titulo-grafico font-bold">{value.toLocaleString('pt-BR')}</span>
+                            <span className="titulo-grafico font-bold"><SensitiveValue>{value.toLocaleString('pt-BR')}</SensitiveValue></span>
                           </div>
                           <div className="progress-bar">
                             <div
@@ -594,10 +595,10 @@ export default function Dashboard() {
                   <div className="flex gap-2">
                     {/* Y-axis labels - 5 values */}
                     <div className="flex flex-col justify-between text-[0.625rem] h-28 py-1 pr-1 text-right min-w-[2rem]">
-                      <span className="titulo-grafico font-semibold">{formatYLabel(maxMonthly)}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxMonthly * 0.75))}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxMonthly * 0.5))}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxMonthly * 0.25))}</span>
+                      <span className="titulo-grafico font-semibold"><SensitiveValue>{formatYLabel(maxMonthly)}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxMonthly * 0.75))}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxMonthly * 0.5))}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxMonthly * 0.25))}</SensitiveValue></span>
                       <span className="text-fg-secondary">0</span>
                     </div>
                     {/* Chart SVG */}
@@ -734,10 +735,10 @@ export default function Dashboard() {
                   <div className="flex gap-2">
                     {/* Y-axis labels - 5 values */}
                     <div className="flex flex-col justify-between text-[0.625rem] h-28 py-1 pr-1 text-right min-w-[2rem]">
-                      <span className="titulo-grafico font-semibold">{formatYLabel(maxHistory)}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxHistory * 0.75))}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxHistory * 0.5))}</span>
-                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxHistory * 0.25))}</span>
+                      <span className="titulo-grafico font-semibold"><SensitiveValue>{formatYLabel(maxHistory)}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxHistory * 0.75))}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxHistory * 0.5))}</SensitiveValue></span>
+                      <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxHistory * 0.25))}</SensitiveValue></span>
                       <span className="text-fg-secondary">0</span>
                     </div>
                     {/* Chart SVG */}

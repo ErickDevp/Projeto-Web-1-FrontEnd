@@ -5,6 +5,7 @@ import { movimentacaoPontosService } from '../../services/movimentacaoPontos/mov
 import { notify } from '../../utils/notify'
 import { formatCurrency, formatDate, formatPoints } from '../../utils/format'
 import StatusBadge, { STATUS_CONFIG, getStatusString } from '../../components/ui/StatusBadge'
+import SensitiveValue from '../../components/ui/SensitiveValue'
 import type { Programa } from '../../interfaces/cardTypes'
 import type { MovimentacaoPontosDTO } from '../../interfaces/movimentacaoPontos'
 import { endpoints } from '../../services/endpoints'
@@ -168,11 +169,11 @@ export default function Movimentacoes() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-xs text-fg-secondary">Total movimentado</p>
-            <p className="text-lg font-bold text-fg-primary">{formatCurrency(totalValor)}</p>
+            <p className="text-lg font-bold text-fg-primary"><SensitiveValue>{formatCurrency(totalValor)}</SensitiveValue></p>
           </div>
           <div className="text-right">
             <p className="text-xs text-fg-secondary">Pontos gerados</p>
-            <p className="text-lg font-bold text-accent-pool">{formatPoints(totalPontos)}</p>
+            <p className="text-lg font-bold text-accent-pool"><SensitiveValue>{formatPoints(totalPontos)}</SensitiveValue></p>
           </div>
         </div>
       </header>
@@ -297,11 +298,11 @@ export default function Movimentacoes() {
                               className="w-24 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-fg-primary text-right focus:border-accent-pool focus:outline-none"
                             />
                           ) : (
-                            <span className="text-fg-primary font-medium">{formatCurrency(item.valor)}</span>
+                            <span className="text-fg-primary font-medium"><SensitiveValue>{formatCurrency(item.valor)}</SensitiveValue></span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <span className="font-semibold text-accent-pool">{formatPoints(item.pontosCalculados)}</span>
+                          <span className="font-semibold text-accent-pool"><SensitiveValue>{formatPoints(item.pontosCalculados)}</SensitiveValue></span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <StatusBadge status={item.status} />
@@ -433,11 +434,11 @@ export default function Movimentacoes() {
                             <div className="flex items-baseline gap-4 mt-2">
                               <div>
                                 <p className="text-xs text-fg-secondary">Valor</p>
-                                <p className="font-medium text-fg-primary">{formatCurrency(item.valor)}</p>
+                                <p className="font-medium text-fg-primary"><SensitiveValue>{formatCurrency(item.valor)}</SensitiveValue></p>
                               </div>
                               <div>
                                 <p className="text-xs text-fg-secondary">Pontos</p>
-                                <p className="font-semibold text-accent-pool">{formatPoints(item.pontosCalculados)}</p>
+                                <p className="font-semibold text-accent-pool"><SensitiveValue>{formatPoints(item.pontosCalculados)}</SensitiveValue></p>
                               </div>
                             </div>
                           </>
