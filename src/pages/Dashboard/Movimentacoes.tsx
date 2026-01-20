@@ -4,7 +4,7 @@ import { programaFidelidadeService } from '../../services/programaFidelidade/pro
 import { movimentacaoPontosService } from '../../services/movimentacaoPontos/movimentacaoPontos.service'
 import { notify } from '../../utils/notify'
 import { formatCurrency, formatDate, formatPoints } from '../../utils/format'
-import { STATUS_STYLES } from '../../utils/cardConstants'
+import StatusBadge, { STATUS_CONFIG, getStatusString } from '../../components/ui/StatusBadge'
 import type { Programa } from '../../interfaces/cardTypes'
 import type { MovimentacaoPontosDTO } from '../../interfaces/movimentacaoPontos'
 import { endpoints } from '../../services/endpoints'
@@ -179,12 +179,12 @@ export default function Movimentacoes() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {['PENDENTE', 'CREDITADO', 'EXPIRADO', 'CANCELADO'].map((status) => {
+        {(['PENDENTE', 'CREDITADO', 'EXPIRADO', 'CANCELADO'] as const).map((status) => {
           const count = movimentacoes.filter((m) => getStatus(m) === status).length
-          const style = STATUS_STYLES[status]
+          const config = STATUS_CONFIG[status]
           return (
-            <div key={status} className={`dashboard-card !min-h-0 p-4 ${style.bg} border ${style.border}`}>
-              <p className={`text-xs font-medium ${style.text}`}>{style.label}</p>
+            <div key={status} className={`dashboard-card !min-h-0 p-4 ${config.bg} border ${config.border}`}>
+              <p className={`text-xs font-medium ${config.text}`}>{config.label}</p>
               <p className="text-2xl font-bold text-fg-primary">{count}</p>
             </div>
           )
@@ -243,8 +243,6 @@ export default function Movimentacoes() {
                   {movimentacoes.map((item) => {
                     const id = getId(item)
                     const isEditing = editingId === id
-                    const status = getStatus(item)
-                    const statusStyle = STATUS_STYLES[status] ?? STATUS_STYLES.PENDENTE
                     const comprovanteUrl = getComprovanteUrl(item)
                     const cartaoNome = item.cartao?.nome ?? (item.cartaoId ? cardMap.get(item.cartaoId) : '-')
                     const programaNome = item.saldo?.programa?.nome ?? (item.programaId ? programMap.get(item.programaId) : '-')
@@ -306,10 +304,7 @@ export default function Movimentacoes() {
                           <span className="font-semibold text-accent-pool">{formatPoints(item.pontosCalculados)}</span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
-                            <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                            {statusStyle.label}
-                          </span>
+                          <StatusBadge status={item.status} />
                         </td>
                         <td className="px-4 py-3 text-center">
                           {comprovanteUrl ? (
@@ -383,14 +378,14 @@ export default function Movimentacoes() {
               {movimentacoes.map((item) => {
                 const id = getId(item)
                 const isEditing = editingId === id
-                const status = getStatus(item)
-                const statusStyle = STATUS_STYLES[status] ?? STATUS_STYLES.PENDENTE
                 const comprovanteUrl = getComprovanteUrl(item)
                 const cartaoNome = item.cartao?.nome ?? (item.cartaoId ? cardMap.get(item.cartaoId) : '-')
                 const programaNome = item.saldo?.programa?.nome ?? (item.programaId ? programMap.get(item.programaId) : '-')
+                const statusKey = getStatusString(item.status)
+                const statusConfig = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.PENDENTE
 
                 return (
-                  <div key={id} className={`rounded-xl border p-4 ${statusStyle.bg} ${statusStyle.border}`}>
+                  <div key={id} className={`rounded-xl border p-4 ${statusConfig.bg} ${statusConfig.border}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         {isEditing ? (
@@ -430,10 +425,7 @@ export default function Movimentacoes() {
                         ) : (
                           <>
                             <div className="flex items-center gap-2 mb-2">
-                              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
-                                <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                                {statusStyle.label}
-                              </span>
+                              <StatusBadge status={item.status} />
                               <span className="text-xs text-fg-secondary">{formatDate(item.dataOcorrencia ?? item.data)}</span>
                             </div>
                             <p className="font-semibold text-fg-primary truncate">{cartaoNome}</p>
