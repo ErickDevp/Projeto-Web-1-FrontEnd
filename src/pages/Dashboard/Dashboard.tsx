@@ -137,7 +137,6 @@ export default function Dashboard() {
     const sorted = [...historico]
       .filter((item) => !Number.isNaN(new Date(item.data).getTime()))
       .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
-      .slice(-7)
 
     return sorted.map((item) => ({
       label: new Date(item.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
@@ -512,7 +511,7 @@ export default function Dashboard() {
               <div className="flex-1">
                 <h2 className="section-title">Histórico de acúmulo</h2>
               </div>
-              <span className="badge">Últimas 7 movimentações</span>
+              <span className="badge">{historySeries.length} movimentações</span>
             </div>
             {/* Chart Container */}
             <div className="chart-container mt-4">
