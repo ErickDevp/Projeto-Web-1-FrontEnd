@@ -72,6 +72,7 @@ export default function TopBar({
       notificacoes: 'Notificações',
       movimentacoes: 'Movimentações',
       relatorios: 'Relatórios',
+      promocoes: 'Promoções',
       configuracoes: 'Configurações',
     }
 

@@ -1,0 +1,607 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { promocaoService } from '../../services/promocao/promocao.service'
+import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
+import { usuarioService } from '../../services/usuario/usuario.service'
+import { notify } from '../../utils/notify'
+import type { PromocaoDTO } from '../../interfaces/promocao'
+import type { Programa } from '../../interfaces/cardTypes'
+import type { UsuarioDTO } from '../../interfaces/auth'
+
+// Promocao entity type (response from backend)
+type Promocao = {
+    id: number
+    programaId: number
+    programa?: { id: number; nome: string }
+    titulo: string
+    descricao: string
+    link?: string
+    data_inicio: string
+    data_fim: string
+    ativo: boolean
+}
+
+// Calculate days until expiration
+function getDaysUntilExpiration(dateStr: string): number {
+    const expirationDate = new Date(dateStr)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    expirationDate.setHours(0, 0, 0, 0)
+    const diffTime = expirationDate.getTime() - today.getTime()
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+}
+
+// Format date for display
+function formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    })
+}
+
+export default function Promocoes() {
+    const [promocoes, setPromocoes] = useState<Promocao[]>([])
+    const [programas, setProgramas] = useState<Programa[]>([])
+    const [user, setUser] = useState<UsuarioDTO | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [showForm, setShowForm] = useState(false)
+    const [editingPromo, setEditingPromo] = useState<Promocao | null>(null)
+    const [deletingId, setDeletingId] = useState<number | null>(null)
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+
+    // Form state
+    const [form, setForm] = useState<{
+        titulo: string
+        descricao: string
+        link: string
+        programaId: string
+        data_inicio: string
+        data_fim: string
+        ativo: boolean
+    }>({
+        titulo: '',
+        descricao: '',
+        link: '',
+        programaId: '',
+        data_inicio: new Date().toISOString().split('T')[0],
+        data_fim: '',
+        ativo: true,
+    })
+
+    // Check if user is admin
+    const isAdmin = user?.role === 'ADMIN'
+
+    // Load data
+    const loadData = useCallback(async () => {
+        try {
+            const [promoData, programaData, userData] = await Promise.all([
+                promocaoService.list<Promocao[]>(),
+                programaFidelidadeService.list<Programa[]>(),
+                usuarioService.getMe(),
+            ])
+
+            setPromocoes(Array.isArray(promoData) ? promoData : [])
+            setProgramas(Array.isArray(programaData) ? programaData : [])
+            setUser(userData)
+        } catch (error) {
+            notify.apiError(error, { fallback: 'Não foi possível carregar as promoções.' })
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        loadData()
+    }, [loadData])
+
+    // Listen for new promotions created by admin
+    useEffect(() => {
+        const handlePromotionCreated = async () => {
+            try {
+                const promoData = await promocaoService.list<Promocao[]>()
+                setPromocoes(Array.isArray(promoData) ? promoData : [])
+            } catch {
+                // Silent failure
+            }
+        }
+
+        window.addEventListener('promotion-created', handlePromotionCreated)
+        return () => {
+            window.removeEventListener('promotion-created', handlePromotionCreated)
+        }
+    }, [])
+
+    // Program name lookup
+    const programaMap = useMemo(() => {
+        const map = new Map<number, string>()
+        programas.forEach((p) => map.set(p.id, p.nome))
+        return map
+    }, [programas])
+
+    // Reset form
+    const resetForm = useCallback(() => {
+        setForm({
+            titulo: '',
+            descricao: '',
+            link: '',
+            programaId: '',
+            data_inicio: new Date().toISOString().split('T')[0],
+            data_fim: '',
+            ativo: true,
+        })
+        setEditingPromo(null)
+        setShowForm(false)
+    }, [])
+
+    // Open form for editing
+    const openEditForm = useCallback((promo: Promocao) => {
+        setEditingPromo(promo)
+        setForm({
+            titulo: promo.titulo ?? '',
+            descricao: promo.descricao ?? '',
+            link: promo.link ?? '',
+            programaId: String(promo.programaId ?? promo.programa?.id ?? ''),
+            data_inicio: promo.data_inicio?.split('T')[0] ?? '',
+            data_fim: promo.data_fim?.split('T')[0] ?? '',
+            ativo: promo.ativo ?? true,
+        })
+        setShowForm(true)
+    }, [])
+
+    // Handle form submit
+    const handleSubmit = useCallback(async (event: React.FormEvent) => {
+        event.preventDefault()
+
+        if (!form.titulo.trim()) {
+            notify.warn('Informe o título da promoção.')
+            return
+        }
+
+        if (!form.programaId) {
+            notify.warn('Selecione um programa de fidelidade.')
+            return
+        }
+
+        if (!form.data_fim) {
+            notify.warn('Informe a data de validade.')
+            return
+        }
+
+        setSaving(true)
+        const payload: PromocaoDTO = {
+            titulo: form.titulo.trim(),
+            descricao: form.descricao.trim(),
+            programaId: Number(form.programaId),
+            data_inicio: form.data_inicio,
+            data_fim: form.data_fim,
+            ativo: form.ativo,
+        }
+
+        try {
+            if (editingPromo?.id) {
+                await promocaoService.update(editingPromo.id, payload)
+                notify.success('Promoção atualizada com sucesso.')
+            } else {
+                await promocaoService.create(payload)
+                notify.success('Promoção criada com sucesso.')
+            }
+            resetForm()
+            await loadData()
+            // Dispatch event to notify other users' pages
+            window.dispatchEvent(new CustomEvent('promotion-created'))
+        } catch (error) {
+            notify.apiError(error, { fallback: 'Não foi possível salvar a promoção.' })
+        } finally {
+            setSaving(false)
+        }
+    }, [form, editingPromo, resetForm, loadData])
+
+    // Handle delete
+    const handleDeleteConfirm = useCallback((id: number) => {
+        setConfirmDeleteId(id)
+    }, [])
+
+    const handleDeleteCancel = useCallback(() => {
+        setConfirmDeleteId(null)
+    }, [])
+
+    const handleDelete = useCallback(async (id: number) => {
+        setDeletingId(id)
+        setConfirmDeleteId(null)
+        try {
+            await promocaoService.remove(id)
+            notify.success('Promoção excluída com sucesso.')
+            await loadData()
+        } catch (error) {
+            notify.apiError(error, { fallback: 'Não foi possível excluir a promoção.' })
+        } finally {
+            setDeletingId(null)
+        }
+    }, [loadData])
+
+    // Count active promotions
+    const activeCount = useMemo(() => {
+        return promocoes.filter((p) => p.ativo && getDaysUntilExpiration(p.data_fim) >= 0).length
+    }, [promocoes])
+
+    return (
+        <section className="space-y-6">
+            <header className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h1 className="titulo-grafico text-2xl font-bold">Promoções</h1>
+                    <p className="mt-1 text-sm text-fg-secondary">
+                        {activeCount > 0
+                            ? `${activeCount} ${activeCount === 1 ? 'promoção ativa' : 'promoções ativas'} disponíveis.`
+                            : 'Nenhuma promoção ativa no momento.'}
+                    </p>
+                </div>
+                {isAdmin && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            resetForm()
+                            setShowForm(true)
+                        }}
+                        className="btn-primary"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Nova promoção
+                    </button>
+                )}
+            </header>
+
+            {/* Form Modal/Panel - Admin only */}
+            {isAdmin && showForm && (
+                <div className="dashboard-card">
+                    <div className="section-header">
+                        <div className="card-icon">
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <h2 className="section-title">{editingPromo ? 'Editar promoção' : 'Nova promoção'}</h2>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="rounded-lg p-2 text-fg-secondary hover:bg-white/10 hover:text-fg-primary transition-colors"
+                        >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+                        <div className="grid gap-5 md:grid-cols-2">
+                            {/* Título */}
+                            <div className="space-y-2">
+                                <label htmlFor="promo-titulo" className="block text-sm font-medium text-fg-primary">
+                                    Título
+                                </label>
+                                <input
+                                    id="promo-titulo"
+                                    value={form.titulo}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, titulo: e.target.value }))}
+                                    placeholder="Ex: Bônus de 50% em transferências"
+                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                                />
+                            </div>
+
+                            {/* Programa */}
+                            <div className="space-y-2">
+                                <label htmlFor="promo-programa" className="block text-sm font-medium text-fg-primary">
+                                    Programa de fidelidade
+                                </label>
+                                <select
+                                    id="promo-programa"
+                                    value={form.programaId}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, programaId: e.target.value }))}
+                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                                >
+                                    <option value="">Selecione um programa</option>
+                                    {programas.map((p) => (
+                                        <option key={p.id} value={p.id}>
+                                            {p.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Link */}
+                            <div className="space-y-2 md:col-span-2">
+                                <label htmlFor="promo-link" className="block text-sm font-medium text-fg-primary">
+                                    Link da promoção <span className="text-fg-secondary">(opcional)</span>
+                                </label>
+                                <input
+                                    id="promo-link"
+                                    type="url"
+                                    value={form.link}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, link: e.target.value }))}
+                                    placeholder="https://exemplo.com/promocao"
+                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                                />
+                            </div>
+
+                            {/* Descrição */}
+                            <div className="space-y-2 md:col-span-2">
+                                <label htmlFor="promo-descricao" className="block text-sm font-medium text-fg-primary">
+                                    Descrição
+                                </label>
+                                <textarea
+                                    id="promo-descricao"
+                                    rows={3}
+                                    value={form.descricao}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, descricao: e.target.value }))}
+                                    placeholder="Descreva os detalhes da promoção..."
+                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all resize-none"
+                                />
+                            </div>
+
+                            {/* Data Início */}
+                            <div className="space-y-2">
+                                <label htmlFor="promo-inicio" className="block text-sm font-medium text-fg-primary">
+                                    Data de início
+                                </label>
+                                <input
+                                    id="promo-inicio"
+                                    type="date"
+                                    value={form.data_inicio}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, data_inicio: e.target.value }))}
+                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                                />
+                            </div>
+
+                            {/* Data Fim */}
+                            <div className="space-y-2">
+                                <label htmlFor="promo-fim" className="block text-sm font-medium text-fg-primary">
+                                    Data de validade
+                                </label>
+                                <input
+                                    id="promo-fim"
+                                    type="date"
+                                    value={form.data_fim}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, data_fim: e.target.value }))}
+                                    min={form.data_inicio}
+                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Ativo checkbox */}
+                        <div className="flex items-center gap-3">
+                            <input
+                                id="promo-ativo"
+                                type="checkbox"
+                                checked={form.ativo}
+                                onChange={(e) => setForm((prev) => ({ ...prev, ativo: e.target.checked }))}
+                                className="h-4 w-4 rounded border-white/10 bg-white/5 text-accent-pool focus:ring-accent-pool/20"
+                            />
+                            <label htmlFor="promo-ativo" className="text-sm text-fg-primary">
+                                Promoção ativa
+                            </label>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex justify-end gap-3 pt-2">
+                            <button type="button" onClick={resetForm} className="btn-secondary">
+                                Cancelar
+                            </button>
+                            <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
+                                {saving ? (
+                                    <>
+                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                        Salvando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                        {editingPromo ? 'Atualizar' : 'Criar promoção'}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Promotions Grid */}
+            {loading ? (
+                <div className="dashboard-card flex items-center justify-center gap-4 py-12">
+                    <div className="relative">
+                        <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
+                        <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
+                    </div>
+                    <span className="text-sm text-fg-secondary">Carregando promoções...</span>
+                </div>
+            ) : promocoes.length === 0 ? (
+                <div className="dashboard-card flex flex-col items-center justify-center gap-4 py-12">
+                    <div className="rounded-full bg-white/5 p-6">
+                        <svg className="h-12 w-12 text-fg-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                        </svg>
+                    </div>
+                    <div className="text-center">
+                        <p className="font-medium text-fg-primary">Nenhuma promoção disponível</p>
+                        <p className="mt-1 text-sm text-fg-secondary">
+                            {isAdmin ? 'Cadastre a primeira promoção.' : 'Volte mais tarde para conferir novas ofertas.'}
+                        </p>
+                    </div>
+                    {isAdmin && (
+                        <button
+                            type="button"
+                            onClick={() => setShowForm(true)}
+                            className="btn-primary mt-2"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Criar promoção
+                        </button>
+                    )}
+                </div>
+            ) : (
+                <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
+                    {promocoes.map((promo) => {
+                        const daysLeft = getDaysUntilExpiration(promo.data_fim)
+                        const isExpired = daysLeft < 0
+                        const isUrgent = daysLeft >= 0 && daysLeft <= 3
+                        const programaNome = promo.programa?.nome ?? programaMap.get(promo.programaId) ?? 'Programa'
+
+                        return (
+                            <div
+                                key={promo.id}
+                                className={`dashboard-card relative overflow-hidden transition-all duration-300 ${isExpired ? 'opacity-60' : ''
+                                    } ${isUrgent && !isExpired ? 'border-yellow-500/30' : ''}`}
+                            >
+                                {/* Urgency Badge */}
+                                {isUrgent && !isExpired && (
+                                    <div className={`absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${daysLeft <= 1 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+                                        }`}>
+                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {daysLeft === 0 ? 'Último dia!' : `${daysLeft} dia${daysLeft > 1 ? 's' : ''}`}
+                                    </div>
+                                )}
+
+                                {/* Expired Badge */}
+                                {isExpired && (
+                                    <div className="absolute right-3 top-3 z-10 rounded-full bg-fg-secondary/20 px-2.5 py-1 text-xs font-semibold text-fg-secondary">
+                                        Expirada
+                                    </div>
+                                )}
+
+                                {/* Header */}
+                                <div className="section-header mb-4">
+                                    <div className="card-icon">
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                                        <span className="badge">{programaNome}</span>
+                                        {/* Link indicator */}
+                                        {promo.link && (
+                                            <a
+                                                href={promo.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-1 rounded-full bg-accent-pool/10 px-2 py-0.5 text-[0.625rem] font-medium text-accent-pool hover:bg-accent-pool/20 transition-colors"
+                                                title="Clique para acessar o link"
+                                            >
+                                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                </svg>
+                                                Link
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-fg-primary line-clamp-2">
+                                        {promo.titulo}
+                                    </h3>
+                                    <p className="mt-2 text-sm text-fg-secondary line-clamp-3">
+                                        {promo.descricao || 'Sem descrição disponível.'}
+                                    </p>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="mt-4 pt-4 border-t border-white/10">
+                                    {/* Date info */}
+                                    <div className="flex items-center gap-2 text-xs text-fg-secondary mb-4">
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
+                                        <span>Válido até {formatDate(promo.data_fim)}</span>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-2">
+                                        {/* Main CTA - Available for all users */}
+                                        {promo.link && !isExpired && (
+                                            <a
+                                                href={promo.link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn-primary flex-1 justify-center"
+                                            >
+                                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                </svg>
+                                                Acessar oferta
+                                            </a>
+                                        )}
+
+                                        {/* Admin Actions */}
+                                        {isAdmin && (
+                                            <div className="flex gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openEditForm(promo)}
+                                                    className="p-2 rounded-lg text-fg-secondary hover:text-accent-pool hover:bg-accent-pool/10 transition-colors"
+                                                    title="Editar"
+                                                >
+                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteConfirm(promo.id)}
+                                                    disabled={deletingId === promo.id}
+                                                    className="p-2 rounded-lg text-fg-secondary hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                                                    title="Excluir"
+                                                >
+                                                    {deletingId === promo.id ? (
+                                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                                                    ) : (
+                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Delete Confirmation */}
+                                    {confirmDeleteId === promo.id && (
+                                        <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                                            <p className="text-xs text-red-400 mb-2">Excluir esta promoção?</p>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleDeleteCancel}
+                                                    className="flex-1 rounded-lg border border-white/20 bg-gray-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-500 transition-colors"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(promo.id)}
+                                                    className="flex-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition-colors"
+                                                >
+                                                    Excluir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
+        </section>
+    )
+}
