@@ -428,10 +428,20 @@
 	background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Light mode - Borders with border-white */
+/* Light mode - Borders with border-white (all opacity variants) */
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] [class*="border-white/5"] {
+	border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
 [data-theme="light"] .border-white\/10,
 [data-theme="light"] [class*="border-white/10"] {
 	border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .border-white\/20,
+[data-theme="light"] [class*="border-white/20"] {
+	border-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Light mode - Form inputs and elements */

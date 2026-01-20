@@ -456,7 +456,7 @@ export default function Dashboard() {
               {cards.length < 3 && (
                 <Link
                   to="/dashboard/cartoes"
-                  className="mt-3 flex items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-accent-pool/50 hover:bg-accent-pool/5 transition-all duration-200 group"
+                  className="mt-3 flex items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-fg-secondary/30 hover:border-accent-pool/50 hover:bg-accent-pool/5 transition-all duration-200 group"
                 >
                   <svg className="h-5 w-5 text-fg-secondary group-hover:text-accent-pool transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

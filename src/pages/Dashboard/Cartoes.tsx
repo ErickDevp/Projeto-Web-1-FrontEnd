@@ -494,7 +494,7 @@ export default function Cartoes() {
                               e.stopPropagation()
                               handleDeleteCancel()
                             }}
-                            className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
+                            className="rounded-lg border border-white/20 bg-gray-600 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-500 transition-colors"
                           >
                             Cancelar
                           </button>

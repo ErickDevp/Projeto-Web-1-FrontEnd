@@ -459,7 +459,7 @@ export default function RegistrarPontos() {
                   ? 'border-accent-pool bg-accent-pool/10 py-6'
                   : file
                     ? 'border-accent-pool/50 bg-accent-pool/5 py-3'
-                    : 'border-white/10 hover:border-white/20 py-6'
+                    : 'border-fg-secondary/20 hover:border-fg-secondary/40 py-6'
                   }`}
               >
                 {file ? (
