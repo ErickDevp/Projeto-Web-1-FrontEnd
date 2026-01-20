@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { notify } from '../../utils/notify'
+import StatusBadge from '../../components/ui/StatusBadge'
 import type {
   RelatorioResponseDTO,
   EvolucaoMensalDTO,
@@ -25,15 +26,17 @@ function formatPoints(value: number): string {
 // Month names in Portuguese
 const MONTH_NAMES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
-// Colors for charts
+// Colors for charts - Vibrant and distinct palette
 const CHART_COLORS = [
-  '#00B4D8', // accent-pool
-  '#38BDF8', // accent-sky
+  '#3B82F6', // blue
+  '#8B5CF6', // violet/purple
   '#10B981', // emerald
-  '#F59E0B', // amber
-  '#EF4444', // red
-  '#8B5CF6', // violet
+  '#F97316', // orange
   '#EC4899', // pink
+  '#06B6D4', // cyan
+  '#6366F1', // indigo
+  '#14B8A6', // teal
+  '#F59E0B', // amber
 ]
 
 // Line Chart Component (SVG)
@@ -55,30 +58,59 @@ function LineChart({ data }: { data: EvolucaoMensalDTO[] }) {
   const minValue = Math.min(...sortedData.map((d) => d.totalPontos))
   const range = maxValue - minValue || 1
 
-  const width = 100
+  // Increased dimensions with left padding for Y-axis labels
+  const width = 110
   const height = 60
-  const padding = 5
+  const paddingLeft = 15
+  const paddingRight = 5
+  const paddingTop = 5
+  const paddingBottom = 5
+
+  const chartWidth = width - paddingLeft - paddingRight
+  const chartHeight = height - paddingTop - paddingBottom
 
   const points = sortedData.map((d, i) => {
-    const x = padding + (i / (sortedData.length - 1 || 1)) * (width - padding * 2)
-    const y = height - padding - ((d.totalPontos - minValue) / range) * (height - padding * 2)
+    const x = paddingLeft + (i / (sortedData.length - 1 || 1)) * chartWidth
+    const y = paddingTop + (1 - (d.totalPontos - minValue) / range) * chartHeight
     return { x, y, data: d }
   })
 
   const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  const areaD = `${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`
+
+  // Y-axis values (percentages of range)
+  const yAxisValues = [0, 0.25, 0.5, 0.75, 1].map((ratio) => ({
+    ratio,
+    value: Math.round(maxValue - ratio * range),
+    y: paddingTop + ratio * chartHeight,
+  }))
 
   return (
     <div className="relative">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-64" preserveAspectRatio="none">
+        {/* Y-axis labels */}
+        {yAxisValues.map((item) => (
+          <text
+            key={item.ratio}
+            x={paddingLeft - 2}
+            y={item.y}
+            textAnchor="end"
+            dominantBaseline="middle"
+            className="fill-current text-fg-secondary"
+            style={{ fontSize: '2.5px' }}
+          >
+            {formatPoints(item.value)}
+          </text>
+        ))}
+
         {/* Grid lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
+        {yAxisValues.map((item) => (
           <line
-            key={ratio}
-            x1={padding}
-            y1={padding + ratio * (height - padding * 2)}
-            x2={width - padding}
-            y2={padding + ratio * (height - padding * 2)}
+            key={item.ratio}
+            x1={paddingLeft}
+            y1={item.y}
+            x2={width - paddingRight}
+            y2={item.y}
             stroke="currentColor"
             strokeOpacity={0.1}
             strokeWidth={0.2}
@@ -118,7 +150,7 @@ function LineChart({ data }: { data: EvolucaoMensalDTO[] }) {
       </svg>
 
       {/* X-axis labels */}
-      <div className="flex justify-between mt-2 text-[0.625rem] text-fg-secondary px-1">
+      <div className="flex justify-between mt-2 text-[0.625rem] text-fg-secondary px-1" style={{ paddingLeft: '12%' }}>
         {sortedData.map((d, i) => (
           <span key={i}>{MONTH_NAMES[d.mes - 1]}/{String(d.ano).slice(-2)}</span>
         ))}
@@ -527,7 +559,7 @@ export default function Relatorios() {
                 </svg>
               </div>
               <div className="flex-1">
-                <h2 className="section-title">Resultado Líquido</h2>
+                <h2 className="section-title">Balanço do Período</h2>
                 <p className="text-xs text-fg-secondary">Saldo final das operações</p>
               </div>
             </div>
@@ -648,7 +680,7 @@ export default function Relatorios() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {data.historico.map((item) => {
-                  const isCredit = item.status?.toUpperCase() === 'CREDITO' || item.status?.toUpperCase() === 'ENTRADA' || item.pontosCalculados >= 0
+                  const isPositive = item.pontosCalculados >= 0
 
                   return (
                     <tr key={item.movimentacaoId} className="hover:bg-white/5 transition-colors">
@@ -659,25 +691,11 @@ export default function Relatorios() {
                         {item.programa}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${isCredit
-                          ? 'bg-green-500/10 text-green-400'
-                          : 'bg-red-500/10 text-red-400'
-                          }`}>
-                          {isCredit ? (
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-                            </svg>
-                          ) : (
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-                            </svg>
-                          )}
-                          {item.status || (isCredit ? 'Entrada' : 'Saída')}
-                        </span>
+                        <StatusBadge status={item.status || (isPositive ? 'CREDITADO' : 'CANCELADO')} />
                       </td>
-                      <td className={`py-3 px-4 text-right font-bold ${isCredit ? 'text-green-400' : 'text-red-400'
+                      <td className={`py-3 px-4 text-right font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'
                         }`}>
-                        {isCredit ? '+' : '-'}{formatPoints(Math.abs(item.pontosCalculados))}
+                        {isPositive ? '+' : '-'}{formatPoints(Math.abs(item.pontosCalculados))}
                       </td>
                     </tr>
                   )

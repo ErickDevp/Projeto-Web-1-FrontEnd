@@ -17,6 +17,7 @@ import DashboardRelatorios from './pages/Dashboard/Relatorios'
 import DashboardConfiguracoes from './pages/Dashboard/Configuracoes'
 import DashboardMovimentacoes from './pages/Dashboard/Movimentacoes'
 import DashboardPromocoes from './pages/Dashboard/Promocoes'
+import DashboardProgramas from './pages/Dashboard/Programas'
 import Modal from './components/ui/Modal'
 import Terms from './pages/Legal/Terms'
 import Privacy from './pages/Legal/Privacy'
@@ -84,6 +85,7 @@ function App() {
             <Route path="movimentacoes" element={<DashboardMovimentacoes />} />
             <Route path="relatorios" element={<DashboardRelatorios />} />
             <Route path="promocoes" element={<DashboardPromocoes />} />
+            <Route path="programas" element={<DashboardProgramas />} />
             <Route path="configuracoes" element={<DashboardConfiguracoes />} />
           </Route>
         </Route>
