@@ -291,15 +291,16 @@
 	-webkit-text-fill-color: transparent;
 }
 
-/* Responsive grid for mini cards - AUTO FIT (Density over width) */
+/* Responsive grid for mini cards - fills available space */
 .mini-card-grid {
 	display: grid;
 	gap: 0.75rem;
 	overflow-y: auto;
-	max-height: 18.75rem;
 	flex: 1;
-	/* Ensures cards are at least 240px but fill available space */
-	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	/* Single column layout with narrower cards */
+	grid-template-columns: 1fr;
+	align-content: start;
+	max-width: 16rem;
 }
 
 .mini-card-grid::-webkit-scrollbar {
@@ -320,7 +321,7 @@
 	background: rgba(73, 197, 182, 0.5);
 }
 
-/* Dashboard grid layout - equalizes row heights */
+/* Dashboard grid layout - flexible rows to support row-span */
 .dashboard-grid {
 	display: grid;
 	gap: 1.5rem;
@@ -330,7 +331,7 @@
 @media (min-width: 1024px) {
 	.dashboard-grid {
 		grid-template-columns: repeat(2, 1fr);
-		grid-auto-rows: 1fr;
+		grid-auto-rows: minmax(auto, auto);
 	}
 
 	.dashboard-grid .full-width {

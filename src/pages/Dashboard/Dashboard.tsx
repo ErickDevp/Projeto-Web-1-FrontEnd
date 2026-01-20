@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma/saldoUsuarioPrograma.service'
@@ -8,6 +8,25 @@ import type { RelatorioResponseDTO } from '../../interfaces/relatorio'
 import type { SaldoUsuarioPrograma } from '../../interfaces/saldoUsuarioPrograma'
 import type { Cartao } from '../../interfaces/cardTypes'
 import { notify } from '../../utils/notify'
+
+// Brand logos for compact card list
+import visaLogo from '../../assets/brands/visa.svg'
+import mastercardLogo from '../../assets/brands/mastercard.svg'
+import amexLogo from '../../assets/brands/amex.svg'
+import eloLogo from '../../assets/brands/elo.svg'
+import hipercardLogo from '../../assets/brands/hipercard.svg'
+
+// Get brand logo based on bandeira
+const getBrandLogo = (bandeira?: string): string | null => {
+  switch (bandeira) {
+    case 'VISA': return visaLogo
+    case 'MASTERCARD': return mastercardLogo
+    case 'AMERICAN_EXPRESS': return amexLogo
+    case 'ELO': return eloLogo
+    case 'HIPERCARD': return hipercardLogo
+    default: return null
+  }
+}
 
 type OutletContext = {
   searchTerm: string
@@ -221,53 +240,150 @@ export default function Dashboard() {
     return [
       {
         id: 'saldo',
-        title: 'Saldo do usuário',
-        keywords: `saldo total pontos milhas ${programSummary.map((item) => item.label).join(' ')}`,
-        content: (
-          <div className="dashboard-card stat-card">
-            {/* Header with icon */}
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="card-icon">
-                  {WalletIcon}
+        title: 'Patrimônio & Metas',
+        keywords: `saldo total pontos milhas patrimonio metas ${programSummary.map((item) => item.label).join(' ')}`,
+        content: (() => {
+          // Financial calculations
+          const avgPointValue = 0.02 // R$ 0,02 per point (average)
+          const estimatedValue = totalPoints * avgPointValue
+          const monthlyGrowth = 5.2 // Mock: +5.2% this month
+
+          // Goal tracker (Mock data)
+          const goalName = "Viagem para Paris"
+          const goalTarget = 150000
+          const goalProgress = Math.min((totalPoints / goalTarget) * 100, 100)
+          const pointsRemaining = Math.max(goalTarget - totalPoints, 0)
+
+          // Program colors for distribution bar
+          const programColors = [
+            'bg-accent-pool', 'bg-accent-sky', 'bg-purple-500',
+            'bg-amber-500', 'bg-rose-500', 'bg-emerald-500'
+          ]
+
+          return (
+            <div className="dashboard-card stat-card">
+              {/* ===== TOP: Goal Tracker ===== */}
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-accent-pool/10 to-accent-sky/10 border border-white/10">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <svg className="h-4 w-4 text-accent-pool" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                    </svg>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">Próxima Meta</span>
+                  </div>
+                  <span className="text-xs font-bold titulo-grafico">{Math.round(goalProgress)}%</span>
                 </div>
+                <p className="text-sm font-medium text-fg-primary mb-2">{goalName}</p>
+                {/* Progress Bar */}
+                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-accent-pool to-accent-sky transition-all duration-500"
+                    style={{ width: `${goalProgress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-fg-secondary">
+                  {pointsRemaining > 0
+                    ? `Faltam ${pointsRemaining.toLocaleString('pt-BR')} pts para alcançar sua meta!`
+                    : '🎉 Parabéns! Meta alcançada!'
+                  }
+                </p>
+              </div>
+
+              {/* ===== MIDDLE: Core Financial Section ===== */}
+              <div className="flex flex-wrap gap-6 mb-6">
+                {/* Left: Total Points */}
+                <div className="flex-1 min-w-[12rem]">
+                  <div className="flex items-start gap-3">
+                    <div className="card-icon">
+                      {WalletIcon}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-fg-secondary">
+                        Saldo Total
+                      </p>
+                      <p className="stat-value mt-1">
+                        {totalPoints.toLocaleString('pt-BR')} <span className="text-lg">pts</span>
+                      </p>
+                      {/* Trend Badge */}
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400">
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                        </svg>
+                        <span className="text-xs font-semibold">+{monthlyGrowth}% este mês</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Estimated Value */}
+                <div className="flex-1 min-w-[12rem]">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-fg-secondary mb-1">
+                      Conversão Estimada
+                    </p>
+                    <p className="text-3xl font-bold titulo-grafico">
+                      R$ {estimatedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                    <p className="mt-1 text-xs text-fg-secondary">
+                      Cotação média: R$ {avgPointValue.toFixed(2)}/pt
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== BOTTOM: Program Distribution ===== */}
+              {programSummary.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fg-secondary">
-                    Saldo total
+                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-fg-secondary mb-3">
+                    Distribuição por Programa
                   </p>
-                  <p className="stat-value mt-2">
-                    {totalPoints.toLocaleString('pt-BR')} <span className="text-lg">pts</span>
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="badge">
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent-pool animate-pulse" />
-                      Atualizado agora
-                    </span>
+
+                  {/* Segmented Distribution Bar */}
+                  <div className="h-3 rounded-full overflow-hidden flex bg-white/10">
+                    {programSummary.map((item, idx) => {
+                      const percentage = totalPoints > 0 ? (item.value / totalPoints) * 100 : 0
+                      return (
+                        <div
+                          key={item.label}
+                          className={`${programColors[idx % programColors.length]} transition-all duration-500 first:rounded-l-full last:rounded-r-full`}
+                          style={{ width: `${percentage}%` }}
+                          title={`${item.label}: ${item.value.toLocaleString('pt-BR')} pts (${percentage.toFixed(1)}%)`}
+                        />
+                      )
+                    })}
+                  </div>
+
+                  {/* Legend Grid */}
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {programSummary.map((item, idx) => {
+                      const percentage = totalPoints > 0 ? (item.value / totalPoints) * 100 : 0
+                      return (
+                        <div
+                          key={item.label}
+                          className="flex items-center gap-2 p-2 rounded-lg border border-white/10 bg-white/5"
+                        >
+                          <div className={`h-3 w-3 rounded-full ${programColors[idx % programColors.length]}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-fg-primary truncate">{item.label}</p>
+                            <p className="text-[10px] text-fg-secondary">
+                              {item.value.toLocaleString('pt-BR')} pts • {percentage.toFixed(0)}%
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="inline-flex flex-col items-end rounded-xl border border-white/10 bg-white/5 px-4 py-2">
-                  <p className="stat-value text-2xl">{programSummary.length}</p>
-                  <p className="text-xs text-fg-secondary">programas conectados</p>
-                </div>
-              </div>
-            </div>
-            {/* Program list */}
-            <div className="mini-card-grid mt-6">
-              {programSummary.length ? (
-                programSummary.map((item) => (
-                  <div key={item.label} className="mini-card flex items-center justify-between">
-                    <span className="truncate text-sm text-fg-secondary">{item.label}</span>
-                    <span className="titulo-grafico font-bold">{item.value.toLocaleString('pt-BR')}</span>
-                  </div>
-                ))
-              ) : (
-                <span className="text-sm text-fg-secondary">Sem saldo registrado.</span>
+              )}
+
+              {programSummary.length === 0 && (
+                <p className="text-sm text-fg-secondary text-center py-4">
+                  Nenhum programa conectado ainda.
+                </p>
               )}
             </div>
-          </div>
-        ),
+          )
+        })(),
       },
       {
         id: 'cartoes',
@@ -285,29 +401,59 @@ export default function Dashboard() {
               </div>
               <span className="badge">{cards.length} ativos</span>
             </div>
-            {/* Card Grid */}
-            <div className="mini-card-grid mt-4">
+            {/* Compact Card List */}
+            <div className={`mt-4 flex-1 flex flex-col ${cards.length > 4 ? 'overflow-y-auto max-h-[16rem]' : ''}`}>
               {cards.length ? (
-                cards.map((card, index) => (
-                  <div
-                    key={card.id ?? `${card.nome}-${index}`}
-                    className="mini-card group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-accent-sky/20 to-accent-pool/20">
-                        {CardIcon}
+                <div className="space-y-2">
+                  {cards.map((card, index) => {
+                    const brandLogo = getBrandLogo(card.bandeira as string)
+                    return (
+                      <div
+                        key={card.id ?? `${card.nome}-${index}`}
+                        className="group flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-accent-pool/30 transition-all duration-200 cursor-pointer"
+                      >
+                        {/* Brand Logo or Fallback Icon */}
+                        <div className="flex-shrink-0 w-10 h-7 flex items-center justify-center rounded bg-white/10">
+                          {brandLogo ? (
+                            <img src={brandLogo} alt={card.bandeira ?? 'Card'} className="h-5 w-auto" />
+                          ) : (
+                            <svg className="h-4 w-4 text-fg-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                            </svg>
+                          )}
+                        </div>
+                        {/* Card Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-fg-primary truncate group-hover:text-accent-pool transition-colors">
+                            {card.nome ?? `Cartão ${index + 1}`}
+                          </p>
+                          <p className="text-xs text-fg-secondary truncate">
+                            {card.tipo?.replace('_', ' ') ?? 'Crédito'} • •••• {String(card.id ?? index + 1).slice(-4).padStart(4, '0')}
+                          </p>
+                        </div>
+                        {/* Arrow indicator on hover */}
+                        <svg className="h-4 w-4 text-fg-secondary opacity-0 group-hover:opacity-100 group-hover:text-accent-pool transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-fg-primary truncate">{card.nome ?? `Cartão ${card.id ?? index + 1}`}</p>
-                        <p className="text-xs text-fg-secondary truncate">
-                          {[card.bandeira, card.tipo].filter(Boolean).join(' • ') || 'Sem detalhes'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-fg-secondary col-span-2">Nenhum cartão cadastrado ainda.</p>
+                    )
+                  })}
+                </div>
+              ) : null}
+
+              {/* CTA Button - Show when few cards or no cards */}
+              {cards.length < 3 && (
+                <Link
+                  to="/dashboard/cartoes"
+                  className="mt-3 flex items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-accent-pool/50 hover:bg-accent-pool/5 transition-all duration-200 group"
+                >
+                  <svg className="h-5 w-5 text-fg-secondary group-hover:text-accent-pool transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  <span className="text-sm font-medium text-fg-secondary group-hover:text-accent-pool transition-colors">
+                    Adicionar novo cartão
+                  </span>
+                </Link>
               )}
             </div>
           </div>
@@ -317,45 +463,102 @@ export default function Dashboard() {
         id: 'pontos-cartao',
         title: 'Pontos por cartão',
         keywords: `pontos cartao cartão grafico barras ${pontosPorCartao.map((item) => item.nomeCartao).join(' ')}`,
-        content: (
-          <div className="dashboard-card">
-            {/* Section Header */}
-            <div className="section-header">
-              <div className="card-icon">
-                {ChartBarIcon}
+        content: (() => {
+          // Use vertical bars layout when 6 or fewer cards, horizontal when more
+          const useVerticalBars = pontosPorCartao.length <= 6 && pontosPorCartao.length > 0
+
+          return (
+            <div className="dashboard-card h-full">
+              {/* Section Header */}
+              <div className="section-header">
+                <div className="card-icon">
+                  {ChartBarIcon}
+                </div>
+                <div className="flex-1">
+                  <h2 className="section-title">Pontos por cartão</h2>
+                </div>
+                <span className="badge">Comparativo</span>
               </div>
-              <div className="flex-1">
-                <h2 className="section-title">Pontos por cartão</h2>
-              </div>
-              <span className="badge">Comparativo</span>
-            </div>
-            {/* Progress Bars */}
-            <div className="mt-4 space-y-4">
-              {pontosPorCartao.length ? (
-                pontosPorCartao.map((item, idx) => {
-                  const value = toNumber(item.totalPontos)
-                  const percent = Math.round((value / maxCardPoints) * 100)
-                  return (
-                    <div key={item.cartaoId} className="group" style={{ animationDelay: `${idx * 100}ms` }}>
-                      <div className="flex items-center justify-between text-sm mb-2">
-                        <span className="text-fg-secondary group-hover:text-fg-primary transition-colors">{item.nomeCartao}</span>
-                        <span className="titulo-grafico font-bold">{value.toLocaleString('pt-BR')}</span>
-                      </div>
-                      <div className="progress-bar">
-                        <div
-                          className="progress-bar-fill"
-                          style={{ width: `${percent}%`, animationDelay: `${idx * 150}ms` }}
-                        />
-                      </div>
+
+              {/* Chart Content */}
+              {useVerticalBars ? (
+                /* Vertical Bars Layout */
+                <div className="mt-4 flex-1 flex flex-col justify-end">
+                  <div className="flex gap-3">
+                    {/* Y-axis labels */}
+                    <div className="flex flex-col justify-between text-xs h-[16rem] py-1 text-right min-w-[3rem]">
+                      <span className="titulo-grafico font-semibold">{formatYLabel(maxCardPoints)}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxCardPoints * 0.75))}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxCardPoints * 0.5))}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxCardPoints * 0.25))}</span>
+                      <span className="text-fg-secondary">0</span>
                     </div>
-                  )
-                })
+                    {/* Bars container */}
+                    <div className="flex-1 flex items-end justify-around gap-3" style={{ height: '16rem' }}>
+                      {pontosPorCartao.map((item) => {
+                        const value = toNumber(item.totalPontos)
+                        const percent = Math.round((value / maxCardPoints) * 100)
+                        const barHeight = (percent / 100) * 16
+                        return (
+                          <div key={item.cartaoId} className="flex flex-col items-center group flex-1 h-full justify-end">
+                            {/* Value on hover */}
+                            <span className="titulo-grafico text-sm font-bold mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              {value.toLocaleString('pt-BR')}
+                            </span>
+                            {/* Vertical Bar */}
+                            <div
+                              className="w-full max-w-[3.5rem] rounded-t-lg bg-gradient-to-t from-accent-sky to-accent-pool relative overflow-hidden transition-all duration-500 group-hover:shadow-lg group-hover:shadow-accent-pool/30"
+                              style={{ height: `${barHeight}rem`, minHeight: percent > 0 ? '0.5rem' : '0' }}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  {/* X-axis Labels */}
+                  <div className="flex gap-3 mt-3 pt-3 border-t border-white/5">
+                    <div className="min-w-[3rem]" /> {/* Spacer for Y-axis */}
+                    <div className="flex-1 flex justify-around gap-3">
+                      {pontosPorCartao.map((item) => (
+                        <span key={item.cartaoId} className="text-xs text-fg-secondary text-center flex-1 leading-tight">
+                          {item.nomeCartao}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <p className="text-sm text-fg-secondary">Sem dados de pontos por cartão.</p>
+                /* Horizontal Bars Layout (original) */
+                <div className="mt-4 space-y-4 flex-1">
+                  {pontosPorCartao.length ? (
+                    pontosPorCartao.map((item, idx) => {
+                      const value = toNumber(item.totalPontos)
+                      const percent = Math.round((value / maxCardPoints) * 100)
+                      return (
+                        <div key={item.cartaoId} className="group" style={{ animationDelay: `${idx * 100}ms` }}>
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-fg-secondary group-hover:text-fg-primary transition-colors">{item.nomeCartao}</span>
+                            <span className="titulo-grafico font-bold">{value.toLocaleString('pt-BR')}</span>
+                          </div>
+                          <div className="progress-bar">
+                            <div
+                              className="progress-bar-fill"
+                              style={{ width: `${percent}%`, animationDelay: `${idx * 150}ms` }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <p className="text-sm text-fg-secondary">Sem dados de pontos por cartão.</p>
+                  )}
+                </div>
               )}
             </div>
-          </div>
-        ),
+          )
+        })(),
       },
       {
         id: 'pontos-mes',
@@ -653,12 +856,23 @@ export default function Dashboard() {
       <div className="dashboard-grid">
         {getBlock('saldo') ? <div className="full-width">{getBlock('saldo')?.content}</div> : null}
 
-        {getBlock('cartoes') ? <div>{getBlock('cartoes')?.content}</div> : null}
-        {getBlock('pontos-programa') ? <div>{getBlock('pontos-programa')?.content}</div> : null}
+        {/* Row 1-2: Cards + Pontos por cartão (side by side, both can span 2 rows) */}
+        {getBlock('cartoes') ? (
+          <div className={cards.length > 2 ? 'lg:row-span-2' : ''}>
+            {getBlock('cartoes')?.content}
+          </div>
+        ) : null}
+        {getBlock('pontos-cartao') ? (
+          <div className="lg:row-span-2">
+            {getBlock('pontos-cartao')?.content}
+          </div>
+        ) : null}
 
-        {getBlock('pontos-cartao') ? <div>{getBlock('pontos-cartao')?.content}</div> : null}
+        {/* Row 2 (if cartoes doesn't span) or Row 3: Pontos por programa + Pontos por mês */}
+        {getBlock('pontos-programa') ? <div>{getBlock('pontos-programa')?.content}</div> : null}
         {getBlock('pontos-mes') ? <div>{getBlock('pontos-mes')?.content}</div> : null}
 
+        {/* Full width: Histórico */}
         {getBlock('historico') ? <div className="full-width">{getBlock('historico')?.content}</div> : null}
       </div>
     </section>

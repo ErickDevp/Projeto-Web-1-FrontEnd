@@ -5,6 +5,7 @@ import eloLogo from '../../assets/brands/elo.svg'
 import hipercardLogo from '../../assets/brands/hipercard.svg'
 
 export type CardVariant = 'black' | 'platinum' | 'gold' | 'silver' | 'mastercard' | 'elo' | 'hipercard'
+export type CardSize = 'default' | 'mini'
 
 interface CreditCardPreviewProps {
     holderName: string
@@ -13,6 +14,7 @@ interface CreditCardPreviewProps {
     cardTier?: string // e.g. "Infinite", "Platinum"
     variant?: CardVariant
     bandeira?: string // e.g. "VISA", "MASTERCARD"
+    size?: CardSize
     className?: string
 }
 
@@ -129,14 +131,18 @@ const variantStyles: Record<CardVariant, {
     },
 }
 
-// Chip component with color variants
-function CardChip({ style }: { style: 'gold' | 'silver' | 'gold-bordered' }) {
-    const baseClasses = 'h-8 w-11 rounded shadow-inner'
+// Chip component with color and size variants
+function CardChip({ style, size = 'default' }: { style: 'gold' | 'silver' | 'gold-bordered'; size?: CardSize }) {
+    const isMini = size === 'mini'
+    const baseClasses = isMini
+        ? 'h-4 w-6 rounded-sm shadow-inner'
+        : 'h-8 w-11 rounded shadow-inner'
+    const gridClasses = isMini ? 'p-0.5 gap-[1px]' : 'p-1 gap-px'
 
     if (style === 'silver') {
         return (
             <div className={`${baseClasses} bg-gradient-to-br from-slate-300 via-gray-400 to-slate-500`}>
-                <div className="grid h-full grid-cols-3 gap-px p-1">
+                <div className={`grid h-full grid-cols-3 ${gridClasses}`}>
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="rounded-sm bg-slate-600/40" />
                     ))}
@@ -148,7 +154,7 @@ function CardChip({ style }: { style: 'gold' | 'silver' | 'gold-bordered' }) {
     if (style === 'gold-bordered') {
         return (
             <div className={`${baseClasses} bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 ring-1 ring-amber-900/30`}>
-                <div className="grid h-full grid-cols-3 gap-px p-1">
+                <div className={`grid h-full grid-cols-3 ${gridClasses}`}>
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="rounded-sm bg-amber-700/40" />
                     ))}
@@ -160,7 +166,7 @@ function CardChip({ style }: { style: 'gold' | 'silver' | 'gold-bordered' }) {
     // Default gold
     return (
         <div className={`${baseClasses} bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600`}>
-            <div className="grid h-full grid-cols-3 gap-px p-1">
+            <div className={`grid h-full grid-cols-3 ${gridClasses}`}>
                 {[...Array(6)].map((_, i) => (
                     <div key={i} className="rounded-sm bg-amber-700/40" />
                 ))}
@@ -174,10 +180,41 @@ export default function CreditCardPreview({
     lastDigits = '1234',
     cardTier = 'INFINITE',
     variant = 'black',
+    size = 'default',
     className = '',
 }: CreditCardPreviewProps) {
     const styles = variantStyles[variant]
+    const isMini = size === 'mini'
 
+    // Mini card - compact version for dashboards
+    if (isMini) {
+        return (
+            <div
+                className={`relative h-20 w-full overflow-hidden rounded-lg bg-gradient-to-br ${styles.card} p-2.5 shadow-md ${className}`}
+            >
+                {/* Card holographic stripe */}
+                <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent ${styles.isLight ? 'via-black/10' : 'via-white/20'} to-transparent`} />
+
+                {/* Header: Chip + Brand Logo */}
+                <div className="flex items-center justify-between">
+                    <CardChip style={styles.chipStyle} size="mini" />
+                    <img
+                        src={styles.logo}
+                        alt="Card Brand"
+                        className="h-4 w-auto opacity-90"
+                    />
+                </div>
+
+                {/* Card footer - name and last digits */}
+                <div className="mt-2 flex items-end justify-between">
+                    <p className={`text-[10px] font-medium ${styles.textPrimary} truncate max-w-[60%] ${styles.shadow}`}>{holderName}</p>
+                    <span className={`font-mono text-[11px] ${styles.numberColor}`}>•••• {lastDigits}</span>
+                </div>
+            </div>
+        )
+    }
+
+    // Default full size card
     return (
         <div
             className={`relative h-44 w-full overflow-hidden rounded-xl bg-gradient-to-br ${styles.card} p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${className}`}
