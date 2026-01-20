@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma/saldoUsuarioPrograma.service'
@@ -69,6 +69,7 @@ const buildAreaPolygon = (values: number[]) => {
 
 export default function Dashboard() {
   const { searchTerm } = useOutletContext<OutletContext>()
+  const navigate = useNavigate()
   const normalizedSearch = searchTerm.trim().toLowerCase()
 
   const [cards, setCards] = useState<Cartao[]>([])
@@ -419,6 +420,7 @@ export default function Dashboard() {
                     return (
                       <div
                         key={card.id ?? `${card.nome}-${index}`}
+                        onClick={() => navigate('/dashboard/cartoes', { state: { editCardId: card.id } })}
                         className="group flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-accent-pool/30 transition-all duration-200 cursor-pointer"
                       >
                         {/* Brand Logo or Fallback Icon */}
@@ -801,7 +803,7 @@ export default function Dashboard() {
         ),
       },
     ]
-  }, [cards, historySeries, monthlyPoints, pontosPorCartao, programSummary, relatorio, totalPoints])
+  }, [cards, historySeries, monthlyPoints, navigate, pontosPorCartao, programSummary, relatorio, totalPoints])
 
   const filteredBlocks = useMemo(() => {
     if (!normalizedSearch) return blocks

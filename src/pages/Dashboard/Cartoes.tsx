@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import type { BandeiraEnum, TipoCartaoEnum } from '../../interfaces/enums'
 import type { CartaoUsuarioDTO } from '../../interfaces/cartaoUsuario'
 import type { Programa, Cartao } from '../../interfaces/cardTypes'
@@ -29,6 +30,7 @@ const getCardVariant = (bandeira?: string): CardVariant => {
 
 
 export default function Cartoes() {
+  const location = useLocation()
   const [cards, setCards] = useState<Cartao[]>([])
   const [programas, setProgramas] = useState<Programa[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +74,27 @@ export default function Cartoes() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Check for editCardId in navigation state and open edit form
+  useEffect(() => {
+    const state = location.state as { editCardId?: number } | null
+    if (state?.editCardId && cards.length > 0 && !loading) {
+      const cardToEdit = cards.find((c) => c.id === state.editCardId)
+      if (cardToEdit) {
+        setEditingCard(cardToEdit)
+        setForm({
+          nome: cardToEdit.nome ?? '',
+          bandeira: (cardToEdit.bandeira as BandeiraEnum) ?? 'VISA',
+          tipo: (cardToEdit.tipo as TipoCartaoEnum) ?? 'CREDITO',
+          multiplicadorPontos: cardToEdit.multiplicadorPontos ?? 1,
+          programaIds: cardToEdit.programas?.map((p) => p.id) ?? (cardToEdit.programa ? [cardToEdit.programa.id] : []),
+        })
+        setShowForm(true)
+        // Clear the state to prevent re-opening on subsequent navigations
+        window.history.replaceState({}, document.title)
+      }
+    }
+  }, [location.state, cards, loading])
 
   // Reset form
   const resetForm = useCallback(() => {
