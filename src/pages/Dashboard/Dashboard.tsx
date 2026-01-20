@@ -246,13 +246,34 @@ export default function Dashboard() {
           // Financial calculations
           const avgPointValue = 0.02 // R$ 0,02 per point (average)
           const estimatedValue = totalPoints * avgPointValue
-          const monthlyGrowth = 5.2 // Mock: +5.2% this month
 
-          // Goal tracker (Mock data)
-          const goalName = "Viagem para Paris"
-          const goalTarget = 150000
-          const goalProgress = Math.min((totalPoints / goalTarget) * 100, 100)
-          const pointsRemaining = Math.max(goalTarget - totalPoints, 0)
+          // Calculate real monthly growth from evolucaoMensal
+          const evolucao = relatorio?.evolucaoMensal ?? []
+          let monthlyGrowth = 0
+          let hasGrowthData = false
+
+          if (evolucao.length >= 2) {
+            // Sort by date to get the last two months
+            const sorted = [...evolucao]
+              .filter((item) => item.ano != null && item.mes != null)
+              .sort((a, b) => {
+                const aDate = new Date(a.ano, a.mes - 1, 1)
+                const bDate = new Date(b.ano, b.mes - 1, 1)
+                return aDate.getTime() - bDate.getTime()
+              })
+
+            if (sorted.length >= 2) {
+              const currentMonth = sorted[sorted.length - 1]
+              const previousMonth = sorted[sorted.length - 2]
+              const currentTotal = toNumber(currentMonth.totalPontos)
+              const previousTotal = toNumber(previousMonth.totalPontos)
+
+              if (previousTotal > 0) {
+                monthlyGrowth = ((currentTotal - previousTotal) / previousTotal) * 100
+                hasGrowthData = true
+              }
+            }
+          }
 
           // Program colors for distribution bar
           const programColors = [
@@ -260,34 +281,14 @@ export default function Dashboard() {
             'bg-amber-500', 'bg-rose-500', 'bg-emerald-500'
           ]
 
+          // Determine badge styling based on growth direction
+          const isPositiveGrowth = monthlyGrowth >= 0
+          const badgeBgClass = isPositiveGrowth ? 'bg-emerald-500/20' : 'bg-red-500/20'
+          const badgeTextClass = isPositiveGrowth ? 'text-emerald-400' : 'text-red-400'
+          const growthSign = isPositiveGrowth ? '+' : ''
+
           return (
             <div className="dashboard-card stat-card">
-              {/* ===== TOP: Goal Tracker ===== */}
-              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-accent-pool/10 to-accent-sky/10 border border-white/10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4 text-accent-pool" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                    </svg>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">Próxima Meta</span>
-                  </div>
-                  <span className="text-xs font-bold titulo-grafico">{Math.round(goalProgress)}%</span>
-                </div>
-                <p className="text-sm font-medium text-fg-primary mb-2">{goalName}</p>
-                {/* Progress Bar */}
-                <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-accent-pool to-accent-sky transition-all duration-500"
-                    style={{ width: `${goalProgress}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-fg-secondary">
-                  {pointsRemaining > 0
-                    ? `Faltam ${pointsRemaining.toLocaleString('pt-BR')} pts para alcançar sua meta!`
-                    : '🎉 Parabéns! Meta alcançada!'
-                  }
-                </p>
-              </div>
 
               {/* ===== MIDDLE: Core Financial Section ===== */}
               <div className="flex flex-wrap gap-6 mb-6">
@@ -305,12 +306,20 @@ export default function Dashboard() {
                         {totalPoints.toLocaleString('pt-BR')} <span className="text-lg">pts</span>
                       </p>
                       {/* Trend Badge */}
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400">
-                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                        </svg>
-                        <span className="text-xs font-semibold">+{monthlyGrowth}% este mês</span>
-                      </div>
+                      {hasGrowthData && (
+                        <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full ${badgeBgClass} ${badgeTextClass}`}>
+                          {isPositiveGrowth ? (
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                            </svg>
+                          ) : (
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 4.5l-15 15m0 0h11.25M4.5 19.5V8.25" />
+                            </svg>
+                          )}
+                          <span className="text-xs font-semibold">{growthSign}{monthlyGrowth.toFixed(1)}% este mês</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -792,7 +801,7 @@ export default function Dashboard() {
         ),
       },
     ]
-  }, [cards, historySeries, monthlyPoints, pontosPorCartao, programSummary, totalPoints])
+  }, [cards, historySeries, monthlyPoints, pontosPorCartao, programSummary, relatorio, totalPoints])
 
   const filteredBlocks = useMemo(() => {
     if (!normalizedSearch) return blocks

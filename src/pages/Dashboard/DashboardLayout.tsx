@@ -139,10 +139,10 @@ export default function DashboardLayout() {
       />
 
       <div className="flex min-h-screen">
-        {/* Sidebar - Responsive */}
+        {/* Sidebar - Fixed on all screen sizes */}
         <aside
           className={`
-            fixed md:sticky top-0 left-0 z-50 h-[100dvh] md:h-screen
+            fixed top-0 left-0 z-50 h-[100dvh]
             flex w-64 md:w-28 lg:w-32 flex-col items-center gap-5
             bg-bg-secondary/95 backdrop-blur-xl md:bg-bg-secondary/80
             border-r border-white/5 shadow-2xl md:shadow-[0.375rem_0_1.5rem_rgba(0,0,0,0.35)]
@@ -210,7 +210,7 @@ export default function DashboardLayout() {
           </div>
         </aside>
 
-        <main className="flex-1 w-full min-w-0 transition-all duration-300">
+        <main className="flex-1 w-full min-w-0 transition-all duration-300 md:ml-28 lg:ml-32">
           {/* Limitador de largura para telas ultra-wide */}
           <div className="mx-auto max-w-[100rem] px-4 py-4 md:px-8 md:py-6 lg:px-10">
             <div className="mb-6 md:mb-8 pt-12 md:pt-0">
