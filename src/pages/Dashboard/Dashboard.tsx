@@ -169,11 +169,22 @@ export default function Dashboard() {
       ...pontosPorCartao.map((item) => toNumber(item.totalPontos))
     )
 
-    const linePoints = buildLinePoints(monthlyPoints.map((item) => item.value))
-    const areaPolygon = buildAreaPolygon(historySeries.map((item) => item.value))
-    const historyLine = buildLinePoints(historySeries.map((item) => item.value))
+    const monthlyValues = monthlyPoints.map((item) => item.value)
+    const historyValues = historySeries.map((item) => item.value)
+    const maxMonthly = Math.max(...monthlyValues, 1)
+    const maxHistory = Math.max(...historyValues, 1)
+
+    const linePoints = buildLinePoints(monthlyValues)
+    const areaPolygon = buildAreaPolygon(historyValues)
+    const historyLine = buildLinePoints(historyValues)
 
     const programTotal = Math.max(1, programSummary.reduce((acc, item) => acc + item.value, 0))
+
+    // Format point values for Y-axis labels
+    const formatYLabel = (value: number) => {
+      if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k`
+      return value.toString()
+    }
 
     // SVG Icons
     const WalletIcon = (
@@ -367,53 +378,65 @@ export default function Dashboard() {
             <div className="chart-container mt-4">
               {monthlyPoints.length ? (
                 <>
-                  <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-28 w-full" aria-hidden="true">
-                    {/* Grid lines */}
-                    <line x1="0" y1={chartHeight * 0.25} x2={chartWidth} y2={chartHeight * 0.25} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                    <line x1="0" y1={chartHeight * 0.5} x2={chartWidth} y2={chartHeight * 0.5} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                    <line x1="0" y1={chartHeight * 0.75} x2={chartWidth} y2={chartHeight * 0.75} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                    {/* Gradient definition */}
-                    <defs>
-                      <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="rgb(39, 121, 167)" />
-                        <stop offset="100%" stopColor="rgb(73, 197, 182)" />
-                      </linearGradient>
-                      <filter id="glow">
-                        <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                        <feMerge>
-                          <feMergeNode in="coloredBlur" />
-                          <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    {/* Line */}
-                    <polyline
-                      fill="none"
-                      stroke="url(#lineGradient)"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={linePoints}
-                      filter="url(#glow)"
-                    />
-                    {/* Points */}
-                    {linePoints.split(' ').map((point, idx) => {
-                      const [x, y] = point.split(',')
-                      const isLast = idx === linePoints.split(' ').length - 1
-                      return (
-                        <g key={point}>
-                          {isLast && <circle cx={x} cy={y} r="8" fill="rgba(73,197,182,0.2)" />}
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r={isLast ? "5" : "3"}
-                            fill={isLast ? "rgb(73, 197, 182)" : "rgb(39, 121, 167)"}
-                          />
-                        </g>
-                      )
-                    })}
-                  </svg>
-                  <div className="mt-3 flex items-center justify-between text-xs text-fg-secondary">
+                  <div className="flex gap-2">
+                    {/* Y-axis labels - 5 values */}
+                    <div className="flex flex-col justify-between text-[0.625rem] h-28 py-1 pr-1 text-right min-w-[2rem]">
+                      <span className="titulo-grafico font-semibold">{formatYLabel(maxMonthly)}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxMonthly * 0.75))}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxMonthly * 0.5))}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxMonthly * 0.25))}</span>
+                      <span className="text-fg-secondary">0</span>
+                    </div>
+                    {/* Chart SVG */}
+                    <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-28 flex-1" aria-hidden="true">
+                      {/* Grid lines - 4 lines for 5 sections */}
+                      <line x1="0" y1={chartHeight * 0.2} x2={chartWidth} y2={chartHeight * 0.2} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      <line x1="0" y1={chartHeight * 0.4} x2={chartWidth} y2={chartHeight * 0.4} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      <line x1="0" y1={chartHeight * 0.6} x2={chartWidth} y2={chartHeight * 0.6} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      <line x1="0" y1={chartHeight * 0.8} x2={chartWidth} y2={chartHeight * 0.8} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      {/* Gradient definition */}
+                      <defs>
+                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="rgb(39, 121, 167)" />
+                          <stop offset="100%" stopColor="rgb(73, 197, 182)" />
+                        </linearGradient>
+                        <filter id="glow">
+                          <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                          <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      {/* Line */}
+                      <polyline
+                        fill="none"
+                        stroke="url(#lineGradient)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={linePoints}
+                        filter="url(#glow)"
+                      />
+                      {/* Points */}
+                      {linePoints.split(' ').map((point, idx) => {
+                        const [x, y] = point.split(',')
+                        const isLast = idx === linePoints.split(' ').length - 1
+                        return (
+                          <g key={point}>
+                            {isLast && <circle cx={x} cy={y} r="8" fill="rgba(73,197,182,0.2)" />}
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r={isLast ? "5" : "3"}
+                              fill={isLast ? "rgb(73, 197, 182)" : "rgb(39, 121, 167)"}
+                            />
+                          </g>
+                        )
+                      })}
+                    </svg>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-fg-secondary pl-9">
                     {monthlyPoints.map((item, idx) => (
                       <span key={item.label} className={idx === monthlyPoints.length - 1 ? 'titulo-grafico font-semibold' : ''}>
                         {item.label}
@@ -495,51 +518,63 @@ export default function Dashboard() {
             <div className="chart-container mt-4">
               {historySeries.length ? (
                 <>
-                  <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-28 w-full" aria-hidden="true">
-                    {/* Gradient definitions */}
-                    <defs>
-                      <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="rgba(39, 121, 167, 0.4)" />
-                        <stop offset="100%" stopColor="rgba(39, 121, 167, 0)" />
-                      </linearGradient>
-                      <linearGradient id="historyLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="rgb(39, 121, 167)" />
-                        <stop offset="100%" stopColor="rgb(73, 197, 182)" />
-                      </linearGradient>
-                    </defs>
-                    {/* Grid lines */}
-                    <line x1="0" y1={chartHeight * 0.25} x2={chartWidth} y2={chartHeight * 0.25} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                    <line x1="0" y1={chartHeight * 0.5} x2={chartWidth} y2={chartHeight * 0.5} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                    <line x1="0" y1={chartHeight * 0.75} x2={chartWidth} y2={chartHeight * 0.75} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                    {/* Area */}
-                    <polygon points={areaPolygon} fill="url(#areaGradient)" />
-                    {/* Line */}
-                    <polyline
-                      fill="none"
-                      stroke="url(#historyLineGradient)"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={historyLine}
-                    />
-                    {/* Points */}
-                    {historyLine.split(' ').map((point, idx) => {
-                      const [x, y] = point.split(',')
-                      const isLast = idx === historyLine.split(' ').length - 1
-                      return (
-                        <g key={`hist-${point}`}>
-                          {isLast && <circle cx={x} cy={y} r="8" fill="rgba(73,197,182,0.2)" />}
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r={isLast ? "4" : "2.5"}
-                            fill={isLast ? "rgb(73, 197, 182)" : "rgb(39, 121, 167)"}
-                          />
-                        </g>
-                      )
-                    })}
-                  </svg>
-                  <div className="mt-3 flex items-center justify-between text-xs text-fg-secondary">
+                  <div className="flex gap-2">
+                    {/* Y-axis labels - 5 values */}
+                    <div className="flex flex-col justify-between text-[0.625rem] h-28 py-1 pr-1 text-right min-w-[2rem]">
+                      <span className="titulo-grafico font-semibold">{formatYLabel(maxHistory)}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxHistory * 0.75))}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxHistory * 0.5))}</span>
+                      <span className="text-fg-secondary">{formatYLabel(Math.round(maxHistory * 0.25))}</span>
+                      <span className="text-fg-secondary">0</span>
+                    </div>
+                    {/* Chart SVG */}
+                    <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-28 flex-1" aria-hidden="true">
+                      {/* Gradient definitions */}
+                      <defs>
+                        <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="rgba(39, 121, 167, 0.4)" />
+                          <stop offset="100%" stopColor="rgba(39, 121, 167, 0)" />
+                        </linearGradient>
+                        <linearGradient id="historyLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="rgb(39, 121, 167)" />
+                          <stop offset="100%" stopColor="rgb(73, 197, 182)" />
+                        </linearGradient>
+                      </defs>
+                      {/* Grid lines - 4 lines for 5 sections */}
+                      <line x1="0" y1={chartHeight * 0.2} x2={chartWidth} y2={chartHeight * 0.2} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      <line x1="0" y1={chartHeight * 0.4} x2={chartWidth} y2={chartHeight * 0.4} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      <line x1="0" y1={chartHeight * 0.6} x2={chartWidth} y2={chartHeight * 0.6} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      <line x1="0" y1={chartHeight * 0.8} x2={chartWidth} y2={chartHeight * 0.8} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                      {/* Area */}
+                      <polygon points={areaPolygon} fill="url(#areaGradient)" />
+                      {/* Line */}
+                      <polyline
+                        fill="none"
+                        stroke="url(#historyLineGradient)"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={historyLine}
+                      />
+                      {/* Points */}
+                      {historyLine.split(' ').map((point, idx) => {
+                        const [x, y] = point.split(',')
+                        const isLast = idx === historyLine.split(' ').length - 1
+                        return (
+                          <g key={`hist-${point}`}>
+                            {isLast && <circle cx={x} cy={y} r="8" fill="rgba(73,197,182,0.2)" />}
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r={isLast ? "4" : "2.5"}
+                              fill={isLast ? "rgb(73, 197, 182)" : "rgb(39, 121, 167)"}
+                            />
+                          </g>
+                        )
+                      })}
+                    </svg>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-fg-secondary pl-9">
                     {historySeries.map((item, idx) => (
                       <span key={item.label} className={idx === historySeries.length - 1 ? 'titulo-grafico font-semibold' : ''}>
                         {item.label}
