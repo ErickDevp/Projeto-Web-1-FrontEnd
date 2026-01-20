@@ -209,49 +209,7 @@ function DonutChart({ data }: { data: PontosPorCartaoDTO[] }) {
   )
 }
 
-// Progress Bars Component (alternative distribution view)
-function ProgressBars({ data }: { data: PontosPorCartaoDTO[] }) {
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-fg-secondary">
-        <p className="text-sm">Sem dados de cartões disponíveis</p>
-      </div>
-    )
-  }
 
-  const maxValue = Math.max(...data.map((d) => d.totalPontos))
-
-  return (
-    <div className="space-y-4">
-      {data.map((item, i) => {
-        const percent = maxValue > 0 ? (item.totalPontos / maxValue) * 100 : 0
-        const color = CHART_COLORS[i % CHART_COLORS.length]
-
-        return (
-          <div key={item.cartaoId} className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-fg-primary font-medium truncate max-w-[60%]">
-                {item.nomeCartao}
-              </span>
-              <span className="text-fg-secondary">
-                {formatPoints(item.totalPontos)} pts
-              </span>
-            </div>
-            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{
-                  width: `${percent}%`,
-                  backgroundColor: color,
-                }}
-              />
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 export default function Relatorios() {
   const [data, setData] = useState<RelatorioResponseDTO | null>(null)
@@ -287,7 +245,8 @@ export default function Relatorios() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `relatorio-pontos-${new Date().toISOString().split('T')[0]}.pdf`
+      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')
+      a.download = `relatorio-pontos-${date}.pdf`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -309,7 +268,8 @@ export default function Relatorios() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `relatorio-pontos-${new Date().toISOString().split('T')[0]}.csv`
+      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')
+      a.download = `relatorio-pontos-${date}.csv`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -325,10 +285,64 @@ export default function Relatorios() {
   // Summary stats
   const stats = useMemo(() => {
     if (!data) return null
-    const totalPoints = data.pontosPorCartao?.reduce((acc, c) => acc + c.totalPontos, 0) ?? 0
+
+    // Basic stats
+    const totalPoints = data.saldoGlobal ?? 0
     const totalCards = data.pontosPorCartao?.length ?? 0
     const totalMovements = data.historico?.length ?? 0
-    return { totalPoints, totalCards, totalMovements, prazoMedio: data.prazoMedio ?? 0 }
+
+    // Advanced metrics
+    // Entradas/Saidas
+    const entradas = data.historico?.filter(h => h.pontosCalculados > 0) ?? []
+    const totalEntradas = entradas.reduce((acc, h) => acc + h.pontosCalculados, 0)
+
+    const saidas = data.historico?.filter(h => h.pontosCalculados < 0) ?? []
+    const totalSaidas = Math.abs(saidas.reduce((acc, h) => acc + h.pontosCalculados, 0))
+
+    const saldoLiquido = totalEntradas - totalSaidas
+
+    // Growth Rate
+    let growthRate = 0
+    if (data.evolucaoMensal && data.evolucaoMensal.length >= 2) {
+      const sortedEvolution = [...data.evolucaoMensal].sort((a, b) => {
+        if (a.ano !== b.ano) return a.ano - b.ano
+        return a.mes - b.mes
+      })
+      const currentMonth = sortedEvolution[sortedEvolution.length - 1].totalPontos
+      const prevMonth = sortedEvolution[sortedEvolution.length - 2].totalPontos
+
+      if (prevMonth === 0) {
+        growthRate = currentMonth > 0 ? 100 : 0
+      } else {
+        growthRate = ((currentMonth - prevMonth) / prevMonth) * 100
+      }
+    }
+
+    // Top Programs
+    const programMap = new Map<string, number>()
+    entradas.forEach(h => {
+      const current = programMap.get(h.programa) || 0
+      programMap.set(h.programa, current + h.pontosCalculados)
+    })
+
+    const topPrograms = Array.from(programMap.entries())
+      .map(([name, points]) => ({ name, points, percent: totalEntradas > 0 ? (points / totalEntradas) * 100 : 0 }))
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 3)
+
+    const mediaPorMovimentacao = totalMovements > 0 ? Math.round(totalEntradas / totalMovements) : 0
+
+    return {
+      totalPoints,
+      totalCards,
+      totalMovements,
+      mediaPorMovimentacao,
+      totalEntradas,
+      totalSaidas,
+      saldoLiquido,
+      growthRate,
+      topPrograms
+    }
   }, [data])
 
   if (loading) {
@@ -441,9 +455,131 @@ export default function Relatorios() {
                 </svg>
               </div>
               <div>
-                <p className="text-xl font-bold text-fg-primary">{stats.prazoMedio} dias</p>
-                <p className="text-xs text-fg-secondary">Prazo Médio</p>
+                <p className="text-xl font-bold text-fg-primary">{formatPoints(stats.mediaPorMovimentacao)} pts</p>
+                <p className="text-xs text-fg-secondary">Média por Movimentação</p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fluxo e Saúde Section */}
+      {stats && (
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+          {/* Card 1: Acúmulo vs Resgates */}
+          <div className="dashboard-card flex flex-col justify-between">
+            <div className="section-header mb-4">
+              <div className="card-icon">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="section-title">Acúmulo vs Resgates</h2>
+                <p className="text-xs text-fg-secondary">Fluxo total de pontos</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex justify-between items-end">
+                <div>
+                  <span className="text-xs text-fg-secondary">Entradas</span>
+                  <p className="text-lg font-bold text-green-400">+{formatPoints(stats.totalEntradas)}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-fg-secondary">Saídas</span>
+                  <p className="text-lg font-bold text-red-400">-{formatPoints(stats.totalSaidas)}</p>
+                </div>
+              </div>
+
+              {/* Visual Progress Bar */}
+              <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden relative flex">
+                {stats.totalEntradas > 0 && (
+                  <div
+                    className="h-full bg-green-500/20 relative"
+                    style={{ width: '100%' }}
+                  >
+                    <div className="absolute inset-y-0 left-0 bg-green-500/40" style={{ width: '100%' }}></div>
+                    {/* Overlay for Saídas (assuming saídas reduce from entries visually) */}
+                    <div
+                      className="absolute inset-y-0 left-0 bg-red-500/50"
+                      style={{ width: `${Math.min((stats.totalSaidas / (stats.totalEntradas || 1)) * 100, 100)}%` }}
+                    />
+                  </div>
+                )}
+                {stats.totalEntradas === 0 && stats.totalSaidas > 0 && (
+                  <div className="h-full w-full bg-red-500/50" />
+                )}
+              </div>
+              <p className="text-xs text-fg-secondary text-center">
+                {stats.totalEntradas > 0
+                  ? `${Math.min((stats.totalSaidas / stats.totalEntradas) * 100, 100).toFixed(1)}% dos ganhos foram utilizados`
+                  : 'Sem entradas registradas'}
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2: Resultado Líquido */}
+          <div className="dashboard-card flex flex-col justify-between">
+            <div className="section-header mb-4">
+              <div className="card-icon">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="section-title">Resultado Líquido</h2>
+                <p className="text-xs text-fg-secondary">Saldo final das operações</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center flex-1 space-y-2">
+              <p className={`text-3xl font-bold ${stats.saldoLiquido >= 0 ? 'text-fg-primary' : 'text-red-400'}`}>
+                {formatPoints(stats.saldoLiquido)}
+              </p>
+
+              <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${stats.growthRate >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                }`}>
+                {stats.growthRate >= 0 ? '▲' : '▼'} {Math.abs(stats.growthRate).toFixed(1)}% vs mês anterior
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Top Programas */}
+          <div className="dashboard-card flex flex-col">
+            <div className="section-header mb-4">
+              <div className="card-icon">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0V5.25m-5.007 0V5.25m0 0h5.007v3.375M9.497 5.25v3.375M12 15v3.75m0-12v3.75" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="section-title">Maior Pontuador</h2>
+                <p className="text-xs text-fg-secondary">Principais fontes de pontos</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto max-h-[160px] pr-2 custom-scrollbar">
+              {stats.topPrograms.length > 0 ? (
+                stats.topPrograms.map((prog, i) => (
+                  <div key={prog.name} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-fg-primary font-medium">{i + 1}. {prog.name}</span>
+                      <span className="text-fg-secondary">{prog.percent.toFixed(0)}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-accent-pool"
+                        style={{ width: `${prog.percent}%`, opacity: 1 - (i * 0.2) }}
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-fg-secondary text-xs">
+                  Sem dados de entrada
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -525,8 +661,8 @@ export default function Relatorios() {
                       </td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${isCredit
-                            ? 'bg-green-500/10 text-green-400'
-                            : 'bg-red-500/10 text-red-400'
+                          ? 'bg-green-500/10 text-green-400'
+                          : 'bg-red-500/10 text-red-400'
                           }`}>
                           {isCredit ? (
                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

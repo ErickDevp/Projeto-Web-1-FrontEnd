@@ -29,5 +29,4 @@ export interface RelatorioResponseDTO {
   historico: HistoricoMovimentacaoDTO[]
   evolucaoMensal?: EvolucaoMensalDTO[]
   saldoGlobal?: number
-  prazoMedio: number
 }
