@@ -562,3 +562,44 @@ select option {
 		transform: translateX(200%) skewX(-12deg);
 	}
 }
+
+/* =========================================
+   Performance Mode - Reduce Motion
+   ========================================= */
+
+/* Disable all animations and transitions when reduce motion is enabled */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+}
+
+/* Remove blur/glassmorphism effects */
+[data-reduce-motion="true"] .dashboard-card {
+	backdrop-filter: none !important;
+	-webkit-backdrop-filter: none !important;
+}
+
+/* Disable hover transforms */
+[data-reduce-motion="true"] .dashboard-card:hover {
+	transform: none !important;
+}
+
+[data-reduce-motion="true"] .dashboard-card:hover .card-icon {
+	transform: none !important;
+}
+
+[data-reduce-motion="true"] .mini-card:hover {
+	transform: none !important;
+}
+
+[data-reduce-motion="true"] .btn-primary:hover {
+	transform: none !important;
+}
+
+/* Disable progress bar shimmer */
+[data-reduce-motion="true"] .progress-bar-fill::after {
+	display: none !important;
+}
