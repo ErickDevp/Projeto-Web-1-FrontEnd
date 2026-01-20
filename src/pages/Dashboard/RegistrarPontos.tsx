@@ -5,13 +5,11 @@ import { programaFidelidadeService } from '../../services/programaFidelidade/pro
 import { movimentacaoPontosService } from '../../services/movimentacaoPontos/movimentacaoPontos.service'
 import { comprovanteService } from '../../services/comprovante/comprovante.service'
 import { notify } from '../../utils/notify'
+import { formatCurrency } from '../../utils/format'
+import { BANDEIRA_COLORS } from '../../utils/cardConstants'
+import type { Programa } from '../../interfaces/cardTypes'
 import type { MovimentacaoPontosDTO } from '../../interfaces/movimentacaoPontos'
 import type { BandeiraEnum, TipoCartaoEnum } from '../../interfaces/enums'
-
-type Programa = {
-  id: number
-  nome: string
-}
 
 type Cartao = {
   id: number
@@ -20,14 +18,6 @@ type Cartao = {
   tipo: TipoCartaoEnum
   multiplicadorPontos: number
   programas?: Programa[]
-}
-
-const BANDEIRA_COLORS: Record<string, string> = {
-  VISA: '#1A1F71',
-  MASTERCARD: '#EB001B',
-  ELO: '#00A4E0',
-  AMERICAN_EXPRESS: '#006FCF',
-  HIPERCARD: '#B3131B',
 }
 
 export default function RegistrarPontos() {
@@ -43,22 +33,18 @@ export default function RegistrarPontos() {
   const [file, setFile] = useState<File | null>(null)
   const [dragActive, setDragActive] = useState(false)
 
-  // State for all programs
-  const [allPrograms, setAllPrograms] = useState<Programa[]>([])
-
   // Load cards and programs
   useEffect(() => {
     let isActive = true
 
     const loadData = async () => {
       try {
-        const [cardData, programData] = await Promise.all([
+        const [cardData] = await Promise.all([
           cartaoUsuarioService.list<Cartao[]>(),
           programaFidelidadeService.list<Programa[]>(),
         ])
         if (!isActive) return
         setCards(Array.isArray(cardData) ? cardData : [])
-        setAllPrograms(Array.isArray(programData) ? programData : [])
       } catch (error) {
         notify.apiError(error, { fallback: 'Não foi possível carregar os dados.' })
       } finally {
@@ -175,11 +161,6 @@ export default function RegistrarPontos() {
       setSaving(false)
     }
   }, [cartaoId, programaId, valor, data, file])
-
-  // Format currency display
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-  }
 
   return (
     <section className="space-y-6">

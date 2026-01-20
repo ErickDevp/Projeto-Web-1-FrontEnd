@@ -107,7 +107,7 @@ export default function DashboardLayout() {
   const navigate = useNavigate()
 
   // Fechar menu ao navegar
-  const handleNavigation = (to: string) => {
+  const handleNavigation = () => {
     setMobileMenuOpen(false)
   }
 
@@ -152,7 +152,7 @@ export default function DashboardLayout() {
         >
           <div className="flex w-full items-center justify-center py-6 md:py-6 relative">
             {/* Logo */}
-            <NavLink to="/dashboard/home" onClick={() => handleNavigation('/dashboard/home')} className="flex items-center justify-center">
+            <NavLink to="/dashboard/home" onClick={handleNavigation} className="flex items-center justify-center">
               <img src={logoUrl} alt="Logo" className="h-16 w-16 md:h-14 md:w-14 object-contain filter drop-shadow-[0_0_0.9375rem_rgba(73,197,182,0.3)] transition-all hover:scale-105" />
             </NavLink>
           </div>
@@ -162,7 +162,7 @@ export default function DashboardLayout() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={() => handleNavigation(item.to)}
+                onClick={handleNavigation}
                 end={item.to === '/dashboard/home'}
                 className={({ isActive }) =>
                   [

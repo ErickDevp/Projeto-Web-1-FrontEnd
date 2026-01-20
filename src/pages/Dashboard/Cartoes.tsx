@@ -1,50 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { BandeiraEnum, TipoCartaoEnum } from '../../interfaces/enums'
 import type { CartaoUsuarioDTO } from '../../interfaces/cartaoUsuario'
+import type { Programa, Cartao } from '../../interfaces/cardTypes'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { notify } from '../../utils/notify'
+import { BANDEIRAS, TIPOS, getTipoLabel } from '../../utils/cardConstants'
 import CreditCardPreview, { type CardVariant } from '../../components/ui/CreditCardPreview'
-
-type Programa = {
-  id: number
-  nome: string
-}
-
-type Cartao = {
-  id?: number
-  nome?: string
-  bandeira?: BandeiraEnum
-  tipo?: TipoCartaoEnum
-  multiplicadorPontos?: number
-  pontos?: number
-  programa?: Programa | null
-  programas?: Programa[]
-  aparencia?: string // Local-only field for now
-}
-
-const BANDEIRAS: { value: BandeiraEnum; label: string; color: string }[] = [
-  { value: 'VISA', label: 'Visa', color: '#1A1F71' },
-  { value: 'MASTERCARD', label: 'Mastercard', color: '#EB001B' },
-  { value: 'ELO', label: 'Elo', color: '#00A4E0' },
-  { value: 'AMERICAN_EXPRESS', label: 'American Express', color: '#006FCF' },
-  { value: 'HIPERCARD', label: 'Hipercard', color: '#B3131B' },
-]
-
-const TIPOS: { value: TipoCartaoEnum; label: string }[] = [
-  { value: 'CREDITO', label: 'Crédito' },
-  { value: 'DEBITO', label: 'Débito' },
-]
-
-// Get bandeira info
-const getBandeiraInfo = (bandeira?: string) => {
-  return BANDEIRAS.find((b) => b.value === bandeira) ?? BANDEIRAS[0]
-}
-
-// Get tipo label
-const getTipoLabel = (tipo?: string) => {
-  return TIPOS.find((t) => t.value === tipo)?.label ?? tipo
-}
 
 // Get card visual variant based on bandeira
 const getCardVariant = (bandeira?: string): CardVariant => {
@@ -129,8 +91,8 @@ export default function Cartoes() {
     setEditingCard(card)
     setForm({
       nome: card.nome ?? '',
-      bandeira: card.bandeira ?? 'VISA',
-      tipo: card.tipo ?? 'CREDITO',
+      bandeira: (card.bandeira as BandeiraEnum) ?? 'VISA',
+      tipo: (card.tipo as TipoCartaoEnum) ?? 'CREDITO',
       multiplicadorPontos: card.multiplicadorPontos ?? 1,
       programaIds: card.programas?.map((p) => p.id) ?? (card.programa ? [card.programa.id] : []),
     })

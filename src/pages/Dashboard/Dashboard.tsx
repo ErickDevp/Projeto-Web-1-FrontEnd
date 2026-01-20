@@ -6,6 +6,7 @@ import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma/saldoUsuarioPrograma.service'
 import type { RelatorioResponseDTO } from '../../interfaces/relatorio'
 import type { SaldoUsuarioPrograma } from '../../interfaces/saldoUsuarioPrograma'
+import type { Cartao } from '../../interfaces/cardTypes'
 import { notify } from '../../utils/notify'
 
 type OutletContext = {
@@ -17,15 +18,6 @@ type Block = {
   title: string
   keywords: string
   content: ReactNode
-}
-
-type Cartao = {
-  id?: number
-  nome?: string
-  bandeira?: string
-  tipo?: string
-  programa?: { nome?: string } | null
-  [key: string]: unknown
 }
 
 const chartWidth = 240

@@ -3,15 +3,13 @@ import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { movimentacaoPontosService } from '../../services/movimentacaoPontos/movimentacaoPontos.service'
 import { notify } from '../../utils/notify'
+import { formatCurrency, formatDate, formatPoints } from '../../utils/format'
+import { STATUS_STYLES } from '../../utils/cardConstants'
+import type { Programa } from '../../interfaces/cardTypes'
 import type { MovimentacaoPontosDTO } from '../../interfaces/movimentacaoPontos'
 import { endpoints } from '../../services/endpoints'
 
 // Types
-type Programa = {
-  id: number
-  nome: string
-}
-
 type Cartao = {
   id?: number
   nome?: string
@@ -33,14 +31,6 @@ type Movimentacao = {
   comprovante?: { id?: number } | null
 }
 
-// Status styling
-const STATUS_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  PENDENTE: { bg: 'bg-yellow-500/10', text: 'text-yellow-400', border: 'border-yellow-500/30', label: 'Pendente' },
-  CREDITADO: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/30', label: 'Creditado' },
-  EXPIRADO: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', label: 'Expirado' },
-  CANCELADO: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/30', label: 'Cancelado' },
-}
-
 const getId = (item: Movimentacao) => item.id ?? item.movimentacaoId ?? 0
 
 const getStatus = (item: Movimentacao): string => {
@@ -49,22 +39,6 @@ const getStatus = (item: Movimentacao): string => {
     return item.status.status ?? 'PENDENTE'
   }
   return 'PENDENTE'
-}
-
-const formatDate = (dateStr?: string): string => {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('pt-BR')
-}
-
-const formatCurrency = (value?: number): string => {
-  if (value == null) return '-'
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-}
-
-const formatPoints = (value?: number): string => {
-  if (value == null) return '-'
-  return new Intl.NumberFormat('pt-BR').format(value)
 }
 
 export default function Movimentacoes() {
