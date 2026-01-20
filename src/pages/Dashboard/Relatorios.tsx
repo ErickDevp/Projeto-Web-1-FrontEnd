@@ -5,7 +5,6 @@ import type {
   RelatorioResponseDTO,
   EvolucaoMensalDTO,
   PontosPorCartaoDTO,
-  HistoricoMovimentacaoDTO,
 } from '../../interfaces/relatorio'
 
 // Format date for display
