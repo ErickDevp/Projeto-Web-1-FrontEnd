@@ -206,6 +206,7 @@
 	background: var(--gradient-primary);
 	animation: progress-fill 1s ease-out both;
 	position: relative;
+	overflow: hidden;
 }
 
 .progress-bar-fill::after {
@@ -214,7 +215,7 @@
 	inset: 0;
 	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
 	background-size: 200% 100%;
-	animation: shimmer 2s infinite;
+	animation: shimmer 2s infinite ease-in-out;
 }
 
 /* Chart container */
