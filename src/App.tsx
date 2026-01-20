@@ -7,6 +7,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Home from './pages/Home'
 import ProtectedRoute from './routes/ProtectedRoute'
+import PublicRoute from './routes/PublicRoute'
 import DashboardLayout from './pages/Dashboard'
 import Dashboard from './pages/Dashboard/Dashboard'
 import DashboardPerfil from './pages/Dashboard/Perfil'
@@ -18,6 +19,7 @@ import DashboardConfiguracoes from './pages/Dashboard/Configuracoes'
 import DashboardMovimentacoes from './pages/Dashboard/Movimentacoes'
 import DashboardPromocoes from './pages/Dashboard/Promocoes'
 import DashboardProgramas from './pages/Dashboard/Programas'
+import AuthLayout from './components/layouts/AuthLayout'
 import Modal from './components/ui/Modal'
 import Terms from './pages/Legal/Terms'
 import Privacy from './pages/Legal/Privacy'
@@ -89,12 +91,21 @@ function App() {
             <Route path="configuracoes" element={<DashboardConfiguracoes />} />
           </Route>
         </Route>
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Auth & Legal Routes - Centered layout */}
+        {/* Legal pages - accessible to everyone */}
+        <Route element={<AuthLayout />}>
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+        </Route>
+        {/* Auth pages - redirect to dashboard if already logged in */}
+        <Route element={<PublicRoute />}>
+          <Route element={<AuthLayout />}>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+          </Route>
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
