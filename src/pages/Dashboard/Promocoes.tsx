@@ -14,7 +14,6 @@ type Promocao = {
     programa?: { id: number; nome: string }
     titulo: string
     descricao: string
-    link?: string
     data_inicio: string
     data_fim: string
     ativo: boolean
@@ -54,7 +53,6 @@ export default function Promocoes() {
     const [form, setForm] = useState<{
         titulo: string
         descricao: string
-        link: string
         programaId: string
         data_inicio: string
         data_fim: string
@@ -62,7 +60,6 @@ export default function Promocoes() {
     }>({
         titulo: '',
         descricao: '',
-        link: '',
         programaId: '',
         data_inicio: new Date().toISOString().split('T')[0],
         data_fim: '',
@@ -93,10 +90,18 @@ export default function Promocoes() {
 
     useEffect(() => {
         loadData()
-    }, [loadData])
 
-    // Listen for new promotions created by admin
-    useEffect(() => {
+        // Polling: refresh data every 15 seconds for real-time updates
+        const pollingInterval = setInterval(async () => {
+            try {
+                const promoData = await promocaoService.list<Promocao[]>()
+                setPromocoes(Array.isArray(promoData) ? promoData : [])
+            } catch {
+                // Silent failure for polling
+            }
+        }, 15000)
+
+        // Listen for promotion-created events (from same browser session)
         const handlePromotionCreated = async () => {
             try {
                 const promoData = await promocaoService.list<Promocao[]>()
@@ -105,12 +110,13 @@ export default function Promocoes() {
                 // Silent failure
             }
         }
-
         window.addEventListener('promotion-created', handlePromotionCreated)
+
         return () => {
+            clearInterval(pollingInterval)
             window.removeEventListener('promotion-created', handlePromotionCreated)
         }
-    }, [])
+    }, [loadData])
 
     // Program name lookup
     const programaMap = useMemo(() => {
@@ -124,7 +130,6 @@ export default function Promocoes() {
         setForm({
             titulo: '',
             descricao: '',
-            link: '',
             programaId: '',
             data_inicio: new Date().toISOString().split('T')[0],
             data_fim: '',
@@ -140,7 +145,6 @@ export default function Promocoes() {
         setForm({
             titulo: promo.titulo ?? '',
             descricao: promo.descricao ?? '',
-            link: promo.link ?? '',
             programaId: String(promo.programaId ?? promo.programa?.id ?? ''),
             data_inicio: promo.data_inicio?.split('T')[0] ?? '',
             data_fim: promo.data_fim?.split('T')[0] ?? '',
@@ -312,21 +316,6 @@ export default function Promocoes() {
                                 </select>
                             </div>
 
-                            {/* Link */}
-                            <div className="space-y-2 md:col-span-2">
-                                <label htmlFor="promo-link" className="block text-sm font-medium text-fg-primary">
-                                    Link da promoção <span className="text-fg-secondary">(opcional)</span>
-                                </label>
-                                <input
-                                    id="promo-link"
-                                    type="url"
-                                    value={form.link}
-                                    onChange={(e) => setForm((prev) => ({ ...prev, link: e.target.value }))}
-                                    placeholder="https://exemplo.com/promocao"
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
-                                />
-                            </div>
-
                             {/* Descrição */}
                             <div className="space-y-2 md:col-span-2">
                                 <label htmlFor="promo-descricao" className="block text-sm font-medium text-fg-primary">
@@ -485,23 +474,8 @@ export default function Promocoes() {
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                                         </svg>
                                     </div>
-                                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                                    <div className="flex-1 min-w-0">
                                         <span className="badge">{programaNome}</span>
-                                        {/* Link indicator */}
-                                        {promo.link && (
-                                            <a
-                                                href={promo.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-1 rounded-full bg-accent-pool/10 px-2 py-0.5 text-[0.625rem] font-medium text-accent-pool hover:bg-accent-pool/20 transition-colors"
-                                                title="Clique para acessar o link"
-                                            >
-                                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                                </svg>
-                                                Link
-                                            </a>
-                                        )}
                                     </div>
                                 </div>
 
@@ -525,78 +499,60 @@ export default function Promocoes() {
                                         <span>Válido até {formatDate(promo.data_fim)}</span>
                                     </div>
 
-                                    {/* Action Buttons */}
-                                    <div className="flex items-center gap-2">
-                                        {/* Main CTA - Available for all users */}
-                                        {promo.link && !isExpired && (
-                                            <a
-                                                href={promo.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="btn-primary flex-1 justify-center"
+                                    {/* Admin Actions */}
+                                    {isAdmin && (
+                                        <div className="flex gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => openEditForm(promo)}
+                                                className="p-2 rounded-lg text-fg-secondary hover:text-accent-pool hover:bg-accent-pool/10 transition-colors"
+                                                title="Editar"
                                             >
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                                                 </svg>
-                                                Acessar oferta
-                                            </a>
-                                        )}
-
-                                        {/* Admin Actions */}
-                                        {isAdmin && (
-                                            <div className="flex gap-1">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openEditForm(promo)}
-                                                    className="p-2 rounded-lg text-fg-secondary hover:text-accent-pool hover:bg-accent-pool/10 transition-colors"
-                                                    title="Editar"
-                                                >
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteConfirm(promo.id)}
+                                                disabled={deletingId === promo.id}
+                                                className="p-2 rounded-lg text-fg-secondary hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                                                title="Excluir"
+                                            >
+                                                {deletingId === promo.id ? (
+                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                                                ) : (
                                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                     </svg>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDeleteConfirm(promo.id)}
-                                                    disabled={deletingId === promo.id}
-                                                    className="p-2 rounded-lg text-fg-secondary hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                                                    title="Excluir"
-                                                >
-                                                    {deletingId === promo.id ? (
-                                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
-                                                    ) : (
-                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                        </svg>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Delete Confirmation */}
-                                    {confirmDeleteId === promo.id && (
-                                        <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-                                            <p className="text-xs text-red-400 mb-2">Excluir esta promoção?</p>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={handleDeleteCancel}
-                                                    className="flex-1 rounded-lg border border-white/20 bg-gray-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-500 transition-colors"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDelete(promo.id)}
-                                                    className="flex-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition-colors"
-                                                >
-                                                    Excluir
-                                                </button>
-                                            </div>
+                                                )}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Delete Confirmation */}
+                                {confirmDeleteId === promo.id && (
+                                    <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                                        <p className="text-xs text-red-400 mb-2">Excluir esta promoção?</p>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleDeleteCancel}
+                                                className="flex-1 rounded-lg border border-white/20 bg-gray-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-500 transition-colors"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(promo.id)}
+                                                className="flex-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition-colors"
+                                            >
+                                                Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )
                     })}
