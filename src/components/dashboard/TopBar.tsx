@@ -110,7 +110,7 @@ export default function TopBar({
       }
 
       try {
-        const notificationData = await notificacaoService.list<Notificacao[]>()
+        const notificationData = await notificacaoService.list()
         if (isActive && Array.isArray(notificationData)) {
           setNotifications(notificationData)
         }
@@ -162,7 +162,7 @@ export default function TopBar({
     const handleCreated = async () => {
       // Reload notifications when a new one is created
       try {
-        const data = await notificacaoService.list<Notificacao[]>()
+        const data = await notificacaoService.list()
         if (Array.isArray(data)) setNotifications(data)
       } catch {
         // Silent failure

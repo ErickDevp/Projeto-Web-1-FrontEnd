@@ -1,10 +1,11 @@
 import { apiClient } from '../http/client'
 import { endpoints } from '../endpoints'
+import type { ComprovanteResponseDTO } from '../../interfaces/comprovante'
 
 export const comprovanteService = {
-  // GET /comprovante/{id} retorna List<Comprovante> (entity)
-  async getById<T = unknown[]>(id: string | number): Promise<T> {
-    const { data } = await apiClient.get<T>(`${endpoints.comprovante.base}/${id}`)
+  // GET /comprovante/{id} retorna List<ComprovanteResponseDTO>
+  async getById(id: string | number): Promise<ComprovanteResponseDTO[]> {
+    const { data } = await apiClient.get<ComprovanteResponseDTO[]>(`${endpoints.comprovante.base}/${id}`)
     return data
   },
 
@@ -17,12 +18,12 @@ export const comprovanteService = {
   },
 
   // POST /comprovante/criar (multipart/form-data)
-  async create(payload: { movimentacaoId: number; file: File }): Promise<string> {
+  async create(payload: { movimentacaoId: number; file: File }): Promise<ComprovanteResponseDTO> {
     const formData = new FormData()
     formData.append('movimentacaoId', String(payload.movimentacaoId))
     formData.append('file', payload.file)
 
-    const { data } = await apiClient.post<string>(endpoints.comprovante.create, formData)
+    const { data } = await apiClient.post<ComprovanteResponseDTO>(endpoints.comprovante.create, formData)
     return data
   },
 

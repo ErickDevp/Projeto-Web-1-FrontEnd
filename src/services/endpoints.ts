@@ -41,10 +41,6 @@ export const endpoints = {
     csv: '/relatorios/csv',
     pdf: '/relatorios/pdf',
   },
-  statusMovimentacao: {
-    base: '/status',
-    create: '/status/criar',
-  },
   saldoUsuarioPrograma: {
     base: '/saldo',
   },

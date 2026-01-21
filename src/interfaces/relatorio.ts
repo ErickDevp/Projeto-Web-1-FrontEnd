@@ -27,6 +27,7 @@ export interface EvolucaoMensalDTO {
 export interface RelatorioResponseDTO {
   pontosPorCartao: PontosPorCartaoDTO[]
   historico: HistoricoMovimentacaoDTO[]
-  evolucaoMensal?: EvolucaoMensalDTO[]
-  saldoGlobal?: number
+  evolucaoMensal: EvolucaoMensalDTO[]
+  saldoGlobal: number
+  prazoMedio: number  // Novo campo
 }

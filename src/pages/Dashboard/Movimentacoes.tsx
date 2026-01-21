@@ -6,8 +6,10 @@ import { notify } from '../../utils/notify'
 import { formatCurrency, formatDate, formatPoints } from '../../utils/format'
 import StatusBadge, { STATUS_CONFIG, getStatusString } from '../../components/ui/StatusBadge'
 import SensitiveValue from '../../components/ui/SensitiveValue'
-import type { Programa } from '../../interfaces/cardTypes'
-import type { MovimentacaoPontosDTO } from '../../interfaces/movimentacaoPontos'
+import type { ProgramaResponseDTO } from '../../interfaces/programaFidelidade'
+import type { MovimentacaoRequestDTO } from '../../interfaces/movimentacaoPontos'
+import type { ComprovanteResponseDTO } from '../../interfaces/comprovante'
+import type { StatusResponseDTO } from '../../interfaces/statusMovimentacao'
 import { endpoints } from '../../services/endpoints'
 
 // Types
@@ -21,15 +23,18 @@ type Movimentacao = {
   id?: number
   movimentacaoId?: number
   cartaoId?: number
+  cartaoNome?: string
   cartao?: { id?: number; nome?: string; bandeira?: string }
   programaId?: number
+  programaNome?: string
   saldo?: { programa?: { id?: number; nome?: string } }
   valor?: number
   pontosCalculados?: number
   dataOcorrencia?: string
   data?: string
-  status?: { status?: string } | string
-  comprovante?: { id?: number } | null
+  status?: StatusResponseDTO | { status?: string } | string
+  comprovantes?: ComprovanteResponseDTO[]
+  comprovante?: { id?: number } | null  // Legacy support
 }
 
 const getId = (item: Movimentacao) => item.id ?? item.movimentacaoId ?? 0
@@ -44,7 +49,7 @@ const getStatus = (item: Movimentacao): string => {
 
 export default function Movimentacoes() {
   const [cards, setCards] = useState<Cartao[]>([])
-  const [programas, setProgramas] = useState<Programa[]>([])
+  const [programas, setProgramas] = useState<ProgramaResponseDTO[]>([])
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -57,14 +62,25 @@ export default function Movimentacoes() {
   const loadData = useCallback(async () => {
     try {
       const [cardData, programaData, movData] = await Promise.all([
-        cartaoUsuarioService.list<Cartao[]>(),
-        programaFidelidadeService.list<Programa[]>(),
-        movimentacaoPontosService.list<Movimentacao[]>(),
+        cartaoUsuarioService.list(),
+        programaFidelidadeService.list(),
+        movimentacaoPontosService.list(),
       ])
 
-      setCards(Array.isArray(cardData) ? cardData : [])
-      setProgramas(Array.isArray(programaData) ? programaData : [])
-      setMovimentacoes(Array.isArray(movData) ? movData : [])
+      setCards(Array.isArray(cardData) ? cardData.map(c => ({ id: c.id, nome: c.nome, bandeira: c.bandeira })) : [])
+      setProgramas(Array.isArray(programaData) ? programaData.map(p => ({ id: p.id, nome: p.nome, descricao: p.descricao })) : [])
+      setMovimentacoes(Array.isArray(movData) ? movData.map(m => ({
+        id: m.id,
+        cartaoId: m.cartaoId,
+        cartaoNome: m.cartaoNome,
+        programaId: m.programaId,
+        programaNome: m.programaNome,
+        valor: Number(m.valor),
+        pontosCalculados: m.pontosCalculados,
+        dataOcorrencia: m.dataOcorrencia,
+        status: m.status,
+        comprovantes: m.comprovantes,
+      })) : [])
     } catch (error) {
       notify.apiError(error, { fallback: 'Não foi possível carregar as movimentações.' })
     } finally {
@@ -114,10 +130,11 @@ export default function Movimentacoes() {
       return
     }
 
-    const payload: MovimentacaoPontosDTO = {
+    const payload: MovimentacaoRequestDTO = {
       cartaoId: Number(form.cartaoId),
       programaId: Number(form.programaId),
       valor: Number(form.valor),
+      data: new Date().toISOString().split('T')[0], // YYYY-MM-DD
     }
 
     try {
@@ -145,8 +162,23 @@ export default function Movimentacoes() {
   }, [loadData])
 
   const getComprovanteUrl = (item: Movimentacao): string | null => {
-    if (!item.comprovante?.id) return null
-    return endpoints.comprovante.arquivo(item.comprovante.id)
+    // First try new array format
+    if (item.comprovantes && item.comprovantes.length > 0) {
+      return endpoints.comprovante.arquivo(item.comprovantes[0].id)
+    }
+    // Fallback to legacy single object format
+    if (item.comprovante?.id) {
+      return endpoints.comprovante.arquivo(item.comprovante.id)
+    }
+    return null
+  }
+
+  // Get status motivo for tooltip
+  const getStatusMotivo = (item: Movimentacao): string | null => {
+    if (typeof item.status === 'object' && item.status && 'motivo' in item.status) {
+      return (item.status as StatusResponseDTO).motivo || null
+    }
+    return null
   }
 
   const totalPontos = useMemo(() => {
@@ -245,8 +277,10 @@ export default function Movimentacoes() {
                     const id = getId(item)
                     const isEditing = editingId === id
                     const comprovanteUrl = getComprovanteUrl(item)
-                    const cartaoNome = item.cartao?.nome ?? (item.cartaoId ? cardMap.get(item.cartaoId) : '-')
-                    const programaNome = item.saldo?.programa?.nome ?? (item.programaId ? programMap.get(item.programaId) : '-')
+                    const cartaoNome = item.cartaoNome ?? item.cartao?.nome ?? (item.cartaoId ? cardMap.get(item.cartaoId) : '-')
+                    const programaNome = item.programaNome ?? item.saldo?.programa?.nome ?? (item.programaId ? programMap.get(item.programaId) : '-')
+                    const statusMotivo = getStatusMotivo(item)
+                    const comprovantesCount = item.comprovantes?.length ?? (item.comprovante?.id ? 1 : 0)
 
                     return (
                       <tr key={id} className="hover:bg-white/[0.02] transition-colors">
@@ -305,7 +339,14 @@ export default function Movimentacoes() {
                           <span className="font-semibold text-accent-pool"><SensitiveValue>{formatPoints(item.pontosCalculados)}</SensitiveValue></span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <StatusBadge status={item.status} />
+                          <div className="inline-flex items-center" title={statusMotivo || undefined}>
+                            <StatusBadge status={item.status} />
+                            {statusMotivo && (
+                              <svg className="ml-1 h-3 w-3 text-fg-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                              </svg>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-center">
                           {comprovanteUrl ? (
@@ -313,15 +354,18 @@ export default function Movimentacoes() {
                               href={comprovanteUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center p-1.5 rounded-lg text-accent-pool hover:bg-accent-pool/10 transition-colors"
-                              title="Ver comprovante"
+                              className="inline-flex items-center justify-center gap-1 p-1.5 rounded-lg text-accent-pool hover:bg-accent-pool/10 transition-colors"
+                              title={comprovantesCount > 1 ? `${comprovantesCount} comprovantes` : 'Ver comprovante'}
                             >
                               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
                               </svg>
+                              {comprovantesCount > 1 && (
+                                <span className="text-[0.625rem] font-medium">{comprovantesCount}</span>
+                              )}
                             </a>
                           ) : (
-                            <span className="text-fg-secondary/40">-</span>
+                            <span className="text-fg-secondary/40">—</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -380,8 +424,8 @@ export default function Movimentacoes() {
                 const id = getId(item)
                 const isEditing = editingId === id
                 const comprovanteUrl = getComprovanteUrl(item)
-                const cartaoNome = item.cartao?.nome ?? (item.cartaoId ? cardMap.get(item.cartaoId) : '-')
-                const programaNome = item.saldo?.programa?.nome ?? (item.programaId ? programMap.get(item.programaId) : '-')
+                const cartaoNome = item.cartaoNome ?? item.cartao?.nome ?? (item.cartaoId ? cardMap.get(item.cartaoId) : '-')
+                const programaNome = item.programaNome ?? item.saldo?.programa?.nome ?? (item.programaId ? programMap.get(item.programaId) : '-')
                 const statusKey = getStatusString(item.status)
                 const statusConfig = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.PENDENTE
 

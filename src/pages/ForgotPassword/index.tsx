@@ -81,7 +81,7 @@ export default function ForgotPassword({ embedded }: Props) {
 
     try {
       const response = await authService.forgotPassword(payload)
-      setResetToken(response.reset_token)
+      setResetToken(response.token)
       notify.success(genericSuccessMessage)
       setCooldownSeconds(10)
     } catch (error) {

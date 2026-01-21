@@ -1,16 +1,23 @@
-// Espelha NotificacaoDTO (para criação)
-export interface NotificacaoDTO {
+// Espelha NotificacaoRequestDTO
+export interface NotificacaoRequestDTO {
   titulo: string
   mensagem: string
   tipo: string
 }
 
-// Espelha a entidade Notificacao do backend
-export interface Notificacao {
+// Espelha NotificacaoResponseDTO
+export interface NotificacaoResponseDTO {
   id: number
   titulo: string
   mensagem: string
   tipo: string
-  lida: boolean
   dataCriacao: string
+  lida: boolean
 }
+
+// =====================
+// Aliases (compatibilidade)
+// =====================
+
+export type NotificacaoDTO = NotificacaoRequestDTO
+export type Notificacao = NotificacaoResponseDTO

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import type { BandeiraEnum, TipoCartaoEnum } from '../../interfaces/enums'
-import type { CartaoUsuarioDTO } from '../../interfaces/cartaoUsuario'
-import type { Programa, Cartao } from '../../interfaces/cardTypes'
+import type { CartaoRequestDTO, CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
+import type { ProgramaResponseDTO } from '../../interfaces/programaFidelidade'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { notify } from '../../utils/notify'
@@ -31,12 +31,12 @@ const getCardVariant = (bandeira?: string): CardVariant => {
 
 export default function Cartoes() {
   const location = useLocation()
-  const [cards, setCards] = useState<Cartao[]>([])
-  const [programas, setProgramas] = useState<Programa[]>([])
+  const [cards, setCards] = useState<CartaoResponseDTO[]>([])
+  const [programas, setProgramas] = useState<ProgramaResponseDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const [editingCard, setEditingCard] = useState<Cartao | null>(null)
+  const [editingCard, setEditingCard] = useState<CartaoResponseDTO | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
@@ -45,21 +45,23 @@ export default function Cartoes() {
     nome: string
     bandeira: BandeiraEnum
     tipo: TipoCartaoEnum
-    multiplicadorPontos: number
+    numero: string
+    dataValidade: string
     programaIds: number[]
   }>({
     nome: '',
     bandeira: 'VISA',
     tipo: 'CREDITO',
-    multiplicadorPontos: 1,
+    numero: '',
+    dataValidade: '',
     programaIds: [],
   })
 
   const loadData = useCallback(async () => {
     try {
       const [cardData, programaData] = await Promise.all([
-        cartaoUsuarioService.list<Cartao[]>(),
-        programaFidelidadeService.list<Programa[]>(),
+        cartaoUsuarioService.list(),
+        programaFidelidadeService.list(),
       ])
 
       setCards(Array.isArray(cardData) ? cardData : [])
@@ -84,10 +86,11 @@ export default function Cartoes() {
         setEditingCard(cardToEdit)
         setForm({
           nome: cardToEdit.nome ?? '',
-          bandeira: (cardToEdit.bandeira as BandeiraEnum) ?? 'VISA',
-          tipo: (cardToEdit.tipo as TipoCartaoEnum) ?? 'CREDITO',
-          multiplicadorPontos: cardToEdit.multiplicadorPontos ?? 1,
-          programaIds: cardToEdit.programas?.map((p) => p.id) ?? (cardToEdit.programa ? [cardToEdit.programa.id] : []),
+          bandeira: cardToEdit.bandeira ?? 'VISA',
+          tipo: cardToEdit.tipo ?? 'CREDITO',
+          numero: cardToEdit.numero ?? '',
+          dataValidade: cardToEdit.dataValidade ?? '',
+          programaIds: cardToEdit.programas?.map((p) => p.id) ?? [],
         })
         setShowForm(true)
         // Clear the state to prevent re-opening on subsequent navigations
@@ -102,7 +105,8 @@ export default function Cartoes() {
       nome: '',
       bandeira: 'VISA',
       tipo: 'CREDITO',
-      multiplicadorPontos: 1,
+      numero: '',
+      dataValidade: '',
       programaIds: [],
     })
     setEditingCard(null)
@@ -110,14 +114,15 @@ export default function Cartoes() {
   }, [])
 
   // Open form for editing
-  const openEditForm = useCallback((card: Cartao) => {
+  const openEditForm = useCallback((card: CartaoResponseDTO) => {
     setEditingCard(card)
     setForm({
       nome: card.nome ?? '',
-      bandeira: (card.bandeira as BandeiraEnum) ?? 'VISA',
-      tipo: (card.tipo as TipoCartaoEnum) ?? 'CREDITO',
-      multiplicadorPontos: card.multiplicadorPontos ?? 1,
-      programaIds: card.programas?.map((p) => p.id) ?? (card.programa ? [card.programa.id] : []),
+      bandeira: card.bandeira ?? 'VISA',
+      tipo: card.tipo ?? 'CREDITO',
+      numero: card.numero ?? '',
+      dataValidade: card.dataValidade ?? '',
+      programaIds: card.programas?.map((p) => p.id) ?? [],
     })
     setShowForm(true)
   }, [])
@@ -154,12 +159,26 @@ export default function Cartoes() {
       return
     }
 
+    // Validate card number (16 digits)
+    const cleanedNumero = form.numero.replace(/\s/g, '')
+    if (cleanedNumero.length !== 16) {
+      notify.warn('O número do cartão deve conter 16 dígitos.')
+      return
+    }
+
+    // Validate expiry date
+    if (!form.dataValidade) {
+      notify.warn('Informe a data de validade do cartão.')
+      return
+    }
+
     setSaving(true)
-    const payload: CartaoUsuarioDTO = {
+    const payload: CartaoRequestDTO = {
       nome: form.nome.trim(),
       bandeira: form.bandeira,
       tipo: form.tipo,
-      multiplicadorPontos: form.multiplicadorPontos,
+      numero: form.numero.replace(/\s/g, ''),
+      dataValidade: form.dataValidade,
       programaIds: form.programaIds,
     }
 
@@ -304,23 +323,40 @@ export default function Cartoes() {
                 </select>
               </div>
 
-              {/* Pontos */}
+              {/* Número do Cartão */}
               <div className="space-y-2">
-                <label htmlFor="card-pontos" className="block text-sm font-medium text-fg-primary">
-                  Fator de conversão <span className="text-fg-secondary">(pts/R$)</span>
+                <label htmlFor="card-numero" className="block text-sm font-medium text-fg-primary">
+                  Número do cartão
                 </label>
                 <input
-                  id="card-pontos"
-                  type="number"
-                  min={0}
-                  step={0.1}
-                  value={form.multiplicadorPontos}
-                  onChange={(e) => setForm((prev) => ({ ...prev, multiplicadorPontos: Number(e.target.value) }))}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                  id="card-numero"
+                  type="text"
+                  maxLength={19}
+                  value={form.numero.replace(/(\d{4})(?=\d)/g, '$1 ')}
+                  onChange={(e) => {
+                    const onlyNumbers = e.target.value.replace(/\D/g, '').slice(0, 16)
+                    setForm((prev) => ({ ...prev, numero: onlyNumbers }))
+                  }}
+                  placeholder="0000 0000 0000 0000"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary font-mono tracking-wider placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                 />
                 <p className="text-xs text-fg-secondary">
-                  Quantos pontos você ganha para cada R$ gasto.
+                  Os 12 primeiros dígitos serão ocultados por segurança.
                 </p>
+              </div>
+
+              {/* Data de Validade */}
+              <div className="space-y-2">
+                <label htmlFor="card-validade" className="block text-sm font-medium text-fg-primary">
+                  Validade
+                </label>
+                <input
+                  id="card-validade"
+                  type="date"
+                  value={form.dataValidade}
+                  onChange={(e) => setForm((prev) => ({ ...prev, dataValidade: e.target.value }))}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                />
               </div>
             </div>
 
@@ -423,7 +459,7 @@ export default function Cartoes() {
       ) : (
         <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
           {cards.map((card, index) => {
-            const programasList = card.programas ?? (card.programa ? [card.programa] : [])
+            const programasList = card.programas ?? []
             const variant = getCardVariant(card.bandeira)
 
             return (
@@ -435,7 +471,7 @@ export default function Cartoes() {
                 <div className="relative">
                   <CreditCardPreview
                     holderName={card.nome ?? `Cartão ${index + 1}`}
-                    lastDigits={String(card.id ?? 1234).padStart(4, '0').slice(-4)}
+                    lastDigits={card.numero ? card.numero.slice(-4) : '****'}
                     cardTier={getTipoLabel(card.tipo) ?? 'Crédito'}
                     variant={variant}
                     className="transition-transform duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl"
@@ -516,15 +552,33 @@ export default function Cartoes() {
 
                 {/* Card Info Section */}
                 <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
-                  {/* Points Factor */}
+                  {/* Validade e Status */}
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">
-                      Fator de conversão
+                      Validade
                     </span>
-                    <span className="text-lg font-bold">
-                      <span className="titulo-grafico">{card.multiplicadorPontos ?? 1}</span>
-                      <span className="ml-1 text-xs font-normal text-fg-secondary">pts/R$</span>
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-fg-primary">
+                        {card.dataValidade
+                          ? new Date(card.dataValidade + 'T00:00:00').toLocaleDateString('pt-BR', {
+                            month: '2-digit',
+                            year: 'numeric',
+                          })
+                          : '—'}
+                      </span>
+                      {card.valido && (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[0.625rem] font-semibold uppercase ${card.valido === 'ATIVO'
+                            ? 'bg-green-500/20 text-green-400'
+                            : card.valido === 'VENCIDO'
+                              ? 'bg-red-500/20 text-red-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                            }`}
+                        >
+                          {card.valido === 'ATIVO' ? 'Válido' : card.valido === 'VENCIDO' ? 'Expirado' : 'Bloqueado'}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Programas */}

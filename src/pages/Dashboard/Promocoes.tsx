@@ -3,20 +3,21 @@ import { promocaoService } from '../../services/promocao/promocao.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notify } from '../../utils/notify'
-import type { PromocaoDTO } from '../../interfaces/promocao'
+import type { PromocaoRequestDTO } from '../../interfaces/promocao'
 import type { Programa } from '../../interfaces/cardTypes'
 import type { UsuarioDTO } from '../../interfaces/auth'
 
-// Promocao entity type (response from backend)
+// Promocao entity type (response from backend - using camelCase)
 type Promocao = {
     id: number
-    programaId: number
+    programaId: number | { id: number; nome: string } // Can be number or object
     programa?: { id: number; nome: string }
     titulo: string
     descricao: string
-    data_inicio: string
-    data_fim: string
-    ativo: boolean
+    dataInicio: string  // camelCase
+    dataFim: string     // camelCase
+    pontosPorReal?: number
+    ativo: boolean | string // Can be boolean or 'ATIVO'/'VENCIDO'
 }
 
 // Calculate days until expiration
@@ -49,20 +50,21 @@ export default function Promocoes() {
     const [deletingId, setDeletingId] = useState<number | null>(null)
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
-    // Form state
     const [form, setForm] = useState<{
         titulo: string
         descricao: string
         programaId: string
-        data_inicio: string
-        data_fim: string
+        dataInicio: string  // camelCase
+        dataFim: string     // camelCase
+        pontosPorReal: string
         ativo: boolean
     }>({
         titulo: '',
         descricao: '',
         programaId: '',
-        data_inicio: new Date().toISOString().split('T')[0],
-        data_fim: '',
+        dataInicio: new Date().toISOString().split('T')[0],
+        dataFim: '',
+        pontosPorReal: '1',
         ativo: true,
     })
 
@@ -73,13 +75,24 @@ export default function Promocoes() {
     const loadData = useCallback(async () => {
         try {
             const [promoData, programaData, userData] = await Promise.all([
-                promocaoService.list<Promocao[]>(),
-                programaFidelidadeService.list<Programa[]>(),
+                promocaoService.list(),
+                programaFidelidadeService.list(),
                 usuarioService.getMe(),
             ])
 
-            setPromocoes(Array.isArray(promoData) ? promoData : [])
-            setProgramas(Array.isArray(programaData) ? programaData : [])
+            // Map promoData to local Promocao type
+            setPromocoes(Array.isArray(promoData) ? promoData.map(p => ({
+                id: p.id,
+                programaId: typeof p.programaId === 'object' ? p.programaId.id : p.programaId,
+                programa: typeof p.programaId === 'object' ? p.programaId : undefined,
+                titulo: p.titulo,
+                descricao: p.descricao,
+                dataInicio: p.dataInicio,
+                dataFim: p.dataFim,
+                pontosPorReal: p.pontosPorReal,
+                ativo: p.ativo === 'ATIVO',
+            })) : [])
+            setProgramas(Array.isArray(programaData) ? programaData.map(p => ({ id: p.id, nome: p.nome })) : [])
             setUser(userData)
         } catch (error) {
             notify.apiError(error, { fallback: 'Não foi possível carregar as promoções.' })
@@ -94,8 +107,18 @@ export default function Promocoes() {
         // Polling: refresh data every 15 seconds for real-time updates
         const pollingInterval = setInterval(async () => {
             try {
-                const promoData = await promocaoService.list<Promocao[]>()
-                setPromocoes(Array.isArray(promoData) ? promoData : [])
+                const promoData = await promocaoService.list()
+                setPromocoes(Array.isArray(promoData) ? promoData.map(p => ({
+                    id: p.id,
+                    programaId: typeof p.programaId === 'object' ? p.programaId.id : p.programaId,
+                    programa: typeof p.programaId === 'object' ? p.programaId : undefined,
+                    titulo: p.titulo,
+                    descricao: p.descricao,
+                    dataInicio: p.dataInicio,
+                    dataFim: p.dataFim,
+                    pontosPorReal: p.pontosPorReal,
+                    ativo: p.ativo === 'ATIVO',
+                })) : [])
             } catch {
                 // Silent failure for polling
             }
@@ -104,8 +127,18 @@ export default function Promocoes() {
         // Listen for promotion-created events (from same browser session)
         const handlePromotionCreated = async () => {
             try {
-                const promoData = await promocaoService.list<Promocao[]>()
-                setPromocoes(Array.isArray(promoData) ? promoData : [])
+                const promoData = await promocaoService.list()
+                setPromocoes(Array.isArray(promoData) ? promoData.map(p => ({
+                    id: p.id,
+                    programaId: typeof p.programaId === 'object' ? p.programaId.id : p.programaId,
+                    programa: typeof p.programaId === 'object' ? p.programaId : undefined,
+                    titulo: p.titulo,
+                    descricao: p.descricao,
+                    dataInicio: p.dataInicio,
+                    dataFim: p.dataFim,
+                    pontosPorReal: p.pontosPorReal,
+                    ativo: p.ativo === 'ATIVO',
+                })) : [])
             } catch {
                 // Silent failure
             }
@@ -131,8 +164,9 @@ export default function Promocoes() {
             titulo: '',
             descricao: '',
             programaId: '',
-            data_inicio: new Date().toISOString().split('T')[0],
-            data_fim: '',
+            dataInicio: new Date().toISOString().split('T')[0],
+            dataFim: '',
+            pontosPorReal: '1',
             ativo: true,
         })
         setEditingPromo(null)
@@ -145,10 +179,11 @@ export default function Promocoes() {
         setForm({
             titulo: promo.titulo ?? '',
             descricao: promo.descricao ?? '',
-            programaId: String(promo.programaId ?? promo.programa?.id ?? ''),
-            data_inicio: promo.data_inicio?.split('T')[0] ?? '',
-            data_fim: promo.data_fim?.split('T')[0] ?? '',
-            ativo: promo.ativo ?? true,
+            programaId: String(typeof promo.programaId === 'object' ? promo.programaId.id : promo.programaId ?? promo.programa?.id ?? ''),
+            dataInicio: promo.dataInicio?.split('T')[0] ?? '',
+            dataFim: promo.dataFim?.split('T')[0] ?? '',
+            pontosPorReal: String(promo.pontosPorReal ?? '1'),
+            ativo: typeof promo.ativo === 'boolean' ? promo.ativo : promo.ativo === 'ATIVO',
         })
         setShowForm(true)
     }, [])
@@ -167,19 +202,19 @@ export default function Promocoes() {
             return
         }
 
-        if (!form.data_fim) {
+        if (!form.dataFim) {
             notify.warn('Informe a data de validade.')
             return
         }
 
         setSaving(true)
-        const payload: PromocaoDTO = {
+        const payload: PromocaoRequestDTO = {
             titulo: form.titulo.trim(),
             descricao: form.descricao.trim(),
             programaId: Number(form.programaId),
-            data_inicio: form.data_inicio,
-            data_fim: form.data_fim,
-            ativo: form.ativo,
+            dataInicio: form.dataInicio,
+            dataFim: form.dataFim,
+            pontosPorReal: Number(form.pontosPorReal) || 1,
         }
 
         try {
@@ -226,7 +261,7 @@ export default function Promocoes() {
 
     // Count active promotions
     const activeCount = useMemo(() => {
-        return promocoes.filter((p) => p.ativo && getDaysUntilExpiration(p.data_fim) >= 0).length
+        return promocoes.filter((p) => p.ativo && getDaysUntilExpiration(p.dataFim) >= 0).length
     }, [promocoes])
 
     return (
@@ -339,8 +374,8 @@ export default function Promocoes() {
                                 <input
                                     id="promo-inicio"
                                     type="date"
-                                    value={form.data_inicio}
-                                    onChange={(e) => setForm((prev) => ({ ...prev, data_inicio: e.target.value }))}
+                                    value={form.dataInicio}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, dataInicio: e.target.value }))}
                                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
@@ -353,9 +388,9 @@ export default function Promocoes() {
                                 <input
                                     id="promo-fim"
                                     type="date"
-                                    value={form.data_fim}
-                                    onChange={(e) => setForm((prev) => ({ ...prev, data_fim: e.target.value }))}
-                                    min={form.data_inicio}
+                                    value={form.dataFim}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, dataFim: e.target.value }))}
+                                    min={form.dataInicio}
                                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
@@ -438,10 +473,11 @@ export default function Promocoes() {
             ) : (
                 <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
                     {promocoes.map((promo) => {
-                        const daysLeft = getDaysUntilExpiration(promo.data_fim)
+                        const daysLeft = getDaysUntilExpiration(promo.dataFim)
                         const isExpired = daysLeft < 0
                         const isUrgent = daysLeft >= 0 && daysLeft <= 3
-                        const programaNome = promo.programa?.nome ?? programaMap.get(promo.programaId) ?? 'Programa'
+                        const programaIdNum = typeof promo.programaId === 'object' ? promo.programaId.id : promo.programaId
+                        const programaNome = promo.programa?.nome ?? programaMap.get(programaIdNum) ?? 'Programa'
 
                         return (
                             <div
@@ -496,7 +532,7 @@ export default function Promocoes() {
                                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                         </svg>
-                                        <span>Válido até {formatDate(promo.data_fim)}</span>
+                                        <span>Válido até {formatDate(promo.dataFim)}</span>
                                     </div>
 
                                     {/* Admin Actions */}

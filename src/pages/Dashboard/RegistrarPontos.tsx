@@ -7,21 +7,11 @@ import { comprovanteService } from '../../services/comprovante/comprovante.servi
 import { notify } from '../../utils/notify'
 import { formatCurrency } from '../../utils/format'
 import { BANDEIRA_COLORS } from '../../utils/cardConstants'
-import type { Programa } from '../../interfaces/cardTypes'
-import type { MovimentacaoPontosDTO } from '../../interfaces/movimentacaoPontos'
-import type { BandeiraEnum, TipoCartaoEnum } from '../../interfaces/enums'
-
-type Cartao = {
-  id: number
-  nome: string
-  bandeira: BandeiraEnum
-  tipo: TipoCartaoEnum
-  multiplicadorPontos: number
-  programas?: Programa[]
-}
+import type { CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
+import type { MovimentacaoRequestDTO } from '../../interfaces/movimentacaoPontos'
 
 export default function RegistrarPontos() {
-  const [cards, setCards] = useState<Cartao[]>([])
+  const [cards, setCards] = useState<CartaoResponseDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -40,8 +30,8 @@ export default function RegistrarPontos() {
     const loadData = async () => {
       try {
         const [cardData] = await Promise.all([
-          cartaoUsuarioService.list<Cartao[]>(),
-          programaFidelidadeService.list<Programa[]>(),
+          cartaoUsuarioService.list(),
+          programaFidelidadeService.list(),
         ])
         if (!isActive) return
         setCards(Array.isArray(cardData) ? cardData : [])
@@ -66,14 +56,6 @@ export default function RegistrarPontos() {
   const availablePrograms = useMemo(() => {
     return selectedCard?.programas ?? []
   }, [selectedCard])
-
-  // Points preview calculation
-  const pointsPreview = useMemo(() => {
-    if (!selectedCard || !valor) return 0
-    const valorNum = parseFloat(valor.replace(',', '.'))
-    if (isNaN(valorNum) || valorNum <= 0) return 0
-    return valorNum * (selectedCard.multiplicadorPontos ?? 1)
-  }, [selectedCard, valor])
 
   // Reset programa when card changes
   useEffect(() => {
@@ -127,13 +109,18 @@ export default function RegistrarPontos() {
       return
     }
 
+    if (!data) {
+      notify.warn('Informe a data da compra.')
+      return
+    }
+
     setSaving(true)
 
-    const payload: MovimentacaoPontosDTO = {
+    const payload: MovimentacaoRequestDTO = {
       cartaoId: Number(cartaoId),
       programaId: Number(programaId),
       valor: parseFloat(valor.replace(',', '.')),
-      data: data || undefined,
+      data: data,
     }
 
     try {
@@ -225,11 +212,6 @@ export default function RegistrarPontos() {
                 <div className="flex-1">
                   <h2 className="section-title text-base">Selecione o cartão</h2>
                 </div>
-                {selectedCard && (
-                  <span className="badge">
-                    {selectedCard.multiplicadorPontos}x pts/R$
-                  </span>
-                )}
               </div>
 
               <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(12.5rem,1fr))]">
@@ -263,7 +245,7 @@ export default function RegistrarPontos() {
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm text-fg-primary truncate">{card.nome}</p>
                           <p className="text-[0.625rem] text-fg-secondary">
-                            {card.multiplicadorPontos}x pts/R$
+                            {card.tipo?.replace('_', ' ')}
                           </p>
                         </div>
                         {isSelected && (
@@ -370,47 +352,37 @@ export default function RegistrarPontos() {
               </div>
 
               <div className="text-center">
-                {/* Current value */}
+                {/* Info about backend calculation */}
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                   <p className="text-[0.625rem] font-bold uppercase tracking-wider text-fg-secondary">
-                    Ganho estimado
+                    Informação
                   </p>
-                  <p className="mt-1 text-3xl font-bold">
-                    <span className="titulo-grafico">
-                      {pointsPreview > 0 ? pointsPreview.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '—'}
-                    </span>
-                  </p>
-                  <p className="text-xs text-fg-secondary">pontos</p>
+                  <div className="mt-3 space-y-2">
+                    <svg className="mx-auto h-8 w-8 text-accent-pool/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                    <p className="text-xs text-fg-secondary">
+                      Os pontos serão calculados automaticamente pelo servidor com base nas regras do programa selecionado.
+                    </p>
+                  </div>
                 </div>
 
-                {/* Calculation breakdown */}
-                {selectedCard && valor && pointsPreview > 0 && (
+                {/* Purchase summary when data is filled */}
+                {selectedCard && valor && (
                   <div className="mt-4 space-y-2 text-xs text-fg-secondary">
                     <div className="flex items-center justify-between">
-                      <span>Compra</span>
+                      <span>Cartão</span>
+                      <span className="font-medium text-fg-primary truncate max-w-[60%]">
+                        {selectedCard.nome}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Valor</span>
                       <span className="font-medium text-fg-primary">
                         {formatCurrency(parseFloat(valor.replace(',', '.')) || 0)}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Multiplicador</span>
-                      <span className="font-medium text-fg-primary">
-                        {selectedCard.multiplicadorPontos}x
-                      </span>
-                    </div>
-                    <div className="border-t border-white/10 pt-2 flex items-center justify-between text-sm">
-                      <span className="font-semibold text-fg-primary">Total</span>
-                      <span className="font-bold titulo-grafico">
-                        {pointsPreview.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                      </span>
-                    </div>
                   </div>
-                )}
-
-                {!selectedCard && (
-                  <p className="mt-4 text-[0.625rem] text-fg-secondary">
-                    Selecione um cartão para ver a previsão
-                  </p>
                 )}
               </div>
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { notificacaoService } from '../../services/notificacao/notificacao.service'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notify } from '../../utils/notify'
-import type { Notificacao, NotificacaoDTO } from '../../interfaces/notificacao'
+import type { Notificacao, NotificacaoRequestDTO } from '../../interfaces/notificacao'
 import type { UsuarioDTO } from '../../interfaces/auth'
 
 // Format relative time
@@ -37,7 +37,7 @@ export default function Notificacoes() {
   // Admin form state
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
-  const [formData, setFormData] = useState<NotificacaoDTO>({
+  const [formData, setFormData] = useState<NotificacaoRequestDTO>({
     titulo: '',
     mensagem: '',
     tipo: 'INFO',
@@ -52,7 +52,7 @@ export default function Notificacoes() {
     const loadData = async () => {
       try {
         const [notificacoesData, userData] = await Promise.all([
-          notificacaoService.list<Notificacao[]>(),
+          notificacaoService.list(),
           usuarioService.getMe(),
         ])
         if (!isActive) return
@@ -169,7 +169,7 @@ export default function Notificacoes() {
       setShowCreateForm(false)
 
       // Reload list
-      const data = await notificacaoService.list<Notificacao[]>()
+      const data = await notificacaoService.list()
       setItems(Array.isArray(data) ? data : [])
       // Notify TopBar to refresh
       window.dispatchEvent(new CustomEvent('notification-created'))

@@ -1,13 +1,23 @@
 import type { StatusMovimentacaoEnum } from './enums'
 
-// Espelha StatusMovimentacaoDTO
+// Espelha StatusResponseDTO (usado aninhado em MovimentacaoResponseDTO)
+export interface StatusResponseDTO {
+  status: StatusMovimentacaoEnum
+  motivo: string
+}
+
+// =====================
+// Aliases (compatibilidade - deprecated)
+// =====================
+
+// Legacy: StatusMovimentacaoDTO (não mais usado como endpoint independente)
 export interface StatusMovimentacaoDTO {
   movimentacaoId: number
   status: StatusMovimentacaoEnum
   motivo: string
 }
 
-// Retorno do backend (entity). Campos podem variar; tipamos o essencial e mantemos flexível.
+// Legacy: StatusMovimentacao (entity)
 export type StatusMovimentacao = {
   id?: number
   movimentacaoId?: number

@@ -317,11 +317,17 @@ export default function Programas() {
     const loadData = useCallback(async () => {
         try {
             const [programasData, saldosData] = await Promise.all([
-                programaFidelidadeService.list<Programa[]>(),
+                programaFidelidadeService.list(),
                 saldoUsuarioProgramaService.list(),
             ])
-            setProgramas(Array.isArray(programasData) ? programasData : [])
-            setSaldos(Array.isArray(saldosData) ? (saldosData as SaldoPrograma[]) : [])
+            setProgramas(Array.isArray(programasData) ? programasData.map(p => ({ id: p.id, nome: p.nome, descricao: p.descricao })) : [])
+            // Map saldosData to SaldoPrograma, handling programaId as nested object
+            setSaldos(Array.isArray(saldosData) ? saldosData.map(s => ({
+                id: s.id,
+                pontos: s.pontos,
+                programaId: typeof s.programaId === 'object' ? s.programaId?.id : s.programaId,
+                programa: typeof s.programaId === 'object' ? s.programaId : undefined,
+            })) : [])
         } catch (error) {
             notify.apiError(error, { fallback: 'Não foi possível carregar os programas.' })
         } finally {

@@ -119,10 +119,8 @@ export default function Perfil() {
     setSaving(true)
     try {
       await usuarioService.updateMe({
-        id: userData?.id ?? 0,
         nome: nome.trim(),
         email: email.trim(),
-        senha: '', // Backend should ignore empty password
       })
 
       notify.success('Dados atualizados com sucesso!')

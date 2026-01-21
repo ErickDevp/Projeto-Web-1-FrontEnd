@@ -1,51 +1,80 @@
-// Espelha o UsuarioLoginDTO
-export interface LoginDTO {
-    email: string;
-    senha: string;
+// =====================
+// Auth DTOs
+// =====================
+
+// Espelha LoginRequestDTO
+export interface LoginRequestDTO {
+    email: string
+    senha: string
 }
 
-// Alias com o nome exato do backend
-export type UsuarioLoginDTO = LoginDTO;
+// Espelha RegisterRequestDTO
+export interface RegisterRequestDTO {
+    nome: string
+    email: string
+    senha: string
+}
 
-// Espelha o UsuarioDTO do backend
+// Espelha PasswordResetRequestDTO
+export interface PasswordResetRequestDTO {
+    email: string
+}
+
+// Espelha PasswordChangeRequestDTO
+export interface PasswordChangeRequestDTO {
+    token: string
+    novaSenha: string
+}
+
+// Espelha AuthResponseDTO
+export interface AuthResponseDTO {
+    token: string
+}
+
+// Espelha PasswordResetResponseDTO
+export interface PasswordResetResponseDTO {
+    token: string
+}
+
+// =====================
+// Usuário DTOs
+// =====================
+
+// Espelha UsuarioRequestDTO (para atualização)
+export interface UsuarioRequestDTO {
+    nome: string
+    email: string
+}
+
+// Espelha UsuarioResponseDTO
+export interface UsuarioResponseDTO {
+    id: number
+    nome: string
+    email: string
+    criado_em: string
+    camionhoFoto?: string
+}
+
+// =====================
+// Aliases (compatibilidade)
+// =====================
+
+// Alias com o nome exato do backend (compatibilidade)
+export type LoginDTO = LoginRequestDTO
+export type UsuarioLoginDTO = LoginRequestDTO
+export type RegisterDTO = RegisterRequestDTO
+export type ForgotPasswordDTO = PasswordResetRequestDTO
+export type EsqueciSenhaDTO = PasswordResetRequestDTO
+export type ResetPasswordDTO = PasswordChangeRequestDTO
+export type RedefinirSenhaDTO = PasswordChangeRequestDTO
+export type AuthResponse = AuthResponseDTO
+export type ForgotPasswordResponse = PasswordResetResponseDTO
+
+// Legacy UsuarioDTO (descontinuado - usar UsuarioResponseDTO)
 export interface UsuarioDTO {
-    id: number;
-    nome: string;
-    email: string;
-    senha: string;
-    role?: 'ADMIN' | 'USER';
-}
-
-// Espelha o UsuarioDTO (usado no cadastro)
-export interface RegisterDTO {
-    nome: string;
-    email: string;
-    senha: string;
-}
-
-// Espelha o EsqueciSenhaDTO
-export interface ForgotPasswordDTO {
-    email: string;
-}
-
-// Alias com o nome exato do backend
-export type EsqueciSenhaDTO = ForgotPasswordDTO;
-
-// Espelha o RedefinirSenhaDTO
-export interface ResetPasswordDTO {
-    token: string;
-    novaSenha: string;
-}
-
-// Alias com o nome exato do backend
-export type RedefinirSenhaDTO = ResetPasswordDTO;
-
-// Resposta do servidor
-export interface AuthResponse {
-    token: string;
-}
-
-export interface ForgotPasswordResponse {
-    message: string;
-    reset_token: string;
+    id: number
+    nome: string
+    email: string
+    senha?: string
+    role?: 'ADMIN' | 'USER'
 }

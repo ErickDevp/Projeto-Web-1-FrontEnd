@@ -1,21 +1,26 @@
 import { apiClient } from '../http/client'
 import { endpoints } from '../endpoints'
-import type { ProgramaFidelidadeDTO } from '../../interfaces/programaFidelidade'
+import type {
+  ProgramaRequestDTO,
+  ProgramaResponseDTO,
+  ProgramaComPromocoesResponseDTO
+} from '../../interfaces/programaFidelidade'
 
 export const programaFidelidadeService = {
-  // GET /programa retorna List<ProgramaFidelidade> (entity)
-  async list<T = unknown[]>(): Promise<T> {
-    const { data } = await apiClient.get<T>(endpoints.programaFidelidade.base)
+  // GET /programa retorna List<ProgramaComPromocoesResponseDTO>
+  async list(): Promise<ProgramaComPromocoesResponseDTO[]> {
+    const { data } = await apiClient.get<ProgramaComPromocoesResponseDTO[]>(endpoints.programaFidelidade.base)
     return data
   },
 
-  async create(payload: ProgramaFidelidadeDTO): Promise<string> {
-    const { data } = await apiClient.post<string>(endpoints.programaFidelidade.create, payload)
+  async create(payload: ProgramaRequestDTO): Promise<ProgramaResponseDTO> {
+    const { data } = await apiClient.post<ProgramaResponseDTO>(endpoints.programaFidelidade.create, payload)
     return data
   },
 
-  async update(id: string | number, payload: ProgramaFidelidadeDTO): Promise<void> {
-    await apiClient.put(`${endpoints.programaFidelidade.base}/${id}`, payload)
+  async update(id: string | number, payload: ProgramaRequestDTO): Promise<ProgramaResponseDTO> {
+    const { data } = await apiClient.put<ProgramaResponseDTO>(`${endpoints.programaFidelidade.base}/${id}`, payload)
+    return data
   },
 
   async remove(id: string | number): Promise<void> {

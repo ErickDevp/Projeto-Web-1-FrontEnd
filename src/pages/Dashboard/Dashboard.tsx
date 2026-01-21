@@ -5,8 +5,8 @@ import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario
 import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma/saldoUsuarioPrograma.service'
 import type { RelatorioResponseDTO } from '../../interfaces/relatorio'
-import type { SaldoUsuarioPrograma } from '../../interfaces/saldoUsuarioPrograma'
-import type { Cartao } from '../../interfaces/cardTypes'
+import type { SaldoResponseDTO } from '../../interfaces/saldoUsuarioPrograma'
+import type { CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
 import { notify } from '../../utils/notify'
 import SensitiveValue from '../../components/ui/SensitiveValue'
 
@@ -73,8 +73,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const normalizedSearch = searchTerm.trim().toLowerCase()
 
-  const [cards, setCards] = useState<Cartao[]>([])
-  const [saldo, setSaldo] = useState<SaldoUsuarioPrograma[]>([])
+  const [cards, setCards] = useState<CartaoResponseDTO[]>([])
+  const [saldo, setSaldo] = useState<SaldoResponseDTO[]>([])
   const [relatorio, setRelatorio] = useState<RelatorioResponseDTO | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -84,7 +84,7 @@ export default function Dashboard() {
     const loadData = async () => {
       try {
         const [cardsData, saldoData, relatorioData] = await Promise.all([
-          cartaoUsuarioService.list<Cartao[]>(),
+          cartaoUsuarioService.list(),
           saldoUsuarioProgramaService.list(),
           relatorioService.get(),
         ])
@@ -109,20 +109,14 @@ export default function Dashboard() {
   }, [])
 
   const totalPoints = useMemo(() => {
-    if (relatorio?.saldoGlobal != null) return toNumber(relatorio.saldoGlobal)
-    return saldo.reduce((acc, item) => acc + toNumber(item.pontos), 0)
-  }, [relatorio, saldo])
+    return toNumber(relatorio?.saldoGlobal ?? 0)
+  }, [relatorio])
 
   const programSummary = useMemo(() => {
-    return saldo.map((item) => {
-      const programaNome =
-        (typeof item.programa === 'object' && item.programa ? (item.programa as { nome?: string }).nome : undefined) ??
-        (item.programaId ? `Programa #${item.programaId}` : 'Programa')
-      return {
-        label: programaNome,
-        value: toNumber(item.pontos),
-      }
-    })
+    return saldo.map((item) => ({
+      label: item.programaId.nome,
+      value: toNumber(item.pontos),
+    }))
   }, [saldo])
 
   const pontosPorCartao = useMemo(() => {
@@ -440,7 +434,7 @@ export default function Dashboard() {
                             {card.nome ?? `Cartão ${index + 1}`}
                           </p>
                           <p className="text-xs text-fg-secondary truncate">
-                            {card.tipo?.replace('_', ' ') ?? 'Crédito'} • •••• {String(card.id ?? index + 1).slice(-4).padStart(4, '0')}
+                            {card.tipo?.replace('_', ' ') ?? 'Crédito'} • •••• {card.numero?.slice(-4) ?? '****'}
                           </p>
                         </div>
                         {/* Arrow indicator on hover */}

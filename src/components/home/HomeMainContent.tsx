@@ -40,8 +40,8 @@ export default function HomeMainContent() {
       try {
         const [saldos, cartoes, programas] = await Promise.all([
           saldoUsuarioProgramaService.list().catch(() => []),
-          cartaoUsuarioService.list<{ id: number }[]>().catch(() => []),
-          programaFidelidadeService.list<{ id: number }[]>().catch(() => []),
+          cartaoUsuarioService.list().catch(() => []),
+          programaFidelidadeService.list().catch(() => []),
         ])
 
         if (!isActive) return
