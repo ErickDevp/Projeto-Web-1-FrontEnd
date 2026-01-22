@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { movimentacaoPontosService } from '../../services/movimentacaoPontos/movimentacaoPontos.service'
+import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { notify } from '../../utils/notify'
 import { formatCurrency, formatDate, formatPoints } from '../../utils/format'
 import StatusBadge, { STATUS_CONFIG, getStatusString } from '../../components/ui/StatusBadge'
@@ -51,6 +52,7 @@ export default function Movimentacoes() {
   const [cards, setCards] = useState<Cartao[]>([])
   const [programas, setProgramas] = useState<ProgramaResponseDTO[]>([])
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([])
+  const [saldoGlobal, setSaldoGlobal] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState<{ cartaoId: string; programaId: string; valor: string }>({
@@ -61,10 +63,11 @@ export default function Movimentacoes() {
 
   const loadData = useCallback(async () => {
     try {
-      const [cardData, programaData, movData] = await Promise.all([
+      const [cardData, programaData, movData, relatorioData] = await Promise.all([
         cartaoUsuarioService.list(),
         programaFidelidadeService.list(),
         movimentacaoPontosService.list(),
+        relatorioService.get(),
       ])
 
       setCards(Array.isArray(cardData) ? cardData.map(c => ({ id: c.id, nome: c.nome, bandeira: c.bandeira })) : [])
@@ -81,6 +84,7 @@ export default function Movimentacoes() {
         status: m.status,
         comprovantes: m.comprovantes,
       })) : [])
+      setSaldoGlobal(relatorioData?.saldoGlobal ? Number(relatorioData.saldoGlobal) : 0)
     } catch (error) {
       notify.apiError(error, { fallback: 'Não foi possível carregar as movimentações.' })
     } finally {
@@ -181,10 +185,6 @@ export default function Movimentacoes() {
     return null
   }
 
-  const totalPontos = useMemo(() => {
-    return movimentacoes.reduce((sum, m) => sum + (m.pontosCalculados ?? 0), 0)
-  }, [movimentacoes])
-
   const totalValor = useMemo(() => {
     return movimentacoes.reduce((sum, m) => sum + (Number(m.valor) || 0), 0)
   }, [movimentacoes])
@@ -204,8 +204,8 @@ export default function Movimentacoes() {
             <p className="text-lg font-bold text-fg-primary"><SensitiveValue>{formatCurrency(totalValor)}</SensitiveValue></p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-fg-secondary">Pontos gerados</p>
-            <p className="text-lg font-bold text-accent-pool"><SensitiveValue>{formatPoints(totalPontos)}</SensitiveValue></p>
+            <p className="text-xs text-fg-secondary">Saldo Global</p>
+            <p className="text-lg font-bold text-accent-pool"><SensitiveValue>{formatPoints(saldoGlobal)}</SensitiveValue></p>
           </div>
         </div>
       </header>

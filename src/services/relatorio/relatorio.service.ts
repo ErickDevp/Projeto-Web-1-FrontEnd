@@ -3,7 +3,7 @@ import { endpoints } from '../endpoints'
 import type { RelatorioResponseDTO } from '../../interfaces/relatorio'
 
 export const relatorioService = {
-  // TODO: ajustar conforme seu RelatorioController (geralmente aceita filtros via query params)
+
   async get<T = RelatorioResponseDTO>(): Promise<T> {
     const { data } = await apiClient.get<T>(endpoints.relatorio.base)
     return data

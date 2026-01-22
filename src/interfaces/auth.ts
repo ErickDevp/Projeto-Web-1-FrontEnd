@@ -52,7 +52,7 @@ export interface UsuarioResponseDTO {
     nome: string
     email: string
     criado_em: string
-    camionhoFoto?: string
+    caminhoFoto?: string
 }
 
 // =====================

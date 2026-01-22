@@ -6,7 +6,7 @@ import { notify } from '../../utils/notify'
 import HomeFeatures from './HomeFeatures'
 import HomeFooter from './HomeFooter'
 import CreditCardPreview from '../ui/CreditCardPreview'
-import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma/saldoUsuarioPrograma.service'
+import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 
@@ -38,18 +38,16 @@ export default function HomeMainContent() {
 
     const loadStats = async () => {
       try {
-        const [saldos, cartoes, programas] = await Promise.all([
-          saldoUsuarioProgramaService.list().catch(() => []),
+        const [relatorio, cartoes, programas] = await Promise.all([
+          relatorioService.get().catch(() => null),
           cartaoUsuarioService.list().catch(() => []),
           programaFidelidadeService.list().catch(() => []),
         ])
 
         if (!isActive) return
 
-        // Calculate total points from all saldos
-        const totalPontos = Array.isArray(saldos)
-          ? saldos.reduce((sum, s) => sum + (s.pontos ?? 0), 0)
-          : 0
+        // Use global balance from report
+        const totalPontos = relatorio?.saldoGlobal ?? 0
 
         setStats({
           totalPontos,
