@@ -9,15 +9,18 @@ import { formatCurrency } from '../../utils/format'
 import { BANDEIRA_COLORS } from '../../utils/cardConstants'
 import type { CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
 import type { MovimentacaoRequestDTO } from '../../interfaces/movimentacaoPontos'
+import type { ProgramaComPromocoesResponseDTO } from '../../interfaces/programaFidelidade'
 
 export default function RegistrarPontos() {
   const [cards, setCards] = useState<CartaoResponseDTO[]>([])
+  const [programasComPromocoes, setProgramasComPromocoes] = useState<ProgramaComPromocoesResponseDTO[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   // Form state
   const [cartaoId, setCartaoId] = useState<string>('')
   const [programaId, setProgramaId] = useState<string>('')
+  const [promocaoId, setPromocaoId] = useState<string>('')
   const [valor, setValor] = useState<string>('')
   const [data, setData] = useState<string>(new Date().toISOString().split('T')[0])
   const [file, setFile] = useState<File | null>(null)
@@ -29,12 +32,13 @@ export default function RegistrarPontos() {
 
     const loadData = async () => {
       try {
-        const [cardData] = await Promise.all([
+        const [cardData, programasData] = await Promise.all([
           cartaoUsuarioService.list(),
           programaFidelidadeService.list(),
         ])
         if (!isActive) return
         setCards(Array.isArray(cardData) ? cardData : [])
+        setProgramasComPromocoes(Array.isArray(programasData) ? programasData : [])
       } catch (error) {
         notify.apiError(error, { fallback: 'Não foi possível carregar os dados.' })
       } finally {
@@ -57,10 +61,28 @@ export default function RegistrarPontos() {
     return selectedCard?.programas ?? []
   }, [selectedCard])
 
-  // Reset programa when card changes
+  // Available promotions - get from programasComPromocoes based on selected program
+  const availablePromocoes = useMemo(() => {
+    if (!programaId) return []
+    const programaCompleto = programasComPromocoes.find(p => p.id === Number(programaId))
+    if (!programaCompleto?.promocoes) return []
+    // Filter only active promotions (ativo === 'ATIVO' and dataFim >= today)
+    const today = new Date().toISOString().split('T')[0]
+    return programaCompleto.promocoes.filter(
+      p => p.ativo === 'ATIVO' && p.dataFim >= today
+    )
+  }, [programaId, programasComPromocoes])
+
+  // Reset programa and promocao when card changes
   useEffect(() => {
     setProgramaId('')
+    setPromocaoId('')
   }, [cartaoId])
+
+  // Reset promocao when program changes
+  useEffect(() => {
+    setPromocaoId('')
+  }, [programaId])
 
   // Handle drag events
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -104,6 +126,11 @@ export default function RegistrarPontos() {
       return
     }
 
+    if (!promocaoId) {
+      notify.warn('Selecione uma promoção.')
+      return
+    }
+
     if (!valor || parseFloat(valor.replace(',', '.')) <= 0) {
       notify.warn('Informe um valor válido.')
       return
@@ -119,16 +146,17 @@ export default function RegistrarPontos() {
     const payload: MovimentacaoRequestDTO = {
       cartaoId: Number(cartaoId),
       programaId: Number(programaId),
+      promocaoId: Number(promocaoId),
       valor: parseFloat(valor.replace(',', '.')),
       data: data,
     }
 
     try {
-      const movimentacaoId = await movimentacaoPontosService.create(payload)
+      const response = await movimentacaoPontosService.create(payload)
 
       if (file) {
         try {
-          await comprovanteService.create({ movimentacaoId: Number(movimentacaoId), file })
+          await comprovanteService.create({ movimentacaoId: response.id, file })
         } catch (fileError) {
           notify.warn('Movimentação registrada, mas houve erro ao enviar o comprovante.')
         }
@@ -139,6 +167,7 @@ export default function RegistrarPontos() {
       // Reset form
       setCartaoId('')
       setProgramaId('')
+      setPromocaoId('')
       setValor('')
       setData(new Date().toISOString().split('T')[0])
       setFile(null)
@@ -147,7 +176,7 @@ export default function RegistrarPontos() {
     } finally {
       setSaving(false)
     }
-  }, [cartaoId, programaId, valor, data, file])
+  }, [cartaoId, programaId, promocaoId, valor, data, file])
 
   return (
     <section className="space-y-6">
@@ -198,7 +227,7 @@ export default function RegistrarPontos() {
           </NavLink>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="grid items-stretch gap-6 lg:grid-cols-3">
+        <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-3">
           {/* Left column - Form */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             {/* Card Selection */}
@@ -261,7 +290,7 @@ export default function RegistrarPontos() {
             </div>
 
             {/* Program + Value + Date */}
-            <div className="dashboard-card p-5 flex-1">
+            <div className="dashboard-card !min-h-0 p-5 !h-fit w-full">
               <div className="section-header mb-4">
                 <div className="card-icon">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -295,6 +324,33 @@ export default function RegistrarPontos() {
                   </select>
                 </div>
 
+                {/* Promoção */}
+                <div className="space-y-1.5">
+                  <label htmlFor="promocao" className="block text-xs font-medium text-fg-primary">
+                    Promoção ativa
+                  </label>
+                  <select
+                    id="promocao"
+                    value={promocaoId}
+                    onChange={(e) => setPromocaoId(e.target.value)}
+                    disabled={!programaId || availablePromocoes.length === 0}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all disabled:opacity-50"
+                  >
+                    <option value="">
+                      {!programaId
+                        ? 'Selecione programa primeiro'
+                        : availablePromocoes.length === 0
+                          ? 'Nenhuma promoção ativa'
+                          : 'Selecione a promoção'}
+                    </option>
+                    {availablePromocoes.map((promo) => (
+                      <option key={promo.id} value={promo.id}>
+                        {promo.titulo} ({promo.pontosPorReal}pts/R$)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Data */}
                 <div className="space-y-1.5">
                   <label htmlFor="data" className="block text-xs font-medium text-fg-primary">
@@ -311,7 +367,7 @@ export default function RegistrarPontos() {
                 </div>
 
                 {/* Valor */}
-                <div className="space-y-1.5 md:col-span-2">
+                <div className="space-y-1.5">
                   <label htmlFor="valor" className="block text-xs font-medium text-fg-primary">
                     Valor da compra (R$)
                   </label>
@@ -389,7 +445,7 @@ export default function RegistrarPontos() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={saving || !cartaoId || !programaId || !valor}
+                disabled={saving || !cartaoId || !programaId || !promocaoId || !valor}
                 className="mt-5 w-full btn-primary justify-center disabled:opacity-50 disabled:cursor-not-allowed py-3"
               >
                 {saving ? (
