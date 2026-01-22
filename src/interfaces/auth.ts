@@ -1,3 +1,5 @@
+import type { RoleEnum } from './enums'
+
 // =====================
 // Auth DTOs
 // =====================
@@ -53,6 +55,7 @@ export interface UsuarioResponseDTO {
     email: string
     criado_em: string
     caminhoFoto?: string
+    role: RoleEnum
 }
 
 // =====================
@@ -76,5 +79,5 @@ export interface UsuarioDTO {
     nome: string
     email: string
     senha?: string
-    role?: 'ADMIN' | 'USER'
+    role: RoleEnum
 }
