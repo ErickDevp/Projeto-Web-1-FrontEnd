@@ -11,11 +11,11 @@ import { notify } from '../../utils/notify'
 import SensitiveValue from '../../components/ui/SensitiveValue'
 
 // Brand logos for compact card list
-import visaLogo from '../../assets/brands/visa.svg'
-import mastercardLogo from '../../assets/brands/mastercard.svg'
-import amexLogo from '../../assets/brands/amex.svg'
-import eloLogo from '../../assets/brands/elo.svg'
-import hipercardLogo from '../../assets/brands/hipercard.svg'
+import visaLogo from '../../assets/brands/bandeiras/visa.svg'
+import mastercardLogo from '../../assets/brands/bandeiras/mastercard.svg'
+import amexLogo from '../../assets/brands/bandeiras/amex.svg'
+import eloLogo from '../../assets/brands/bandeiras/elo.svg'
+import hipercardLogo from '../../assets/brands/bandeiras/hipercard.svg'
 
 // Get brand logo based on bandeira
 const getBrandLogo = (bandeira?: string): string | null => {

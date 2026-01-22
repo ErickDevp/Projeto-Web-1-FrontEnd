@@ -1,8 +1,8 @@
-import visaLogo from '../../assets/brands/visa.svg'
-import mastercardLogo from '../../assets/brands/mastercard.svg'
-import amexLogo from '../../assets/brands/amex.svg'
-import eloLogo from '../../assets/brands/elo.svg'
-import hipercardLogo from '../../assets/brands/hipercard.svg'
+import visaLogo from '../../assets/brands/bandeiras/visa.svg'
+import mastercardLogo from '../../assets/brands/bandeiras/mastercard.svg'
+import amexLogo from '../../assets/brands/bandeiras/amex.svg'
+import eloLogo from '../../assets/brands/bandeiras/elo.svg'
+import hipercardLogo from '../../assets/brands/bandeiras/hipercard.svg'
 
 export type CardVariant = 'black' | 'platinum' | 'gold' | 'silver' | 'mastercard' | 'elo' | 'hipercard'
 export type CardSize = 'default' | 'mini'

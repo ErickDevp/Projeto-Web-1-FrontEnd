@@ -1,8 +1,3 @@
-/**
- * Constantes e helpers relacionados a cartões
- * Consolidado de: Cartoes.tsx, RegistrarPontos.tsx, Movimentacoes.tsx
- */
-
 import type { BandeiraEnum, TipoCartaoEnum } from '../interfaces/enums'
 
 // Bandeiras de cartão com cores e labels
