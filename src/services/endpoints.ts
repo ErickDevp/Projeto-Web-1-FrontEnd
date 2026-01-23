@@ -6,9 +6,10 @@ export const endpoints = {
     resetPassword: '/auth/reset-password',
   },
   usuario: {
-    base: '/usuario',
-    me: '/usuario/me',
-    foto: '/usuario/foto',
+  base: '/usuario',
+  me: '/usuario/me',
+  foto: '/usuario/foto',
+  fotoPerfil: '/usuario/foto-perfil',
   },
   notificacao: {
     base: '/notificacao',
