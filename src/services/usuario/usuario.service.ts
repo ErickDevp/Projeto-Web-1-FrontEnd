@@ -16,9 +16,9 @@ export const usuarioService = {
   },
 
   async uploadFoto(file: File): Promise<void> {
-    const formData = new FormData()
-    formData.append('file', file)
-    await apiClient.post(endpoints.usuario.foto, formData)
+  const formData = new FormData()
+  formData.append('foto', file)
+  await apiClient.post(endpoints.usuario.fotoPerfil, formData)
   },
 
   async updateMe(payload: UsuarioDTO): Promise<void> {
