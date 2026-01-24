@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import logoUrl from '../../assets/logo/logo.png'
-import TopBar from '../../components/dashboard/TopBar'
+import TopBar from '../../components/topbar/TopBar'
 import { useAuth } from '../../hooks/useAuth'
 
 type NavItem = {
