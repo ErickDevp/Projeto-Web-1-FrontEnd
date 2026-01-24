@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import TopBar from '../../components/topbar/TopBar'
-import { Sidebar } from '../../components/Sidebar/Sidebar'
+import { Sidebar } from '../../components/sidebar/Sidebar'
 import { MobileToggle } from '../../components/ui/MobileToggle'
 import { useDashboardLayout } from '../../hooks/useDashboardLayout'
 
