@@ -1,7 +1,7 @@
 import { useRelatoriosDashboard } from '../../hooks/useRelatoriosDashboard'
-import { LineChart, DonutChart } from '../../components/relatorios/RelatorioCharts'
-import { RelatorioSummary } from '../../components/relatorios/RelatorioSummary'
-import { RelatorioHistory } from '../../components/relatorios/RelatorioHistory'
+import { LineChart, DonutChart } from '../../components/dashboard/relatorios/RelatorioCharts'
+import { RelatorioSummary } from '../../components/dashboard/relatorios/RelatorioSummary'
+import { RelatorioHistory } from '../../components/dashboard/relatorios/RelatorioHistory'
 
 export default function Relatorios() {
   const {

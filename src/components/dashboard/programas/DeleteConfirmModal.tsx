@@ -1,4 +1,4 @@
-import type { DeleteConfirmModalProps } from '../../interfaces/programa'
+import type { DeleteConfirmModalProps } from '../../../interfaces/programa'
 
 export default function DeleteConfirmModal({
     isOpen,

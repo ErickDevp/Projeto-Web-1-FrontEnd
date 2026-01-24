@@ -1,5 +1,5 @@
-import { usePreferences } from '../../hooks/usePreferences'
-import type { EvolucaoMensalDTO, PontosPorCartaoDTO } from '../../interfaces/relatorio'
+import { usePreferences } from '../../../hooks/usePreferences'
+import type { EvolucaoMensalDTO, PontosPorCartaoDTO } from '../../../interfaces/relatorio'
 
 // Month names in Portuguese
 const MONTH_NAMES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']

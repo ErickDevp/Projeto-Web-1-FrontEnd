@@ -1,4 +1,4 @@
-import SensitiveValue from '../ui/SensitiveValue'
+import SensitiveValue from '../../ui/SensitiveValue'
 
 function formatPoints(value: number): string {
     return new Intl.NumberFormat('pt-BR').format(value)

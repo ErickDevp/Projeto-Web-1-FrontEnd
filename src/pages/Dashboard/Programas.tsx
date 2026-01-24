@@ -4,7 +4,7 @@ import { saldoUsuarioProgramaService } from '../../services/saldoUsuarioPrograma
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notify } from '../../utils/notify'
 import { formatPoints } from '../../utils/programaHelpers'
-import { ProgramCard, ProgramFormModal, DeleteConfirmModal } from '../../components/programas'
+import { ProgramCard, ProgramFormModal, DeleteConfirmModal } from '../../components/dashboard/programas'
 import TabButton from '../../components/ui/TabButton'
 import SensitiveValue from '../../components/ui/SensitiveValue'
 import type { Programa, SaldoPrograma, ViewMode } from '../../interfaces/programa'

@@ -1,8 +1,8 @@
-import { getBrandConfig, getProgramLogo, inferCategory, getInitials } from '../../utils/brandHelpers'
-import { formatPoints, getActivePromotions, isPromotionEndingSoon, formatDate } from '../../utils/programaHelpers'
-import CategoryBadge from '../ui/CategoryBadge'
-import SensitiveValue from '../ui/SensitiveValue'
-import type { ProgramCardProps } from '../../interfaces/programa'
+import { getBrandConfig, getProgramLogo, inferCategory, getInitials } from '../../../utils/brandHelpers'
+import { formatPoints, getActivePromotions, isPromotionEndingSoon, formatDate } from '../../../utils/programaHelpers'
+import CategoryBadge from '../../ui/CategoryBadge'
+import SensitiveValue from '../../ui/SensitiveValue'
+import type { ProgramCardProps } from '../../../interfaces/programa'
 
 export default function ProgramCard({
     programa,

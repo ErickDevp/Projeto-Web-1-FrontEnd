@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { notify } from '../../utils/notify'
-import type { ProgramFormModalProps } from '../../interfaces/programa'
+import { notify } from '../../../utils/notify'
+import type { ProgramFormModalProps } from '../../../interfaces/programa'
 
 export default function ProgramFormModal({
     isOpen,

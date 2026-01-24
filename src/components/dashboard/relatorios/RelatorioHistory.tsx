@@ -1,6 +1,6 @@
-import StatusBadge from '../ui/StatusBadge'
-import SensitiveValue from '../ui/SensitiveValue'
-import type { HistoricoMovimentacaoDTO } from '../../interfaces/relatorio'
+import StatusBadge from '../../ui/StatusBadge'
+import SensitiveValue from '../../ui/SensitiveValue'
+import type { HistoricoMovimentacaoDTO } from '../../../interfaces/relatorio'
 
 // Format date for display
 function formatDate(dateStr: string): string {
