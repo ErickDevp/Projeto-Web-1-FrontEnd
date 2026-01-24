@@ -3,13 +3,11 @@ import { endpoints } from '../endpoints'
 import type { NotificacaoRequestDTO, NotificacaoResponseDTO } from '../../interfaces/notificacao'
 
 export const notificacaoService = {
-  // GET /notificacao retorna List<NotificacaoResponseDTO>
   async list(): Promise<NotificacaoResponseDTO[]> {
     const { data } = await apiClient.get<NotificacaoResponseDTO[]>(endpoints.notificacao.base)
     return data
   },
 
-  // GET /notificacao/publicas retorna List<NotificacaoResponseDTO>
   async listPublicas(): Promise<NotificacaoResponseDTO[]> {
     const { data } = await apiClient.get<NotificacaoResponseDTO[]>(endpoints.notificacao.publicas)
     return data
@@ -25,17 +23,16 @@ export const notificacaoService = {
     return data
   },
 
-  // PUT /notificacao/{id}/lida - Marcar como lida
   async markAsRead(id: string | number): Promise<void> {
     await apiClient.put(`${endpoints.notificacao.base}/${id}/lida`)
   },
 
-  // DELETE /notificacao/{id} - Dismiss notification for current user only
+  /** Dispensa notificação apenas para o usuário atual */
   async dismiss(id: string | number): Promise<void> {
     await apiClient.delete(`${endpoints.notificacao.base}/${id}`)
   },
 
-  // DELETE /notificacao/{id}/all - Remove notification for all users (admin only)
+  /** Remove notificação para todos os usuários (apenas admin) */
   async removeForAll(id: string | number): Promise<void> {
     await apiClient.delete(`${endpoints.notificacao.base}/${id}/all`)
   },

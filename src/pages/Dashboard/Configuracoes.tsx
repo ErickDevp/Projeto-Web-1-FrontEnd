@@ -90,15 +90,13 @@ function Toggle({
   )
 }
 
-// Theme Card Component
 function ThemeCard({
-  theme: _theme,
   label,
   icon,
   isSelected,
   onClick,
 }: {
-  theme: 'light' | 'dark' | 'system'
+  theme?: 'light' | 'dark' | 'system' // mark optional or just ignore
   label: string
   icon: React.ReactNode
   isSelected: boolean

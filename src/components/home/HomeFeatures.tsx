@@ -71,7 +71,7 @@ export default function HomeFeatures() {
                         className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-accent-pool/30 hover:bg-white/10 hover:shadow-[0_0_1.5rem_rgba(73,197,182,0.15)]"
                         style={{ animationDelay: `${index * 100}ms` }}
                     >
-                        {/* Gradient glow on hover */}
+                        {/* Brilho de gradiente ao passar o mouse */}
                         <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-accent-pool/10 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
 
                         <div className="relative">

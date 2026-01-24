@@ -190,20 +190,25 @@ function DonutChart({ data }: { data: PontosPorCartaoDTO[] }) {
   const circumference = 2 * Math.PI * radius
   const center = size / 2
 
-  let currentAngle = 0
-  const segments = data.map((d, i) => {
+  const segments = data.reduce<{
+    items: (PontosPorCartaoDTO & { percent: number; offset: number; length: number; color: string })[],
+    currentAngle: number
+  }>((acc, d, i) => {
     const percent = total > 0 ? d.totalPontos / total : 0
     const segmentLength = circumference * percent
-    const offset = circumference - currentAngle
-    currentAngle += segmentLength
-    return {
+    const offset = circumference - acc.currentAngle
+
+    acc.items.push({
       ...d,
       percent,
       offset,
       length: segmentLength,
       color: CHART_COLORS[i % CHART_COLORS.length],
-    }
-  })
+    })
+
+    acc.currentAngle += segmentLength
+    return acc
+  }, { items: [], currentAngle: 0 }).items
 
   return (
     <div className="flex flex-col items-center gap-4">

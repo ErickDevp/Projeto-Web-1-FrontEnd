@@ -1,11 +1,11 @@
-// Espelha NotificacaoRequestDTO
+/** DTO para requisição de notificação */
 export interface NotificacaoRequestDTO {
   titulo: string
   mensagem: string
   tipo: string
 }
 
-// Espelha NotificacaoResponseDTO
+/** DTO de resposta da notificação */
 export interface NotificacaoResponseDTO {
   id: number
   titulo: string
@@ -15,9 +15,5 @@ export interface NotificacaoResponseDTO {
   lida: boolean
 }
 
-// =====================
-// Aliases (compatibilidade)
-// =====================
-
-export type NotificacaoDTO = NotificacaoRequestDTO
+// Alias de compatibilidade
 export type Notificacao = NotificacaoResponseDTO

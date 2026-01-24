@@ -9,7 +9,7 @@ import { notify } from '../../utils/notify'
 import { BANDEIRAS, TIPOS, getTipoLabel } from '../../utils/cardConstants'
 import CreditCardPreview, { type CardVariant } from '../../components/ui/CreditCardPreview'
 
-// Get card visual variant based on bandeira
+// Obtém a variante visual do cartão baseada na bandeira
 const getCardVariant = (bandeira?: string): CardVariant => {
   switch (bandeira) {
     case 'VISA':
@@ -40,7 +40,7 @@ export default function Cartoes() {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
 
-  // Form state
+  // Estado do formulário
   const [form, setForm] = useState<{
     nome: string
     bandeira: BandeiraEnum
@@ -77,7 +77,7 @@ export default function Cartoes() {
     loadData()
   }, [loadData])
 
-  // Check for editCardId in navigation state and open edit form
+  // Verifica id do cartão para edição na navegação e abre o formulário
   useEffect(() => {
     const state = location.state as { editCardId?: number } | null
     if (state?.editCardId && cards.length > 0 && !loading) {
@@ -99,7 +99,7 @@ export default function Cartoes() {
     }
   }, [location.state, cards, loading])
 
-  // Reset form
+  // Reseta formulário
   const resetForm = useCallback(() => {
     setForm({
       nome: '',
@@ -113,7 +113,7 @@ export default function Cartoes() {
     setShowForm(false)
   }, [])
 
-  // Open form for editing
+  // Abre formulário para edição
   const openEditForm = useCallback((card: CartaoResponseDTO) => {
     setEditingCard(card)
     setForm({
@@ -127,7 +127,7 @@ export default function Cartoes() {
     setShowForm(true)
   }, [])
 
-  // Toggle program selection
+  // Alterna seleção de programa
   const togglePrograma = useCallback((programaId: number) => {
     setForm((prev) => {
       const exists = prev.programaIds.includes(programaId)
@@ -140,12 +140,12 @@ export default function Cartoes() {
     })
   }, [])
 
-  // Selected programs display
+  // Exibição dos programas selecionados
   const selectedProgramNames = useMemo(() => {
     return programas.filter((p) => form.programaIds.includes(p.id)).map((p) => p.nome)
   }, [form.programaIds, programas])
 
-  // Handle form submit
+  // Lida com o envio do formulário
   const handleSubmit = useCallback(async (event: React.FormEvent) => {
     event.preventDefault()
 
@@ -159,14 +159,14 @@ export default function Cartoes() {
       return
     }
 
-    // Validate card number (16 digits)
+    // Valida número do cartão (16 dígitos)
     const cleanedNumero = form.numero.replace(/\s/g, '')
     if (cleanedNumero.length !== 16) {
       notify.warn('O número do cartão deve conter 16 dígitos.')
       return
     }
 
-    // Validate expiry date
+    // Valida data de validade
     if (!form.dataValidade) {
       notify.warn('Informe a data de validade do cartão.')
       return
@@ -199,7 +199,7 @@ export default function Cartoes() {
     }
   }, [form, editingCard, resetForm, loadData])
 
-  // Handle delete with confirmation
+  // Lida com exclusão com confirmação
   const handleDeleteConfirm = useCallback((id: number) => {
     setConfirmDeleteId(id)
   }, [])
@@ -246,7 +246,7 @@ export default function Cartoes() {
         </button>
       </header>
 
-      {/* Form Modal/Panel */}
+      {/* Modal/Painel do Formulário */}
       {showForm && (
         <div className="dashboard-card">
           <div className="section-header">
@@ -360,7 +360,7 @@ export default function Cartoes() {
               </div>
             </div>
 
-            {/* Programas - Multi-select with chips */}
+            {/* Programas - Múltipla seleção com chips */}
             <div className="space-y-3">
               <label className="block text-sm font-medium text-fg-primary">
                 Programas de fidelidade vinculados
@@ -398,7 +398,7 @@ export default function Cartoes() {
               )}
             </div>
 
-            {/* Actions */}
+            {/* Ações */}
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={resetForm} className="btn-secondary">
                 Cancelar
@@ -423,7 +423,7 @@ export default function Cartoes() {
         </div>
       )}
 
-      {/* Cards Grid */}
+      {/* Grid de Cartões */}
       {loading ? (
         <div className="dashboard-card flex items-center justify-center gap-4 py-12">
           <div className="relative">
@@ -467,7 +467,7 @@ export default function Cartoes() {
                 key={card.id ?? `${card.nome}-${index}`}
                 className="group relative flex flex-col"
               >
-                {/* Credit Card Visual */}
+                {/* Visual do Cartão de Crédito */}
                 <div className="relative">
                   <CreditCardPreview
                     holderName={card.nome ?? `Cartão ${index + 1}`}
@@ -477,7 +477,7 @@ export default function Cartoes() {
                     className="transition-transform duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl"
                   />
 
-                  {/* Action Buttons Overlay */}
+                  {/* Overlay de Botões de Ação */}
                   <div className="absolute right-3 top-3 z-10 flex gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <button
                       type="button"
@@ -496,7 +496,7 @@ export default function Cartoes() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        card.id && handleDeleteConfirm(card.id)
+                        if (card.id) handleDeleteConfirm(card.id)
                       }}
                       disabled={deletingId === card.id}
                       className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur-sm hover:bg-red-500/80 hover:text-white transition-colors disabled:opacity-50"
@@ -512,7 +512,7 @@ export default function Cartoes() {
                     </button>
                   </div>
 
-                  {/* Delete Confirmation Modal */}
+                  {/* Modal de Confirmação de Exclusão */}
                   {confirmDeleteId === card.id && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-black/80 backdrop-blur-sm">
                       <div className="text-center p-4">
@@ -538,7 +538,7 @@ export default function Cartoes() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation()
-                              card.id && handleDelete(card.id)
+                              if (card.id) handleDelete(card.id)
                             }}
                             className="rounded-lg bg-red-500 px-4 py-2 text-xs font-semibold text-white hover:bg-red-600 transition-colors"
                           >
@@ -550,7 +550,7 @@ export default function Cartoes() {
                   )}
                 </div>
 
-                {/* Card Info Section */}
+                {/* Seção de Informações do Cartão */}
                 <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
                   {/* Validade e Status */}
                   <div className="flex items-center justify-between">

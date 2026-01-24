@@ -129,7 +129,7 @@ export default function Perfil() {
     } finally {
       setSaving(false)
     }
-  }, [nome, email, userData?.id])
+  }, [nome, email])
 
   // Handle account deletion
   const handleDeleteAccount = useCallback(async () => {

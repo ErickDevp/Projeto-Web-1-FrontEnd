@@ -1,15 +1,16 @@
 import type { StatusResponseDTO } from './statusMovimentacao'
+import type { ComprovanteResponseDTO } from './comprovante'
 
-// Espelha MovimentacaoRequestDTO
+/** DTO para requisição de movimentação */
 export interface MovimentacaoRequestDTO {
   cartaoId: number
   programaId: number
-  promocaoId?: number    // Opcional
-  valor: number | string // BigDecimal pode vir como número ou string
-  data: string           // ISO date string (YYYY-MM-DD)
+  promocaoId?: number
+  valor: number | string
+  data: string
 }
 
-// Espelha MovimentacaoResponseDTO
+/** DTO de resposta da movimentação */
 export interface MovimentacaoResponseDTO {
   id: number
   valor: number | string
@@ -22,11 +23,3 @@ export interface MovimentacaoResponseDTO {
   status: StatusResponseDTO
   comprovantes: ComprovanteResponseDTO[]
 }
-
-import type { ComprovanteResponseDTO } from './comprovante'
-
-// =====================
-// Aliases (compatibilidade)
-// =====================
-
-export type MovimentacaoPontosDTO = MovimentacaoRequestDTO

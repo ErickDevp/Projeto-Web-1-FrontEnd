@@ -7,7 +7,6 @@ import type {
 } from '../../interfaces/programaFidelidade'
 
 export const programaFidelidadeService = {
-  // GET /programa retorna List<ProgramaComPromocoesResponseDTO>
   async list(): Promise<ProgramaComPromocoesResponseDTO[]> {
     const { data } = await apiClient.get<ProgramaComPromocoesResponseDTO[]>(endpoints.programaFidelidade.base)
     return data

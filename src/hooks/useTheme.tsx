@@ -30,34 +30,23 @@ function getInitialTheme(): ThemePreference {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [theme, setThemeState] = useState<ThemePreference>(getInitialTheme)
-    const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
-        const initial = getInitialTheme()
-        return initial === 'system' ? getSystemTheme() : initial
-    })
+    const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(() => getSystemTheme())
 
-    // Update resolved theme when theme preference changes
+    // Ouve alterações do tema do sistema (sempre ativo para manter o estado atualizado)
     useEffect(() => {
-        if (theme === 'system') {
-            setResolvedTheme(getSystemTheme())
-        } else {
-            setResolvedTheme(theme)
-        }
-    }, [theme])
-
-    // Listen for system theme changes when in 'system' mode
-    useEffect(() => {
-        if (theme !== 'system') return
-
         const mediaQuery = window.matchMedia('(prefers-color-scheme: light)')
         const handler = (e: MediaQueryListEvent) => {
-            setResolvedTheme(e.matches ? 'light' : 'dark')
+            setSystemTheme(e.matches ? 'light' : 'dark')
         }
 
         mediaQuery.addEventListener('change', handler)
         return () => mediaQuery.removeEventListener('change', handler)
-    }, [theme])
+    }, [])
 
-    // Apply theme to document and persist
+    // Calcula o tema resolvido
+    const resolvedTheme = theme === 'system' ? systemTheme : theme
+
+    // Aplica o tema ao documento e persiste
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', resolvedTheme)
         localStorage.setItem(STORAGE_KEY, theme)
@@ -69,11 +58,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     const toggleTheme = useCallback(() => {
         setThemeState((prev) => {
-            if (prev === 'dark') return 'light'
-            if (prev === 'light') return 'system'
-            return 'dark'
+            // Se estiver em modo sistema, inverte o tema atual resolvido
+            if (prev === 'system') {
+                return resolvedTheme === 'dark' ? 'light' : 'dark'
+            }
+            // Caso contrário, apenas alterna entre claro e escuro
+            return prev === 'dark' ? 'light' : 'dark'
         })
-    }, [])
+    }, [resolvedTheme])
 
     return (
         <ThemeContext.Provider value={{ theme, resolvedTheme, toggleTheme, setTheme }}>
@@ -85,8 +77,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme(): ThemeContextValue {
     const context = useContext(ThemeContext)
     if (!context) {
-        throw new Error('useTheme must be used within a ThemeProvider')
+        throw new Error('useTheme deve ser usado dentro de um ThemeProvider')
     }
     return context
 }
-

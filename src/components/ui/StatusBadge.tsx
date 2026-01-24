@@ -44,7 +44,7 @@ const STATUS_CONFIG: Record<string, StatusConfig> = {
 const DEFAULT_STATUS: StatusConfig = STATUS_CONFIG.PENDENTE
 
 /**
- * Helper function to extract status string from various formats
+ * Função auxiliar para extrair string de status de vários formatos
  */
 function getStatusString(status: StatusType | { status?: string } | undefined): string {
     if (!status) return 'PENDENTE'
@@ -56,23 +56,23 @@ function getStatusString(status: StatusType | { status?: string } | undefined): 
 }
 
 type StatusBadgeProps = {
-    /** The status value - can be a string or an object with a status property */
+    /** O valor do status - pode ser uma string ou um objeto com uma propriedade status */
     status: StatusType | { status?: string } | undefined
-    /** Optional className for additional styling */
+    /** className opcional para estilização adicional */
     className?: string
-    /** Size variant */
+    /** Variante de tamanho */
     size?: 'sm' | 'md'
 }
 
 /**
- * StatusBadge component for displaying status indicators with semantic colors.
+ * Componente StatusBadge para exibir indicadores de status com cores semânticas.
  * 
  * @example
- * // With string status
+ * // Com status string
  * <StatusBadge status="CREDITADO" />
  * 
  * @example
- * // With object status
+ * // Com status objeto
  * <StatusBadge status={{ status: 'PENDENTE' }} />
  */
 export default function StatusBadge({ status, className = '', size = 'sm' }: StatusBadgeProps) {
@@ -99,6 +99,6 @@ export default function StatusBadge({ status, className = '', size = 'sm' }: Sta
     )
 }
 
-// Export config for use in stat cards
+// Exporta config para uso em cards de estatísticas
 export { STATUS_CONFIG, getStatusString }
 export type { StatusConfig }

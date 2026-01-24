@@ -10,14 +10,14 @@ import type { CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
 import { notify } from '../../utils/notify'
 import SensitiveValue from '../../components/ui/SensitiveValue'
 
-// Brand logos for compact card list
+// Logos de bandeiras para lista compacta
 import visaLogo from '../../assets/brands/bandeiras/visa.svg'
 import mastercardLogo from '../../assets/brands/bandeiras/mastercard.svg'
 import amexLogo from '../../assets/brands/bandeiras/amex.svg'
 import eloLogo from '../../assets/brands/bandeiras/elo.svg'
 import hipercardLogo from '../../assets/brands/bandeiras/hipercard.svg'
 
-// Get brand logo based on bandeira
+// Obtém logo da bandeira
 const getBrandLogo = (bandeira?: string): string | null => {
   switch (bandeira) {
     case 'VISA': return visaLogo
@@ -239,17 +239,17 @@ export default function Dashboard() {
         title: 'Patrimônio & Metas',
         keywords: `saldo total pontos milhas patrimonio metas ${programSummary.map((item) => item.label).join(' ')}`,
         content: (() => {
-          // Financial calculations
+          // Cálculos financeiros
           const avgPointValue = 0.02 // R$ 0,02 per point (average)
           const estimatedValue = totalPoints * avgPointValue
 
-          // Calculate real monthly growth from evolucaoMensal
+          // Calcula crescimento mensal real via evolucaoMensal
           const evolucao = relatorio?.evolucaoMensal ?? []
           let monthlyGrowth = 0
           let hasGrowthData = false
 
           if (evolucao.length >= 2) {
-            // Sort by date to get the last two months
+            // Ordena por data para obter os dois últimos meses
             const sorted = [...evolucao]
               .filter((item) => item.ano != null && item.mes != null)
               .sort((a, b) => {
@@ -271,13 +271,13 @@ export default function Dashboard() {
             }
           }
 
-          // Program colors for distribution bar
+          // Cores dos programas para barra de distribuição
           const programColors = [
             'bg-accent-pool', 'bg-accent-sky', 'bg-purple-500',
             'bg-amber-500', 'bg-rose-500', 'bg-emerald-500'
           ]
 
-          // Determine badge styling based on growth direction
+          // Define estilo do badge baseado na direção do crescimento
           const isPositiveGrowth = monthlyGrowth >= 0
           const badgeBgClass = isPositiveGrowth ? 'bg-emerald-500/20' : 'bg-red-500/20'
           const badgeTextClass = isPositiveGrowth ? 'text-emerald-400' : 'text-red-400'
@@ -286,9 +286,9 @@ export default function Dashboard() {
           return (
             <div className="dashboard-card stat-card">
 
-              {/* ===== MIDDLE: Core Financial Section ===== */}
+              {/* ===== MEIO: Seção Financeira Principal ===== */}
               <div className="flex flex-wrap gap-6 mb-6">
-                {/* Left: Total Points */}
+                {/* Esquerda: Total de Pontos */}
                 <div className="flex-1 min-w-[12rem]">
                   <div className="flex items-start gap-3">
                     <div className="card-icon">
@@ -301,7 +301,7 @@ export default function Dashboard() {
                       <p className="stat-value mt-1">
                         <SensitiveValue>{totalPoints.toLocaleString('pt-BR')}</SensitiveValue> <span className="text-lg">pts</span>
                       </p>
-                      {/* Trend Badge */}
+                      {/* Badge de Tendência */}
                       {hasGrowthData && (
                         <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full ${badgeBgClass} ${badgeTextClass}`}>
                           {isPositiveGrowth ? (
@@ -320,7 +320,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Right: Estimated Value */}
+                {/* Direita: Valor Estimado */}
                 <div className="flex-1 min-w-[12rem]">
                   <div className="p-4 rounded-xl border border-white/10 bg-white/5">
                     <p className="text-xs font-semibold uppercase tracking-[0.15em] text-fg-secondary mb-1">
@@ -336,14 +336,14 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* ===== BOTTOM: Program Distribution ===== */}
+              {/* ===== ABAIXO: Distribuição por Programa ===== */}
               {programSummary.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.15em] text-fg-secondary mb-3">
                     Distribuição por Programa
                   </p>
 
-                  {/* Segmented Distribution Bar */}
+                  {/* Barra de Distribuição Segmentada */}
                   <div className="h-3 rounded-full overflow-hidden flex bg-white/10">
                     {programSummary.map((item, idx) => {
                       const percentage = totalPoints > 0 ? (item.value / totalPoints) * 100 : 0
@@ -358,7 +358,7 @@ export default function Dashboard() {
                     })}
                   </div>
 
-                  {/* Legend Grid */}
+                  {/* Grade de Legenda */}
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {programSummary.map((item, idx) => {
                       const percentage = totalPoints > 0 ? (item.value / totalPoints) * 100 : 0
@@ -406,7 +406,7 @@ export default function Dashboard() {
               </div>
               <span className="badge">{cards.length} ativos</span>
             </div>
-            {/* Compact Card List */}
+            {/* Lista Compacta de Cartões */}
             <div className={`mt-4 flex-1 flex flex-col ${cards.length > 4 ? 'overflow-y-auto max-h-[16rem]' : ''}`}>
               {cards.length ? (
                 <div className="space-y-2">
@@ -418,7 +418,7 @@ export default function Dashboard() {
                         onClick={() => navigate('/dashboard/cartoes', { state: { editCardId: card.id } })}
                         className="group flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-accent-pool/30 transition-all duration-200 cursor-pointer"
                       >
-                        {/* Brand Logo or Fallback Icon */}
+                        {/* Logo da Bandeira ou Ícone de Fallback */}
                         <div className="flex-shrink-0 w-10 h-7 flex items-center justify-center rounded bg-white/10">
                           {brandLogo ? (
                             <img src={brandLogo} alt={card.bandeira ?? 'Card'} className="h-5 w-auto" />
@@ -428,7 +428,7 @@ export default function Dashboard() {
                             </svg>
                           )}
                         </div>
-                        {/* Card Info */}
+                        {/* Info do Cartão */}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-fg-primary truncate group-hover:text-accent-pool transition-colors">
                             {card.nome ?? `Cartão ${index + 1}`}
@@ -437,7 +437,7 @@ export default function Dashboard() {
                             {card.tipo?.replace('_', ' ') ?? 'Crédito'} • •••• {card.numero?.slice(-4) ?? '****'}
                           </p>
                         </div>
-                        {/* Arrow indicator on hover */}
+                        {/* Indicador de seta ao passar mouse */}
                         <svg className="h-4 w-4 text-fg-secondary opacity-0 group-hover:opacity-100 group-hover:text-accent-pool transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
@@ -447,7 +447,7 @@ export default function Dashboard() {
                 </div>
               ) : null}
 
-              {/* CTA Button - Show when few cards or no cards */}
+              {/* Botão CTA - Mostra quando há poucos ou nenhum cartão */}
               {cards.length < 3 && (
                 <Link
                   to="/dashboard/cartoes"
@@ -470,12 +470,12 @@ export default function Dashboard() {
         title: 'Pontos por cartão',
         keywords: `pontos cartao cartão grafico barras ${pontosPorCartao.map((item) => item.nomeCartao).join(' ')}`,
         content: (() => {
-          // Use vertical bars layout when 6 or fewer cards, horizontal when more
+          // Usa layout de barras verticais para 6 ou menos cartões, horizontal para mais
           const useVerticalBars = pontosPorCartao.length <= 6 && pontosPorCartao.length > 0
 
           return (
             <div className="dashboard-card h-full">
-              {/* Section Header */}
+              {/* Cabeçalho da Seção */}
               <div className="section-header">
                 <div className="card-icon">
                   {ChartBarIcon}
@@ -486,12 +486,12 @@ export default function Dashboard() {
                 <span className="badge">Comparativo</span>
               </div>
 
-              {/* Chart Content */}
+              {/* Conteúdo do Gráfico */}
               {useVerticalBars ? (
-                /* Vertical Bars Layout */
+                /* Layout de Barras Verticais */
                 <div className="mt-4 flex-1 flex flex-col justify-end">
                   <div className="flex gap-3">
-                    {/* Y-axis labels */}
+                    {/* Rótulos do eixo Y */}
                     <div className="flex flex-col justify-between text-xs h-[16rem] py-1 text-right min-w-[3rem]">
                       <span className="titulo-grafico font-semibold"><SensitiveValue>{formatYLabel(maxCardPoints)}</SensitiveValue></span>
                       <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxCardPoints * 0.75))}</SensitiveValue></span>
@@ -499,7 +499,7 @@ export default function Dashboard() {
                       <span className="text-fg-secondary"><SensitiveValue>{formatYLabel(Math.round(maxCardPoints * 0.25))}</SensitiveValue></span>
                       <span className="text-fg-secondary">0</span>
                     </div>
-                    {/* Bars container */}
+                    {/* Container das barras */}
                     <div className="flex-1 flex items-end justify-around gap-3" style={{ height: '16rem' }}>
                       {pontosPorCartao.map((item) => {
                         const value = toNumber(item.totalPontos)
@@ -507,11 +507,11 @@ export default function Dashboard() {
                         const barHeight = (percent / 100) * 16
                         return (
                           <div key={item.cartaoId} className="flex flex-col items-center group flex-1 h-full justify-end">
-                            {/* Value on hover */}
+                            {/* Valor ao passar mouse */}
                             <span className="titulo-grafico text-sm font-bold mb-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               <SensitiveValue>{value.toLocaleString('pt-BR')}</SensitiveValue>
                             </span>
-                            {/* Vertical Bar */}
+                            {/* Barra Vertical */}
                             <div
                               className="w-full max-w-[3.5rem] rounded-t-lg bg-gradient-to-t from-accent-sky to-accent-pool relative overflow-hidden transition-all duration-500 group-hover:shadow-lg group-hover:shadow-accent-pool/30"
                               style={{ height: `${barHeight}rem`, minHeight: percent > 0 ? '0.5rem' : '0' }}
@@ -523,7 +523,7 @@ export default function Dashboard() {
                       })}
                     </div>
                   </div>
-                  {/* X-axis Labels */}
+                  {/* Rótulos do eixo X */}
                   <div className="flex gap-3 mt-3 pt-3 border-t border-white/5">
                     <div className="min-w-[3rem]" /> {/* Spacer for Y-axis */}
                     <div className="flex-1 flex justify-around gap-3">
@@ -536,7 +536,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                /* Horizontal Bars Layout (original) */
+                /* Layout de Barras Horizontais (original) */
                 <div className="mt-4 space-y-4 flex-1">
                   {pontosPorCartao.length ? (
                     pontosPorCartao.map((item, idx) => {
@@ -602,7 +602,7 @@ export default function Dashboard() {
                       <line x1="0" y1={chartHeight * 0.4} x2={chartWidth} y2={chartHeight * 0.4} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
                       <line x1="0" y1={chartHeight * 0.6} x2={chartWidth} y2={chartHeight * 0.6} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
                       <line x1="0" y1={chartHeight * 0.8} x2={chartWidth} y2={chartHeight * 0.8} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                      {/* Gradient definition */}
+                      {/* Definição de gradiente */}
                       <defs>
                         <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                           <stop offset="0%" stopColor="rgb(39, 121, 167)" />
@@ -675,7 +675,7 @@ export default function Dashboard() {
               </div>
               <span className="badge">Distribuição</span>
             </div>
-            {/* Progress Bars */}
+            {/* Barras de Progresso */}
             <div className="mt-4 space-y-4">
               {programSummary.length ? (
                 programSummary.map((item, idx) => {
@@ -737,7 +737,7 @@ export default function Dashboard() {
                     </div>
                     {/* Chart SVG */}
                     <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-28 flex-1" aria-hidden="true">
-                      {/* Gradient definitions */}
+                      {/* Definições de gradiente */}
                       <defs>
                         <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                           <stop offset="0%" stopColor="rgba(39, 121, 167, 0.4)" />
@@ -753,7 +753,7 @@ export default function Dashboard() {
                       <line x1="0" y1={chartHeight * 0.4} x2={chartWidth} y2={chartHeight * 0.4} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
                       <line x1="0" y1={chartHeight * 0.6} x2={chartWidth} y2={chartHeight * 0.6} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
                       <line x1="0" y1={chartHeight * 0.8} x2={chartWidth} y2={chartHeight * 0.8} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                      {/* Area */}
+                      {/* Área */}
                       <polygon points={areaPolygon} fill="url(#areaGradient)" />
                       {/* Line */}
                       <polyline
@@ -862,7 +862,7 @@ export default function Dashboard() {
       <div className="dashboard-grid">
         {getBlock('saldo') ? <div className="full-width">{getBlock('saldo')?.content}</div> : null}
 
-        {/* Row 1-2: Cards + Pontos por cartão (side by side, both can span 2 rows) */}
+        {/* Linha 1-2: Cartões + Pontos por cartão (lado a lado, ambos podem ocupar 2 linhas) */}
         {getBlock('cartoes') ? (
           <div className={cards.length > 2 ? 'lg:row-span-2' : ''}>
             {getBlock('cartoes')?.content}
@@ -874,11 +874,11 @@ export default function Dashboard() {
           </div>
         ) : null}
 
-        {/* Row 2 (if cartoes doesn't span) or Row 3: Pontos por programa + Pontos por mês */}
+        {/* Linha 2 (se cartões não ocupar) ou Linha 3: Pontos por programa + Pontos por mês */}
         {getBlock('pontos-programa') ? <div>{getBlock('pontos-programa')?.content}</div> : null}
         {getBlock('pontos-mes') ? <div>{getBlock('pontos-mes')?.content}</div> : null}
 
-        {/* Full width: Histórico */}
+        {/* Largura total: Histórico */}
         {getBlock('historico') ? <div className="full-width">{getBlock('historico')?.content}</div> : null}
       </div>
     </section>

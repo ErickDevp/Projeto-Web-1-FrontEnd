@@ -132,7 +132,7 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-fg-primary font-sans selection:bg-accent-pool/30">
-      {/* Mobile Menu Button - Floating or Top Bar */}
+      {/* Botão do Menu Mobile - Flutuante ou Barra Superior */}
       <div className="md:hidden fixed z-[60] top-4 left-4">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -150,7 +150,7 @@ export default function DashboardLayout() {
         </button>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Overlay da Sidebar Mobile */}
       <div
         className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
@@ -158,7 +158,7 @@ export default function DashboardLayout() {
       />
 
       <div className="flex min-h-screen">
-        {/* Sidebar - Fixed on all screen sizes */}
+        {/* Sidebar - Fixa em todos os tamanhos de tela */}
         <aside
           className={`
             fixed top-0 left-0 z-50 h-[100dvh]
@@ -194,7 +194,7 @@ export default function DashboardLayout() {
                   ].join(' ')
                 }
               >
-                {/* Active Indicator Strip */}
+                {/* Faixa Indicadora Ativa */}
                 {({ isActive }) => (
                   <>
                     <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-accent-pool transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`} />

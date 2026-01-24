@@ -3,13 +3,11 @@ import { endpoints } from '../endpoints'
 import type { ComprovanteResponseDTO } from '../../interfaces/comprovante'
 
 export const comprovanteService = {
-  // GET /comprovante/{id} retorna List<ComprovanteResponseDTO>
   async getById(id: string | number): Promise<ComprovanteResponseDTO[]> {
     const { data } = await apiClient.get<ComprovanteResponseDTO[]>(`${endpoints.comprovante.base}/${id}`)
     return data
   },
 
-  // GET /comprovante/{id}/arquivo (bytes)
   async getArquivo(id: string | number): Promise<Blob> {
     const { data } = await apiClient.get<Blob>(endpoints.comprovante.arquivo(id), {
       responseType: 'blob',
@@ -17,7 +15,6 @@ export const comprovanteService = {
     return data
   },
 
-  // POST /comprovante/criar (multipart/form-data)
   async create(payload: { movimentacaoId: number; file: File }): Promise<ComprovanteResponseDTO> {
     const formData = new FormData()
     formData.append('movimentacaoId', String(payload.movimentacaoId))

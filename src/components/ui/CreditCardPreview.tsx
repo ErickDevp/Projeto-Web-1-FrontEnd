@@ -10,10 +10,10 @@ export type CardSize = 'default' | 'mini'
 interface CreditCardPreviewProps {
     holderName: string
     lastDigits: string
-    cardType?: string // e.g. "Black", "Gold"
-    cardTier?: string // e.g. "Infinite", "Platinum"
+    cardType?: string // e.x. "Black", "Gold"
+    cardTier?: string // e.x. "Infinite", "Platinum"
     variant?: CardVariant
-    bandeira?: string // e.g. "VISA", "MASTERCARD"
+    bandeira?: string // e.x. "VISA", "MASTERCARD"
     size?: CardSize
     className?: string
 }
@@ -131,7 +131,7 @@ const variantStyles: Record<CardVariant, {
     },
 }
 
-// Chip component with color and size variants
+// Componente de Chip com variantes de cor e tamanho
 function CardChip({ style, size = 'default' }: { style: 'gold' | 'silver' | 'gold-bordered'; size?: CardSize }) {
     const isMini = size === 'mini'
     const baseClasses = isMini
@@ -186,16 +186,16 @@ export default function CreditCardPreview({
     const styles = variantStyles[variant]
     const isMini = size === 'mini'
 
-    // Mini card - compact version for dashboards
+    // Mini card - versão compacta para dashboards
     if (isMini) {
         return (
             <div
                 className={`relative h-20 w-full overflow-hidden rounded-lg bg-gradient-to-br ${styles.card} p-2.5 shadow-md ${className}`}
             >
-                {/* Card holographic stripe */}
+                {/* Listra holográfica do cartão */}
                 <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent ${styles.isLight ? 'via-black/10' : 'via-white/20'} to-transparent`} />
 
-                {/* Header: Chip + Brand Logo */}
+                {/* Cabeçalho: Chip + Logo da Bandeira */}
                 <div className="flex items-center justify-between">
                     <CardChip style={styles.chipStyle} size="mini" />
                     <img
@@ -205,7 +205,7 @@ export default function CreditCardPreview({
                     />
                 </div>
 
-                {/* Card footer - name and last digits */}
+                {/* Rodapé do cartão - nome e últimos dígitos */}
                 <div className="mt-2 flex items-end justify-between">
                     <p className={`text-[10px] font-medium ${styles.textPrimary} truncate max-w-[60%] ${styles.shadow}`}>{holderName}</p>
                     <span className={`font-mono text-[11px] ${styles.numberColor}`}>•••• {lastDigits}</span>
@@ -214,22 +214,22 @@ export default function CreditCardPreview({
         )
     }
 
-    // Default full size card
+    // Cartão em tamanho real padrão
     return (
         <div
             className={`relative h-44 w-full overflow-hidden rounded-xl bg-gradient-to-br ${styles.card} p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${className}`}
         >
-            {/* Animated shine effect for metallic cards - Only visible on hover */}
+            {/* Efeito de brilho animado para cartões metálicos - Visível apenas ao pairar */}
             {styles.hasShine && (
                 <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                     <div className="absolute -inset-full animate-[shimmer_3s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
                 </div>
             )}
 
-            {/* Card holographic stripe */}
+            {/* Listra holográfica do cartão */}
             <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent ${styles.isLight ? 'via-black/10' : 'via-white/20'} to-transparent`} />
 
-            {/* Header: Chip + Brand Logo */}
+            {/* Cabeçalho: Chip + Logo da Bandeira */}
             <div className="flex items-start justify-between">
                 <CardChip style={styles.chipStyle} />
                 <img
@@ -239,7 +239,7 @@ export default function CreditCardPreview({
                 />
             </div>
 
-            {/* Card number - Monospace font for realism */}
+            {/* Número do cartão - Fonte monospace para realismo */}
             <div className={`mt-4 flex gap-3 font-mono text-lg font-medium tracking-widest ${styles.numberColor} ${styles.shadow}`}>
                 <span>••••</span>
                 <span>••••</span>
@@ -247,7 +247,7 @@ export default function CreditCardPreview({
                 <span>{lastDigits}</span>
             </div>
 
-            {/* Card footer */}
+            {/* Rodapé do cartão */}
             <div className="mt-4 flex items-end justify-between">
                 <div>
                     <p className={`text-[10px] uppercase tracking-wider ${styles.textSecondary}`}>Titular</p>
@@ -260,4 +260,3 @@ export default function CreditCardPreview({
         </div>
     )
 }
-

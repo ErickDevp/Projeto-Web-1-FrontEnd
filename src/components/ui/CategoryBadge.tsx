@@ -41,19 +41,12 @@ const DEFAULT_CATEGORY: CategoryConfig = {
 }
 
 type CategoryBadgeProps = {
-    /** Category name */
+    /** Nome da categoria */
     category: CategoryType
-    /** Optional className for additional styling */
+    /** className opcional para estilização adicional */
     className?: string
 }
 
-/**
- * CategoryBadge component for displaying program categories with semantic colors.
- * 
- * @example
- * <CategoryBadge category="AEREA" />
- * <CategoryBadge category="BANCO" />
- */
 export default function CategoryBadge({ category, className = '' }: CategoryBadgeProps) {
     const normalizedCategory = category?.toUpperCase() ?? ''
     const config = CATEGORY_CONFIG[normalizedCategory] ?? {
