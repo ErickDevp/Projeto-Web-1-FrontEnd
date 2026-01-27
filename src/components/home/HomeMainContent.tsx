@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { notify } from '../../utils/notify'
 import HomeFeatures from './HomeFeatures'
 import HomeFooter from './HomeFooter'
-import CreditCardPreview from '../ui/CreditCardPreview'
+import CreditCardPreview from '../dashboard/cartoes/CreditCardPreview'
 import { relatorioService } from '../../services/relatorio/relatorio.service'
 import { cartaoUsuarioService } from '../../services/cartaoUsuario/cartaoUsuario.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
@@ -30,7 +30,7 @@ export default function HomeMainContent() {
     loading: true,
   })
 
-  // Fetch user stats when authenticated
+  // Busca estatísticas do usuário quando autenticado
   useEffect(() => {
     if (!isAuthenticated) return
 
@@ -46,7 +46,7 @@ export default function HomeMainContent() {
 
         if (!isActive) return
 
-        // Use global balance from report
+        // Usa saldo global do relatório
         const totalPontos = relatorio?.saldoGlobal ?? 0
 
         setStats({
@@ -157,12 +157,12 @@ export default function HomeMainContent() {
                   to="/dashboard"
                   className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-accent-pool/30 hover:shadow-[0_0_2rem_rgba(73,197,182,0.2)]"
                 >
-                  {/* Animated gradient background */}
+                  {/* Fundo de gradiente animado */}
                   <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-gradient-to-br from-accent-pool/30 to-accent-sky/20 blur-3xl transition-transform duration-500 group-hover:scale-125" />
                   <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-gradient-to-tr from-accent-sky/20 to-accent-pool/10 blur-2xl transition-transform duration-500 group-hover:scale-125" />
 
                   <div className="relative text-center">
-                    {/* Dashboard icon */}
+                    {/* Ícone Dashboard */}
                     <div className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-pool/20 to-accent-sky/20 transition-transform duration-300 group-hover:scale-110">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -181,7 +181,7 @@ export default function HomeMainContent() {
                       </svg>
                     </div>
 
-                    {/* Welcome text */}
+                    {/* Texto de boas-vindas */}
                     <h3 className="text-lg font-semibold text-fg-primary">
                       Bem-vindo de volta!
                     </h3>
@@ -189,7 +189,7 @@ export default function HomeMainContent() {
                       Acesse seu painel para gerenciar seus pontos e milhas.
                     </p>
 
-                    {/* CTA Button */}
+                    {/* Botão CTA */}
                     <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent-pool to-accent-sky px-6 py-3 text-sm font-semibold text-black transition-all duration-300 group-hover:gap-3 group-hover:shadow-[0_0_1.5rem_rgba(73,197,182,0.4)]">
                       <span>Ir para o Dashboard</span>
                       <svg
@@ -206,7 +206,7 @@ export default function HomeMainContent() {
                       </svg>
                     </div>
 
-                    {/* Stats preview */}
+                    {/* Prévia de estatísticas */}
                     <div className="mt-6 flex justify-center gap-6 border-t border-white/10 pt-5">
                       <div className="text-center">
                         <p className="text-2xl font-bold bg-gradient-to-r from-accent-pool to-accent-sky bg-clip-text text-transparent">
@@ -233,11 +233,11 @@ export default function HomeMainContent() {
                 </Link>
               ) : (
                 <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 p-6 backdrop-blur-sm">
-                  {/* Premium card background effects */}
+                  {/* Efeitos de fundo do cartão premium */}
                   <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-600/10 blur-2xl" />
                   <div className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-gradient-to-tr from-accent-pool/20 to-accent-sky/10 blur-2xl" />
 
-                  {/* Credit card mockup */}
+                  {/* Mockup do cartão de crédito */}
                   <CreditCardPreview
                     holderName="SEU NOME"
                     lastDigits="1234"
@@ -246,14 +246,14 @@ export default function HomeMainContent() {
                     className="mb-6"
                   />
 
-                  {/* Balance display */}
+                  {/* Exibição de saldo */}
                   <div className="relative">
                     <p className="text-xs font-semibold uppercase tracking-wider text-fg-secondary">Saldo Total</p>
                     <p className="mt-1 bg-gradient-to-r from-accent-pool to-accent-sky bg-clip-text text-3xl font-bold text-transparent">
                       1.450.000 <span className="text-lg">pts</span>
                     </p>
 
-                    {/* Mini sparkline chart */}
+                    {/* Mini gráfico sparkline */}
                     <div className="mt-4 flex h-10 items-end gap-1">
                       {[40, 55, 45, 70, 60, 80, 65, 90, 75, 100, 85, 95].map((h, i) => (
                         <div
@@ -266,7 +266,7 @@ export default function HomeMainContent() {
                     <p className="mt-2 text-[10px] text-fg-secondary/60">Evolução dos últimos 12 meses</p>
                   </div>
 
-                  {/* CTA hint */}
+                  {/* Dica CTA */}
                   <p className="mt-4 text-center text-xs text-fg-secondary/80">
                     Registre-se para começar a gerenciar seu saldo real!
                   </p>

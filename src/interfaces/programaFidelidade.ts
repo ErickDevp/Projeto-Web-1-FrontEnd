@@ -1,17 +1,19 @@
-// Espelha ProgramaRequestDTO
+import type { ValidoEnum } from './enums'
+
+/** DTO para requisição de programa */
 export interface ProgramaRequestDTO {
   nome: string
   descricao: string
 }
 
-// Espelha ProgramaResponseDTO
+/** DTO de resposta do programa */
 export interface ProgramaResponseDTO {
   id: number
   nome: string
   descricao: string
 }
 
-// Espelha PromocaoProgramaResponseDTO (promoções aninhadas no programa)
+/** DTO de promoção aninhada no programa */
 export interface PromocaoProgramaResponseDTO {
   id: number
   titulo: string
@@ -19,19 +21,13 @@ export interface PromocaoProgramaResponseDTO {
   pontosPorReal: number
   dataInicio: string
   dataFim: string
-  ativo: import('./enums').ValidoEnum
+  ativo: ValidoEnum
 }
 
-// Espelha ProgramaComPromocoesResponseDTO (GET /programa)
+/** DTO de programa com promoções (GET /programa) */
 export interface ProgramaComPromocoesResponseDTO {
   id: number
   nome: string
   descricao: string
   promocoes: PromocaoProgramaResponseDTO[]
 }
-
-// =====================
-// Aliases (compatibilidade)
-// =====================
-
-export type ProgramaFidelidadeDTO = ProgramaRequestDTO

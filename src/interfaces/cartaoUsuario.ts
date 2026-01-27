@@ -1,17 +1,17 @@
 import type { BandeiraEnum, TipoCartaoEnum, ValidoEnum } from './enums'
 import type { ProgramaResponseDTO } from './programaFidelidade'
 
-// Espelha CartaoRequestDTO (para criar/atualizar)
+/** DTO para criar/atualizar cartão */
 export interface CartaoRequestDTO {
   nome: string
   bandeira: BandeiraEnum
   tipo: TipoCartaoEnum
-  numero: string           // 16 dígitos numéricos
-  dataValidade: string     // ISO date (YYYY-MM-DD)
-  programaIds: number[]    // IDs dos programas vinculados
+  numero: string
+  dataValidade: string
+  programaIds: number[]
 }
 
-// Espelha CartaoResponseDTO (resposta do backend)
+/** DTO de resposta do cartão */
 export interface CartaoResponseDTO {
   id: number
   nome: string
@@ -21,26 +21,4 @@ export interface CartaoResponseDTO {
   dataValidade: string
   valido: ValidoEnum
   programas: ProgramaResponseDTO[]
-}
-
-// =====================
-// Aliases (compatibilidade)
-// =====================
-
-// Legacy: CartaoUsuarioDTO
-export type CartaoUsuarioDTO = CartaoRequestDTO
-
-// Legacy: CartaoUsuarioResponseDTO (campos antigos)
-export interface CartaoUsuarioResponseDTO {
-  id: number
-  nome: string
-  bandeira: BandeiraEnum
-  tipo: TipoCartaoEnum
-  numero?: string
-  dataValidade?: string
-  valido?: ValidoEnum
-  multiplicadorPontos?: number  // Deprecated
-  pontos?: number               // Deprecated
-  programaIds?: number[]        // Deprecated
-  programas?: ProgramaResponseDTO[]
 }

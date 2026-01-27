@@ -32,7 +32,7 @@ export default function Modal({ title, onClose, children }: Props) {
           input.dispatchEvent(new Event('input', { bubbles: true }))
           input.dispatchEvent(new Event('change', { bubbles: true }))
         } catch {
-          // ignore
+          // ignora
         }
       }
     }

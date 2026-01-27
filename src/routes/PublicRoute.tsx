@@ -2,13 +2,13 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 /**
- * PublicRoute - Route guard that prevents authenticated users from accessing public pages
+ * PublicRoute - Guarda de rota que impede usuários autenticados de acessar páginas públicas
  * 
- * If user is authenticated: Redirects to /dashboard
- * If user is NOT authenticated: Renders child routes (<Outlet />)
+ * Se autenticado: Redireciona para /dashboard
+ * Se NÃO autenticado: Renderiza rotas filhas (<Outlet />)
  * 
- * Use this to wrap login, register, and other auth pages that should
- * only be accessible to non-logged-in users.
+ * Use isso para envolver páginas de login, registro e outras páginas de autenticação
+ * que só devem ser acessíveis a usuários não logados.
  */
 export default function PublicRoute() {
     const { isAuthenticated } = useAuth()

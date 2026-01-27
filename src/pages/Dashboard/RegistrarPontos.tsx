@@ -17,7 +17,7 @@ export default function RegistrarPontos() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  // Form state
+  // Estado do formulário
   const [cartaoId, setCartaoId] = useState<string>('')
   const [programaId, setProgramaId] = useState<string>('')
   const [promocaoId, setPromocaoId] = useState<string>('')
@@ -26,7 +26,7 @@ export default function RegistrarPontos() {
   const [file, setFile] = useState<File | null>(null)
   const [dragActive, setDragActive] = useState(false)
 
-  // Load cards and programs
+  // Carrega cartões e programas
   useEffect(() => {
     let isActive = true
 
@@ -50,41 +50,41 @@ export default function RegistrarPontos() {
     return () => { isActive = false }
   }, [])
 
-  // Selected card
+  // Cartão selecionado
   const selectedCard = useMemo(() => {
     if (!cartaoId) return null
     return cards.find((c) => c.id === Number(cartaoId)) ?? null
   }, [cartaoId, cards])
 
-  // Available programs - only from selected card
+  // Programas disponíveis - apenas do cartão selecionado
   const availablePrograms = useMemo(() => {
     return selectedCard?.programas ?? []
   }, [selectedCard])
 
-  // Available promotions - get from programasComPromocoes based on selected program
+  // Promoções disponíveis - obtém de programasComPromocoes baseado no programa selecionado
   const availablePromocoes = useMemo(() => {
     if (!programaId) return []
     const programaCompleto = programasComPromocoes.find(p => p.id === Number(programaId))
     if (!programaCompleto?.promocoes) return []
-    // Filter only active promotions (ativo === 'ATIVO' and dataFim >= today)
+    // Filtra apenas promoções ativas (ativo === 'ATIVO' e dataFim >= hoje)
     const today = new Date().toISOString().split('T')[0]
     return programaCompleto.promocoes.filter(
       p => p.ativo === 'ATIVO' && p.dataFim >= today
     )
   }, [programaId, programasComPromocoes])
 
-  // Reset programa and promocao when card changes
+  // Reseta programa e promoção quando cartão muda
   useEffect(() => {
     setProgramaId('')
     setPromocaoId('')
   }, [cartaoId])
 
-  // Reset promocao when program changes
+  // Reseta promoção quando programa muda
   useEffect(() => {
     setPromocaoId('')
   }, [programaId])
 
-  // Handle drag events
+  // Lida com eventos de arrastar
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -95,7 +95,7 @@ export default function RegistrarPontos() {
     }
   }, [])
 
-  // Handle drop
+  // Lida com soltar
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -112,7 +112,7 @@ export default function RegistrarPontos() {
     }
   }, [])
 
-  // Handle form submit
+  // Lida com envio do formulário
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -157,14 +157,14 @@ export default function RegistrarPontos() {
       if (file) {
         try {
           await comprovanteService.create({ movimentacaoId: response.id, file })
-        } catch (fileError) {
+        } catch {
           notify.warn('Movimentação registrada, mas houve erro ao enviar o comprovante.')
         }
       }
 
       notify.success('Movimentação registrada com sucesso!')
 
-      // Reset form
+      // Reseta formulário
       setCartaoId('')
       setProgramaId('')
       setPromocaoId('')
@@ -228,9 +228,9 @@ export default function RegistrarPontos() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-3">
-          {/* Left column - Form */}
+          {/* Coluna Esquerda - Formulário */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            {/* Card Selection */}
+            {/* Seleção de Cartão */}
             <div className="dashboard-card !min-h-0 p-5">
               <div className="section-header mb-4">
                 <div className="card-icon">
@@ -258,7 +258,7 @@ export default function RegistrarPontos() {
                         : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
                         }`}
                     >
-                      {/* Bandeira accent */}
+                      {/* Acento da Bandeira */}
                       <div
                         className="absolute -right-4 -top-4 h-16 w-16 rounded-full opacity-20 blur-xl"
                         style={{ backgroundColor: bandeiraColor }}
@@ -289,7 +289,7 @@ export default function RegistrarPontos() {
               </div>
             </div>
 
-            {/* Program + Value + Date */}
+            {/* Programa + Valor + Data */}
             <div className="dashboard-card !min-h-0 p-5 !h-fit w-full">
               <div className="section-header mb-4">
                 <div className="card-icon">
@@ -392,9 +392,9 @@ export default function RegistrarPontos() {
             </div>
           </div>
 
-          {/* Right column - Preview & File Upload */}
+          {/* Coluna Direita - Prévia e Upload de Arquivo */}
           <div className="space-y-4 self-start">
-            {/* Points Preview */}
+            {/* Prévia de Pontos */}
             <div className="dashboard-card stat-card !min-h-0 p-5">
               <div className="section-header mb-4">
                 <div className="card-icon">
@@ -408,7 +408,7 @@ export default function RegistrarPontos() {
               </div>
 
               <div className="text-center">
-                {/* Info about backend calculation */}
+                {/* Informação sobre cálculo no backend */}
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                   <p className="text-[0.625rem] font-bold uppercase tracking-wider text-fg-secondary">
                     Informação
@@ -423,7 +423,7 @@ export default function RegistrarPontos() {
                   </div>
                 </div>
 
-                {/* Purchase summary when data is filled */}
+                {/* Resumo da compra quando dados preenchidos */}
                 {selectedCard && valor && (
                   <div className="mt-4 space-y-2 text-xs text-fg-secondary">
                     <div className="flex items-center justify-between">
@@ -442,7 +442,7 @@ export default function RegistrarPontos() {
                 )}
               </div>
 
-              {/* Submit Button */}
+              {/* Botão de Enviar */}
               <button
                 type="submit"
                 disabled={saving || !cartaoId || !programaId || !promocaoId || !valor}
@@ -464,7 +464,7 @@ export default function RegistrarPontos() {
               </button>
             </div>
 
-            {/* File Upload - Moved to Right Column */}
+            {/* Upload de Arquivo - Movido para Coluna Direita */}
             <div className="dashboard-card !min-h-0 p-4">
               <div className="section-header mb-3">
                 <div className="card-icon !h-8 !w-8">

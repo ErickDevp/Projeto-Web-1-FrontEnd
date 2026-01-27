@@ -9,6 +9,7 @@ export type BrandConfig = {
     bgColor: string
 }
 
+/** Retorna configuração visual baseada no nome do programa */
 export function getBrandConfig(nome: string): BrandConfig {
     const lower = nome.toLowerCase()
     if (lower.includes('livelo')) return { gradient: 'from-pink-500 to-purple-600', textColor: 'text-pink-400', bgColor: 'bg-pink-500/20' }
@@ -17,7 +18,6 @@ export function getBrandConfig(nome: string): BrandConfig {
     if (lower.includes('azul') || lower.includes('tudoazul')) return { gradient: 'from-blue-500 to-cyan-500', textColor: 'text-blue-400', bgColor: 'bg-blue-500/20' }
     if (lower.includes('esfera')) return { gradient: 'from-emerald-500 to-green-500', textColor: 'text-emerald-400', bgColor: 'bg-emerald-500/20' }
     if (lower.includes('multiplus') || lower.includes('pontos')) return { gradient: 'from-violet-500 to-indigo-600', textColor: 'text-violet-400', bgColor: 'bg-violet-500/20' }
-    // Default
     return { gradient: 'from-accent-sky to-accent-pool', textColor: 'text-accent-pool', bgColor: 'bg-accent-pool/20' }
 }
 
@@ -27,6 +27,7 @@ const PROGRAM_LOGOS: Record<string, string> = {
     esfera: esferaLogo,
 }
 
+/** Retorna logo do programa se disponível */
 export function getProgramLogo(nome: string): string | null {
     const lower = nome.toLowerCase().replace(/\s/g, '')
     for (const [key, logo] of Object.entries(PROGRAM_LOGOS)) {
@@ -35,19 +36,16 @@ export function getProgramLogo(nome: string): string | null {
     return null
 }
 
-
 const AEREA_KEYWORDS = ['smiles', 'latam', 'azul', 'tudoazul', 'tap', 'miles', 'gol', 'avianca']
 const BANCO_KEYWORDS = ['livelo', 'esfera', 'iupp', 'átomos', 'curtaí', 'c6', 'inter', 'nubank', 'itaú', 'bradesco']
 
-
+/** Infere categoria do programa baseado no nome */
 export function inferCategory(nome: string, currentCategory?: string): CategoryType | null {
     const lower = nome.toLowerCase()
 
-    // Check known program keywords
     if (AEREA_KEYWORDS.some(kw => lower.includes(kw))) return 'AEREA'
     if (BANCO_KEYWORDS.some(kw => lower.includes(kw))) return 'BANCO'
 
-    // Return current category if it's not "Outro" or empty
     if (currentCategory && currentCategory !== 'Outro' && currentCategory.trim() !== '') {
         return currentCategory as CategoryType
     }
@@ -55,6 +53,7 @@ export function inferCategory(nome: string, currentCategory?: string): CategoryT
     return null
 }
 
+/** Retorna iniciais do nome (máx. 2 caracteres) */
 export function getInitials(name: string): string {
     return name
         .split(' ')

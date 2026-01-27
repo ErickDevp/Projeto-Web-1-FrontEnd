@@ -3,7 +3,6 @@ import { endpoints } from '../endpoints'
 import type { PromocaoRequestDTO, PromocaoResponseDTO } from '../../interfaces/promocao'
 
 export const promocaoService = {
-  // GET /promocao retorna List<PromocaoResponseDTO>
   async list(): Promise<PromocaoResponseDTO[]> {
     const { data } = await apiClient.get<PromocaoResponseDTO[]>(endpoints.promocao.base)
     return data

@@ -4,14 +4,14 @@ export default function Home() {
   return (
     <section className="relative h-screen bg-bg-primary text-fg-primary">
       <div className="pointer-events-none absolute inset-0">
-        {/* Subtle flight routes pattern */}
+        {/* Padrão sutil de rotas aéreas */}
         <svg
           className="absolute inset-0 h-full w-full opacity-[0.04]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 800 600"
           preserveAspectRatio="xMidYMid slice"
         >
-          {/* World map simplified dots */}
+          {/* Pontos simplificados do mapa mundi */}
           <g fill="currentColor" className="text-white">
             {/* Americas */}
             <circle cx="180" cy="200" r="2" />
@@ -19,37 +19,37 @@ export default function Home() {
             <circle cx="160" cy="280" r="2" />
             <circle cx="220" cy="320" r="2" />
             <circle cx="190" cy="380" r="2" />
-            {/* Europe */}
+            {/* Europa */}
             <circle cx="400" cy="180" r="2" />
             <circle cx="420" cy="200" r="2" />
             <circle cx="440" cy="190" r="2" />
             <circle cx="380" cy="210" r="2" />
-            {/* Asia */}
+            {/* Ásia */}
             <circle cx="550" cy="200" r="2" />
             <circle cx="600" cy="220" r="2" />
             <circle cx="650" cy="250" r="2" />
             <circle cx="580" cy="280" r="2" />
-            {/* Africa */}
+            {/* África */}
             <circle cx="420" cy="300" r="2" />
             <circle cx="450" cy="340" r="2" />
-            {/* Australia */}
+            {/* Austrália */}
             <circle cx="680" cy="400" r="2" />
             <circle cx="700" cy="380" r="2" />
           </g>
-          {/* Flight routes */}
+          {/* Rotas de voo */}
           <g stroke="currentColor" strokeWidth="0.5" fill="none" className="text-accent-pool">
-            {/* Route 1: Americas to Europe */}
+            {/* Rota 1: Americas para Europa */}
             <path d="M200,250 Q300,150 400,180" strokeDasharray="4,4" />
-            {/* Route 2: Europe to Asia */}
+            {/* Rota 2: Europa para Ásia */}
             <path d="M420,200 Q500,180 580,220" strokeDasharray="4,4" />
-            {/* Route 3: Asia to Australia */}
+            {/* Rota 3: Ásia para Austrália */}
             <path d="M600,280 Q650,340 680,400" strokeDasharray="4,4" />
-            {/* Route 4: Americas to Asia (trans-pacific) */}
+            {/* Rota 4: Americas para Ásia (trans-pacífico) */}
             <path d="M180,280 Q400,100 600,220" strokeDasharray="4,4" />
-            {/* Route 5: Europe to Africa */}
+            {/* Rota 5: Europa para África */}
             <path d="M400,210 Q410,250 420,300" strokeDasharray="4,4" />
           </g>
-          {/* Airplane icons at route midpoints */}
+          {/* Ícones de avião nos pontos médios das rotas */}
           <g fill="currentColor" className="text-white">
             <text x="300" y="165" fontSize="12" transform="rotate(-20 300 165)">✈</text>
             <text x="500" y="185" fontSize="12" transform="rotate(5 500 185)">✈</text>

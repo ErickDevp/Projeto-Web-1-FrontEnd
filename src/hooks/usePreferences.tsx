@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 
-// Types
 export type NotificationPreferences = {
     expirationAlerts: boolean
     newPromotions: boolean
@@ -20,7 +19,6 @@ type PreferencesContextValue = {
     resetPreferences: () => void
 }
 
-// Constants
 const STORAGE_KEY = 'app-preferences'
 
 const DEFAULT_PREFERENCES: Preferences = {
@@ -33,10 +31,9 @@ const DEFAULT_PREFERENCES: Preferences = {
     },
 }
 
-// Context
 const PreferencesContext = createContext<PreferencesContextValue | null>(null)
 
-// Helper to get initial preferences from localStorage
+// Helper para obter preferências iniciais do localStorage
 function getInitialPreferences(): Preferences {
     if (typeof window === 'undefined') return DEFAULT_PREFERENCES
 
@@ -44,7 +41,7 @@ function getInitialPreferences(): Preferences {
         const stored = localStorage.getItem(STORAGE_KEY)
         if (stored) {
             const parsed = JSON.parse(stored)
-            // Merge with defaults to ensure all keys exist
+            // Mescla com os padrões para garantir que todas as chaves existam
             return {
                 ...DEFAULT_PREFERENCES,
                 ...parsed,
@@ -55,21 +52,20 @@ function getInitialPreferences(): Preferences {
             }
         }
     } catch {
-        // Invalid JSON, use defaults
+        // JSON inválido, usa padrões
     }
 
     return DEFAULT_PREFERENCES
 }
 
-// Provider Component
 export function PreferencesProvider({ children }: { children: ReactNode }) {
     const [preferences, setPreferences] = useState<Preferences>(getInitialPreferences)
 
-    // Persist to localStorage and apply reduce-motion attribute
+    // Persiste no localStorage e aplica o atributo reduce-motion
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences))
 
-        // Apply reduce-motion to body
+        // Aplica reduce-motion no body
         if (preferences.reduceMotion) {
             document.body.setAttribute('data-reduce-motion', 'true')
         } else {
@@ -77,7 +73,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         }
     }, [preferences])
 
-    // Set a single preference
+    // Define uma única preferência
     const setPreference = useCallback(<K extends keyof Preferences>(key: K, value: Preferences[K]) => {
         setPreferences((prev) => ({
             ...prev,
@@ -85,7 +81,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         }))
     }, [])
 
-    // Set a notification preference
+    // Define uma preferência de notificação
     const setNotificationPreference = useCallback(<K extends keyof NotificationPreferences>(key: K, value: boolean) => {
         setPreferences((prev) => ({
             ...prev,
@@ -96,7 +92,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         }))
     }, [])
 
-    // Reset all preferences to defaults
+    // Reseta todas as preferências para os padrões
     const resetPreferences = useCallback(() => {
         setPreferences(DEFAULT_PREFERENCES)
     }, [])
@@ -115,11 +111,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     )
 }
 
-// Custom Hook
 export function usePreferences(): PreferencesContextValue {
     const context = useContext(PreferencesContext)
     if (!context) {
-        throw new Error('usePreferences must be used within a PreferencesProvider')
+        throw new Error('usePreferences deve ser usado dentro de um PreferencesProvider')
     }
     return context
 }

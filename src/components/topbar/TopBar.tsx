@@ -7,8 +7,8 @@ import { notificacaoService } from '../../services/notificacao/notificacao.servi
 import type { Notificacao } from '../../interfaces/notificacao'
 
 function ThemeToggleButton() {
-  const { theme, toggleTheme } = useTheme()
-  const isDark = theme === 'dark'
+  const { resolvedTheme, toggleTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
 
   return (
     <button
@@ -101,12 +101,12 @@ export default function TopBar({
     let objectUrl: string | null = null
 
     const loadData = async () => {
-      // Load data independently to prevent one failure from blocking others
+      // Carrega dados de forma independente para evitar que uma falha bloqueie as outras
       try {
         const userData = await usuarioService.getMe()
         if (isActive) setUser({ nome: userData.nome, email: userData.email })
       } catch {
-        // User data failed - continue
+        // Falha ao carregar dados do usuário - continua
       }
 
       try {
@@ -115,7 +115,7 @@ export default function TopBar({
           setNotifications(notificationData)
         }
       } catch {
-        // Notifications failed - continue
+        // Falha ao carregar notificações - continua
       }
 
       try {
@@ -125,7 +125,7 @@ export default function TopBar({
           setUserPhotoUrl(objectUrl)
         }
       } catch {
-        // Photo failed - continue with default avatar
+        // Falha ao carregar foto - continua com avatar padrão
       }
     }
 
@@ -137,7 +137,7 @@ export default function TopBar({
     }
   }, [])
 
-  // Listen for notification events from Notificacoes page
+  // Ouve eventos de notificação da página Notificacoes
   useEffect(() => {
     const handleNotificationRead = (e: Event) => {
       const customEvent = e as CustomEvent<{ id: number }>
@@ -160,12 +160,12 @@ export default function TopBar({
     }
 
     const handleCreated = async () => {
-      // Reload notifications when a new one is created
+      // Recarrega notificações quando uma nova é criada
       try {
         const data = await notificacaoService.list()
         if (Array.isArray(data)) setNotifications(data)
       } catch {
-        // Silent failure
+        // Falha silenciosa
       }
     }
 
@@ -184,7 +184,7 @@ export default function TopBar({
     }
   }, [])
 
-  // Mark as read handler for TopBar dropdown
+  // Handler para marcar como lida no dropdown da TopBar
   const handleMarkAsRead = useCallback(async (id: number) => {
     try {
       await notificacaoService.markAsRead(id)
@@ -192,7 +192,7 @@ export default function TopBar({
         prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
       )
     } catch {
-      // Silent failure in TopBar
+      // Falha silenciosa na TopBar
     }
   }, [])
 

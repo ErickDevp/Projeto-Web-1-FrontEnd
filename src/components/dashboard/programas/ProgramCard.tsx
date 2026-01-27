@@ -1,8 +1,8 @@
-import { getBrandConfig, getProgramLogo, inferCategory, getInitials } from '../../utils/brandHelpers'
-import { formatPoints, getActivePromotions, isPromotionEndingSoon, formatDate } from '../../utils/programaHelpers'
-import CategoryBadge from '../ui/CategoryBadge'
-import SensitiveValue from '../ui/SensitiveValue'
-import type { ProgramCardProps } from '../../interfaces/programa'
+import { getBrandConfig, getProgramLogo, inferCategory, getInitials } from '../../../utils/brandHelpers'
+import { formatPoints, getActivePromotions, isPromotionEndingSoon, formatDate } from '../../../utils/programaHelpers'
+import CategoryBadge from '../../ui/CategoryBadge'
+import SensitiveValue from '../../ui/SensitiveValue'
+import type { ProgramCardProps } from '../../../interfaces/programa'
 
 export default function ProgramCard({
     programa,
@@ -21,7 +21,7 @@ export default function ProgramCard({
     const hasEndingSoon = activePromotions.some(isPromotionEndingSoon)
 
     const handleCardClick = (e: React.MouseEvent) => {
-        // Prevent navigation if clicking on buttons or links
+        // Previne navegação se clicar em botões ou links
         if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) {
             return
         }
@@ -36,7 +36,7 @@ export default function ProgramCard({
             className={`dashboard-card flex flex-col h-full relative overflow-hidden group transition-all duration-300 ${programa.url ? 'cursor-pointer hover:shadow-lg hover:translate-y-[-2px] hover:border-accent-pool/30' : ''
                 }`}
         >
-            {/* Watermark Logo */}
+            {/* Logo d'água */}
             {logo && (
                 <img
                     src={logo}
@@ -45,7 +45,7 @@ export default function ProgramCard({
                 />
             )}
 
-            {/* Admin Actions */}
+            {/* Ações de Admin */}
             {isAdmin && (
                 <div className="absolute top-3 right-3 z-20 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
@@ -75,7 +75,7 @@ export default function ProgramCard({
                 </div>
             )}
 
-            {/* Ending Soon Alert Badge */}
+            {/* Alerta de Expiração Próxima */}
             {hasEndingSoon && (
                 <div className={`absolute top-3 ${isAdmin ? 'right-20' : 'right-3'} z-10 flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 border border-red-500/30 transition-all`}>
                     <svg className="h-3 w-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -85,9 +85,9 @@ export default function ProgramCard({
                 </div>
             )}
 
-            {/* Header */}
+            {/* Cabeçalho */}
             <div className="flex items-start gap-4 relative z-10">
-                {/* Logo/Initials Avatar */}
+                {/* Logo/Avatar de Iniciais */}
                 {logo ? (
                     <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white p-2 shadow-lg shrink-0">
                         <img src={logo} alt={programa.nome} className="h-full w-full object-contain" />
@@ -114,19 +114,19 @@ export default function ProgramCard({
                 </div>
             </div>
 
-            {/* Description */}
+            {/* Descrição */}
             {programa.descricao && (!saldo || programa.descricao.length < 50) && (
                 <p className="mt-3 text-sm text-fg-secondary line-clamp-2 relative z-10">{programa.descricao}</p>
             )}
 
-            {/* URL Link */}
+            {/* Link URL */}
             {programa.url && (
                 <div className={`mt-2 text-xs ${brandConfig.textColor} hover:underline truncate block relative z-10 pointer-events-none`}>
                     {programa.url} <span className="text-fg-secondary ml-1">(clique no card)</span>
                 </div>
             )}
 
-            {/* Active Promotions Section */}
+            {/* Seção de Promoções Ativas */}
             {activePromotions.length > 0 && (
                 <div className="mt-4 space-y-2 relative z-10">
                     <div className="flex items-center gap-2 text-xs text-fg-secondary">
@@ -165,10 +165,10 @@ export default function ProgramCard({
                 </div>
             )}
 
-            {/* Spacer */}
+            {/* Espaçador */}
             <div className="flex-1" />
 
-            {/* Balance Section */}
+            {/* Seção de Saldo */}
             {saldo !== undefined && (
                 <div className={`mt-4 pt-4 border-t border-white/10 ${mode === 'all' ? 'opacity-80' : ''} relative z-10`}>
                     <div className="flex items-end justify-between">
@@ -180,7 +180,7 @@ export default function ProgramCard({
                         </div>
                     </div>
 
-                    {/* Associated Card - Only in mine mode */}
+                    {/* Cartão Associado - Apenas no modo meu */}
                     {mode === 'mine' && cartaoNome && (
                         <div className="mt-3 flex items-center gap-2 text-xs text-fg-secondary">
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

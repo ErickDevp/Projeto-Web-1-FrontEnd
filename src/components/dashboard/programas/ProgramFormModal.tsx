@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { notify } from '../../utils/notify'
-import type { ProgramFormModalProps } from '../../interfaces/programa'
+import { notify } from '../../../utils/notify'
+import type { ProgramFormModalProps } from '../../../interfaces/programa'
 
 export default function ProgramFormModal({
     isOpen,
@@ -15,15 +15,23 @@ export default function ProgramFormModal({
         descricao: '',
     })
 
-    // Sync form with programa when in edit mode
+    // Sincroniza formulário com programa quando em modo de edição
     useEffect(() => {
         if (mode === 'edit' && programa) {
-            setForm({
-                nome: programa.nome || '',
-                descricao: programa.descricao || '',
+            setForm(prev => {
+                if (prev.nome === (programa.nome || '') && prev.descricao === (programa.descricao || '')) {
+                    return prev
+                }
+                return {
+                    nome: programa.nome || '',
+                    descricao: programa.descricao || '',
+                }
             })
         } else if (mode === 'create') {
-            setForm({ nome: '', descricao: '' })
+            setForm(prev => {
+                if (prev.nome === '' && prev.descricao === '') return prev
+                return { nome: '', descricao: '' }
+            })
         }
     }, [mode, programa])
 
@@ -52,7 +60,7 @@ export default function ProgramFormModal({
 
         await onSubmit(form)
 
-        // Reset form only after successful create
+        // Reseta o formulário apenas após sucesso na criação
         if (mode === 'create') {
             setForm({ nome: '', descricao: '' })
         }

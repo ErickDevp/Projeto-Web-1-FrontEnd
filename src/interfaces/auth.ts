@@ -1,54 +1,46 @@
 import type { RoleEnum } from './enums'
 
-// =====================
-// Auth DTOs
-// =====================
-
-// Espelha LoginRequestDTO
+/** DTO para requisição de login */
 export interface LoginRequestDTO {
     email: string
     senha: string
 }
 
-// Espelha RegisterRequestDTO
+/** DTO para requisição de registro */
 export interface RegisterRequestDTO {
     nome: string
     email: string
     senha: string
 }
 
-// Espelha PasswordResetRequestDTO
+/** DTO para requisição de reset de senha */
 export interface PasswordResetRequestDTO {
     email: string
 }
 
-// Espelha PasswordChangeRequestDTO
+/** DTO para requisição de alteração de senha */
 export interface PasswordChangeRequestDTO {
     token: string
     novaSenha: string
 }
 
-// Espelha AuthResponseDTO
+/** DTO de resposta de autenticação */
 export interface AuthResponseDTO {
     token: string
 }
 
-// Espelha PasswordResetResponseDTO
+/** DTO de resposta de reset de senha */
 export interface PasswordResetResponseDTO {
     token: string
 }
 
-// =====================
-// Usuário DTOs
-// =====================
-
-// Espelha UsuarioRequestDTO (para atualização)
+/** DTO para requisição de atualização de usuário */
 export interface UsuarioRequestDTO {
     nome: string
     email: string
 }
 
-// Espelha UsuarioResponseDTO
+/** DTO de resposta do usuário */
 export interface UsuarioResponseDTO {
     id: number
     nome: string
@@ -58,11 +50,7 @@ export interface UsuarioResponseDTO {
     role: RoleEnum
 }
 
-// =====================
-// Aliases (compatibilidade)
-// =====================
-
-// Alias com o nome exato do backend (compatibilidade)
+// Aliases de compatibilidade
 export type LoginDTO = LoginRequestDTO
 export type UsuarioLoginDTO = LoginRequestDTO
 export type RegisterDTO = RegisterRequestDTO
@@ -73,7 +61,10 @@ export type RedefinirSenhaDTO = PasswordChangeRequestDTO
 export type AuthResponse = AuthResponseDTO
 export type ForgotPasswordResponse = PasswordResetResponseDTO
 
-// Legacy UsuarioDTO (descontinuado - usar UsuarioResponseDTO)
+/** 
+ * DTO de usuário com campo de senha opcional 
+ * Usado em páginas que precisam verificar role do usuário
+ */
 export interface UsuarioDTO {
     id: number
     nome: string
