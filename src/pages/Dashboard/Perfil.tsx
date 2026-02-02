@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { useAuth } from '../../hooks/useAuth'
 import { notify } from '../../utils/notify'
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
 
 type UserData = {
   id: number
@@ -164,12 +165,8 @@ export default function Perfil() {
           <h1 className="titulo-grafico text-2xl font-bold">Meu perfil</h1>
           <p className="mt-1 text-sm text-fg-secondary">Gerencie seus dados pessoais e preferências.</p>
         </header>
-        <div className="dashboard-card flex items-center justify-center gap-4 py-12">
-          <div className="relative">
-            <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
-            <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
-          </div>
-          <span className="text-sm text-fg-secondary">Carregando dados do perfil...</span>
+        <div className="dashboard-card">
+          <LoadingSpinner message="Carregando dados do perfil..." />
         </div>
       </section>
     )

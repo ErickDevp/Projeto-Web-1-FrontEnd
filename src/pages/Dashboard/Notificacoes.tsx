@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { notificacaoService } from '../../services/notificacao/notificacao.service'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notify } from '../../utils/notify'
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import PageHeader from '../../components/ui/PageHeader'
+import EmptyState from '../../components/ui/EmptyState'
 import type { Notificacao, NotificacaoRequestDTO } from '../../interfaces/notificacao'
 import type { UsuarioDTO } from '../../interfaces/auth'
 
@@ -184,16 +187,14 @@ export default function Notificacoes() {
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="titulo-grafico text-2xl font-bold">Notificações</h1>
-          <p className="mt-1 text-sm text-fg-secondary">
-            {unreadCount > 0
-              ? `Você tem ${unreadCount} ${unreadCount > 1 ? 'notificações não lidas' : 'notificação não lida'}.`
-              : 'Todas as notificações foram lidas.'}
-          </p>
-        </div>
-
+      <PageHeader
+        title="Notificações"
+        description={
+          unreadCount > 0
+            ? `Você tem ${unreadCount} ${unreadCount > 1 ? 'notificações não lidas' : 'notificação não lida'}.`
+            : 'Todas as notificações foram lidas.'
+        }
+      >
         <div className="flex flex-wrap items-center gap-2">
           {items.length > 0 && (
             <>
@@ -246,7 +247,7 @@ export default function Notificacoes() {
             </button>
           )}
         </div>
-      </header>
+      </PageHeader>
 
       {/* Admin Create Form */}
       {isAdmin && showCreateForm && (
@@ -348,22 +349,18 @@ export default function Notificacoes() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-4 py-12">
-            <div className="relative">
-              <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
-              <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
-            </div>
-            <span className="text-sm text-fg-secondary">Carregando notificações...</span>
-          </div>
+          <LoadingSpinner message="Carregando notificações..." />
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-            <div className="rounded-full bg-white/5 p-6">
+          <EmptyState
+            className="gap-4"
+            icon={(
               <svg className="h-12 w-12 text-fg-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
               </svg>
-            </div>
-            <p className="text-sm text-fg-secondary">Nenhuma notificação encontrada.</p>
-          </div>
+            )}
+            title=""
+            description="Nenhuma notificação encontrada."
+          />
         ) : (
           <div className="space-y-3">
             {items.map((item) => {

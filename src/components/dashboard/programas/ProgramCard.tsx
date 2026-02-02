@@ -100,10 +100,18 @@ export default function ProgramCard({
 
                 <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-fg-primary truncate">{programa.nome}</h3>
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
                         {category && <CategoryBadge category={category} />}
+                        {programa.multiplicadorPontos !== undefined && programa.multiplicadorPontos !== null && (
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${brandConfig.bgColor} ${brandConfig.textColor}`}>
+                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m9-9H3" />
+                                </svg>
+                                {programa.multiplicadorPontos}x
+                            </span>
+                        )}
                         {activePromotions.length > 0 && (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${brandConfig.bgColor} ${brandConfig.textColor}`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${brandConfig.bgColor} ${brandConfig.textColor}`}>
                                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                                 </svg>
@@ -137,7 +145,7 @@ export default function ProgramCard({
                         <span className="font-medium">Promoções Ativas</span>
                     </div>
                     <div className="space-y-1.5">
-                        {activePromotions.slice(0, 2).map((promo) => (
+                        {activePromotions.map((promo) => (
                             <div
                                 key={promo.id}
                                 className={`flex items-center justify-between p-2 rounded-lg ${brandConfig.bgColor} ${isPromotionEndingSoon(promo) ? 'ring-1 ring-red-500/30' : ''}`}
@@ -156,11 +164,6 @@ export default function ProgramCard({
                                 </div>
                             </div>
                         ))}
-                        {activePromotions.length > 2 && (
-                            <p className="text-xs text-fg-secondary text-center">
-                                +{activePromotions.length - 2} outras promoções
-                            </p>
-                        )}
                     </div>
                 </div>
             )}

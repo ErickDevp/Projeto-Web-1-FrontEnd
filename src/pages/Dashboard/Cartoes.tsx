@@ -1,4 +1,5 @@
 import { useCartoes } from '../../hooks/useCartoes'
+import PageHeader from '../../components/ui/PageHeader'
 import { CartaoList } from '../../components/dashboard/cartoes/CartaoList'
 import { CartaoFormModal } from '../../components/dashboard/cartoes/CartaoFormModal'
 
@@ -19,13 +20,10 @@ export default function Cartoes() {
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="titulo-grafico text-2xl font-bold">Cartões</h1>
-          <p className="mt-1 text-sm text-fg-secondary">
-            Cadastre e acompanhe seus cartões e programas de fidelidade.
-          </p>
-        </div>
+      <PageHeader
+        title="Cartões"
+        description="Cadastre e acompanhe seus cartões e programas de fidelidade."
+      >
         <button
           type="button"
           onClick={openNewForm}
@@ -36,7 +34,7 @@ export default function Cartoes() {
           </svg>
           Novo cartão
         </button>
-      </header>
+      </PageHeader>
 
       {/* Modal de Formulário */}
       <CartaoFormModal

@@ -8,6 +8,7 @@ import { useDashboardCalculations } from '../../hooks/useDashboardCalculations'
 import { useDashboardExport } from '../../hooks/useDashboardExport'
 
 // Components
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import { DashboardHeader } from '../../components/dashboard/dashboard/DashboardHeader'
 import { DashboardStats } from '../../components/dashboard/dashboard/DashboardStats'
 import { DashboardCards } from '../../components/dashboard/dashboard/DashboardCards'
@@ -111,12 +112,8 @@ export default function Dashboard() {
       />
 
       {loading ? (
-        <div className="dashboard-card flex items-center justify-center gap-4 py-12">
-          <div className="relative">
-            <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
-            <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
-          </div>
-          <span className="text-sm text-fg-secondary">Carregando dados do dashboard...</span>
+        <div className="dashboard-card">
+          <LoadingSpinner message="Carregando dados do dashboard..." />
         </div>
       ) : null}
 

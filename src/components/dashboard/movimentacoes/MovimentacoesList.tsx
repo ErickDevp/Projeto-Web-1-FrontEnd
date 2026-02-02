@@ -86,7 +86,7 @@ const MovimentacoesList: React.FC<MovimentacoesListProps> = ({
                                 ) : (
                                     <>
                                         <div className="flex items-center gap-2 mb-2">
-                                            <StatusBadge status={item.status} />
+                                            <StatusBadge status={item.status} pontosCalculados={item.pontosCalculados} />
                                             <span className="text-xs text-fg-secondary">{formatDate(item.dataOcorrencia ?? item.data)}</span>
                                         </div>
                                         <p className="font-semibold text-fg-primary truncate">{cartaoNome}</p>
@@ -98,7 +98,7 @@ const MovimentacoesList: React.FC<MovimentacoesListProps> = ({
                                             </div>
                                             <div>
                                                 <p className="text-xs text-fg-secondary">Pontos</p>
-                                                <p className="font-semibold text-accent-pool"><SensitiveValue>{formatPoints(item.pontosCalculados)}</SensitiveValue></p>
+                                                <p className={`font-semibold ${(item.pontosCalculados ?? 0) < 0 ? 'text-red-400' : 'text-accent-pool'}`}><SensitiveValue>{formatPoints(item.pontosCalculados)}</SensitiveValue></p>
                                             </div>
                                         </div>
                                     </>
