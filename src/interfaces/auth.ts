@@ -36,8 +36,9 @@ export interface PasswordResetResponseDTO {
 
 /** DTO para requisição de atualização de usuário */
 export interface UsuarioRequestDTO {
-    nome: string
-    email: string
+    nome?: string
+    email?: string
+    novaSenha?: string
 }
 
 /** DTO de resposta do usuário */

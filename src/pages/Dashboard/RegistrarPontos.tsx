@@ -13,6 +13,7 @@ import PageHeader from '../../components/ui/PageHeader'
 import EmptyState from '../../components/ui/EmptyState'
 import TextInput from '../../components/ui/TextInput'
 import TabButton from '../../components/ui/TabButton'
+import SensitiveValue from '../../components/ui/SensitiveValue'
 import CreditCardPreview, { type CardVariant } from '../../components/dashboard/cartoes/CreditCardPreview'
 import type { CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
 import type { MovimentacaoRequestDTO } from '../../interfaces/movimentacaoPontos'
@@ -542,7 +543,7 @@ export default function RegistrarPontos() {
                   {previsaoPontos !== null ? (
                     <>
                       <p className="text-4xl font-bold text-accent-pool">
-                        +{formatPoints(previsaoPontos)}
+                        +<SensitiveValue>{formatPoints(previsaoPontos)}</SensitiveValue>
                       </p>
                       <p className="mt-1 text-xs text-fg-secondary">pontos a acumular</p>
                       {/* Destaque do multiplicador */}
@@ -580,7 +581,7 @@ export default function RegistrarPontos() {
                       <div className="flex items-center justify-between">
                         <span>Valor</span>
                         <span className="font-medium text-fg-primary">
-                          {formatCurrency(parseFloat(valor.replace(',', '.')) || 0)}
+                          <SensitiveValue>{formatCurrency(parseFloat(valor.replace(',', '.')) || 0)}</SensitiveValue>
                         </span>
                       </div>
                     </div>
@@ -626,7 +627,7 @@ export default function RegistrarPontos() {
                   {quantidadePontos && parseInt(quantidadePontos) > 0 ? (
                     <>
                       <p className="text-4xl font-bold text-red-400">
-                        -{formatPoints(parseInt(quantidadePontos))}
+                        -<SensitiveValue>{formatPoints(parseInt(quantidadePontos))}</SensitiveValue>
                       </p>
                       <p className="mt-1 text-xs text-fg-secondary">pontos a resgatar</p>
                     </>
@@ -650,7 +651,7 @@ export default function RegistrarPontos() {
                           ? 'text-red-400'
                           : 'text-accent-pool'
                           }`}>
-                          {formatPoints(saldoDisponivelPrograma ?? 0)} pts
+                          <SensitiveValue>{formatPoints(saldoDisponivelPrograma ?? 0)}</SensitiveValue> pts
                         </span>
                       </div>
                       {quantidadePontos && parseInt(quantidadePontos) > (saldoDisponivelPrograma ?? 0) && (

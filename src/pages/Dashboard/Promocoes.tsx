@@ -212,13 +212,23 @@ export default function Promocoes() {
         }
 
         setSaving(true)
+        const multiplicadorValue = form.pontosPorReal.trim()
+            ? Number(form.pontosPorReal.replace(',', '.'))
+            : 1
+
+        if (Number.isNaN(multiplicadorValue) || multiplicadorValue <= 0) {
+            notify.warn('Informe um multiplicador válido (maior que 0).')
+            setSaving(false)
+            return
+        }
+
         const payload: PromocaoRequestDTO = {
             titulo: form.titulo.trim(),
             descricao: form.descricao.trim(),
             programaId: Number(form.programaId),
             dataInicio: form.dataInicio,
             dataFim: form.dataFim,
-            pontosPorReal: Number(form.pontosPorReal) || 1,
+            pontosPorReal: multiplicadorValue,
         }
 
         try {
@@ -386,6 +396,19 @@ export default function Promocoes() {
                                     value={form.dataFim}
                                     onChange={(e) => setForm((prev) => ({ ...prev, dataFim: e.target.value }))}
                                     min={form.dataInicio}
+                                />
+                            </div>
+
+                            {/* Multiplicador */}
+                            <div className="space-y-2">
+                                <TextInput
+                                    id="promo-multiplicador"
+                                    label="Multiplicador de pontos"
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={form.pontosPorReal}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, pontosPorReal: e.target.value }))}
+                                    placeholder="Ex: 1,5"
                                 />
                             </div>
                         </div>

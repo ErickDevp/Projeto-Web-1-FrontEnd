@@ -9,7 +9,6 @@ export type Programa = {
     nome: string
     descricao: string
     categoria?: CategoriaPrograma
-    multiplicadorPontos?: number
     url?: string
     promocoes?: Promocao[] | null
 }
@@ -42,7 +41,7 @@ export type ProgramFormModalProps = {
     mode: 'create' | 'edit'
     programa?: Programa | null
     onClose: () => void
-    onSubmit: (data: { nome: string; descricao: string; categoria?: CategoriaPrograma; multiplicadorPontos?: number }) => Promise<void>
+    onSubmit: (data: { nome: string; descricao: string; categoria?: CategoriaPrograma }) => Promise<void>
     loading: boolean
 }
 

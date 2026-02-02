@@ -6,7 +6,6 @@ export interface ProgramaRequestDTO {
   nome: string
   descricao: string
   categoria?: CategoriaPrograma
-  multiplicadorPontos?: number
 }
 
 /** DTO de resposta do programa */
@@ -15,7 +14,6 @@ export interface ProgramaResponseDTO {
   nome: string
   descricao: string
   categoria?: CategoriaPrograma
-  multiplicadorPontos?: number
 }
 
 /** DTO de promoção aninhada no programa */
@@ -35,6 +33,5 @@ export interface ProgramaComPromocoesResponseDTO {
   nome: string
   descricao: string
   categoria?: CategoriaPrograma
-  multiplicadorPontos?: number
   promocoes: PromocaoProgramaResponseDTO[]
 }

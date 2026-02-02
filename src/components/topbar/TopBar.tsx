@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useTheme } from '../../hooks/useTheme'
+import { usePreferences } from '../../hooks/usePreferences'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notificacaoService } from '../../services/notificacao/notificacao.service'
 import type { Notificacao } from '../../interfaces/notificacao'
@@ -56,6 +57,7 @@ export default function TopBar({
   const [notifications, setNotifications] = useState<Notificacao[]>([])
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null)
   const { logout } = useAuth()
+  const { preferences } = usePreferences()
   const navigate = useNavigate()
   const location = useLocation()
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -196,9 +198,34 @@ export default function TopBar({
     }
   }, [])
 
+  const handleDismissForUser = useCallback(async (id: number) => {
+    try {
+      await notificacaoService.dismiss(id)
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+      window.dispatchEvent(new CustomEvent('notification-deleted', { detail: { id } }))
+    } catch {
+      // Falha silenciosa na TopBar
+    }
+  }, [])
+
   const displayName = userName ?? user?.nome ?? 'Usuário'
   const displayEmail = userEmail ?? user?.email ?? ''
-  const unreadNotifications = notifications.filter((n) => !n.lida)
+  const filteredNotifications = useMemo(() => {
+    const matchesWeeklySummary = (item: Notificacao) => {
+      if (item.tipo === 'RESUMO' || item.tipo === 'RESUMO_SEMANAL') return true
+      const text = `${item.titulo} ${item.mensagem}`.toLowerCase()
+      return text.includes('resumo semanal') || text.includes('resumo da semana') || text.includes('semanal')
+    }
+
+    return notifications.filter((item) => {
+      if (item.tipo === 'EXPIRACAO') return preferences.notifications.expirationAlerts
+      if (item.tipo === 'PROMOCAO') return preferences.notifications.newPromotions
+      if (matchesWeeklySummary(item)) return preferences.notifications.weeklySummary
+      return true
+    })
+  }, [notifications, preferences.notifications.expirationAlerts, preferences.notifications.newPromotions, preferences.notifications.weeklySummary])
+
+  const unreadNotifications = filteredNotifications.filter((n) => !n.lida)
   const unreadCount = unreadNotifications.length
   const recentNotifications = unreadNotifications.slice(0, 3)
 
@@ -265,7 +292,7 @@ export default function TopBar({
                     <li key={item.id}>
                       <button
                         type="button"
-                        onClick={() => handleMarkAsRead(item.id)}
+                        onClick={() => handleDismissForUser(item.id)}
                         className="w-full flex items-start gap-2 rounded-lg bg-white/5 p-2 border border-white/5 hover:bg-white/10 transition-colors text-left"
                       >
                         <span className="mt-1.5 flex h-2 w-2 flex-shrink-0 rounded-full bg-accent-pool animate-pulse" />

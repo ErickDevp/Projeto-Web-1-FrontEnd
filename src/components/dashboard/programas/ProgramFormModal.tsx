@@ -14,7 +14,6 @@ export default function ProgramFormModal({
         nome: '',
         descricao: '',
         categoria: 'OUTRO' as CategoriaPrograma,
-        multiplicadorPontos: '',
     })
 
     // Sincroniza formulário com programa quando em modo de edição
@@ -28,15 +27,12 @@ export default function ProgramFormModal({
                     nome: programa.nome || '',
                     descricao: programa.descricao || '',
                     categoria: (programa.categoria || 'OUTRO') as CategoriaPrograma,
-                    multiplicadorPontos: programa.multiplicadorPontos !== undefined && programa.multiplicadorPontos !== null
-                        ? String(programa.multiplicadorPontos)
-                        : '',
                 }
             })
         } else if (mode === 'create') {
             setForm(prev => {
-                if (prev.nome === '' && prev.descricao === '' && prev.categoria === 'OUTRO' && prev.multiplicadorPontos === '') return prev
-                return { nome: '', descricao: '', categoria: 'OUTRO', multiplicadorPontos: '' }
+                if (prev.nome === '' && prev.descricao === '' && prev.categoria === 'OUTRO') return prev
+                return { nome: '', descricao: '', categoria: 'OUTRO' }
             })
         }
     }, [mode, programa])
@@ -64,27 +60,17 @@ export default function ProgramFormModal({
             return
         }
 
-        const multiplicadorValue = form.multiplicadorPontos.trim()
-            ? Number(form.multiplicadorPontos.replace(',', '.'))
-            : undefined
-
-        if (multiplicadorValue !== undefined && (Number.isNaN(multiplicadorValue) || multiplicadorValue <= 0)) {
-            notify.error('Informe um multiplicador válido (maior que 0).')
-            return
-        }
-
         const categoriaValue = (form.categoria || 'OUTRO') as CategoriaPrograma
 
         await onSubmit({
             nome: form.nome,
             descricao: form.descricao,
             categoria: categoriaValue,
-            multiplicadorPontos: multiplicadorValue,
         })
 
         // Reseta o formulário apenas após sucesso na criação
         if (mode === 'create') {
-            setForm({ nome: '', descricao: '', categoria: 'OUTRO', multiplicadorPontos: '' })
+            setForm({ nome: '', descricao: '', categoria: 'OUTRO' })
         }
     }
 
@@ -169,21 +155,6 @@ export default function ProgramFormModal({
                             onChange={(e) => setForm((prev) => ({ ...prev, descricao: e.target.value }))}
                             placeholder="Descrição do programa de fidelidade"
                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 resize-none"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label htmlFor={`${inputIdPrefix}multiplicador`} className="block text-sm font-medium text-fg-primary">
-                            Multiplicador de Pontos
-                        </label>
-                        <input
-                            id={`${inputIdPrefix}multiplicador`}
-                            type="text"
-                            inputMode="decimal"
-                            value={form.multiplicadorPontos}
-                            onChange={(e) => setForm((prev) => ({ ...prev, multiplicadorPontos: e.target.value }))}
-                            placeholder="Ex: 1.5"
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20"
                         />
                     </div>
 

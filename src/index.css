@@ -93,6 +93,17 @@
 	}
 }
 
+/* Toastify - ensure clickable close button */
+.Toastify__toast-container {
+	pointer-events: auto;
+	z-index: 99999;
+}
+
+.Toastify__toast,
+.Toastify__close-button {
+	pointer-events: auto;
+}
+
 /* Dashboard Card Base */
 .dashboard-card {
 	position: relative;
@@ -571,31 +582,28 @@ select option {
 [data-reduce-motion="true"] *,
 [data-reduce-motion="true"] *::before,
 [data-reduce-motion="true"] *::after {
-	animation-duration: 0.01ms !important;
-	animation-iteration-count: 1 !important;
-	transition-duration: 0.01ms !important;
+	animation: none !important;
+	transition: none !important;
+	transition-delay: 0ms !important;
 }
 
-/* Remove blur/glassmorphism effects */
-[data-reduce-motion="true"] .dashboard-card {
+/* Disable smooth scrolling */
+body[data-reduce-motion="true"] {
+	scroll-behavior: auto !important;
+}
+
+/* Remove blur/glassmorphism and filters globally */
+[data-reduce-motion="true"] * {
 	backdrop-filter: none !important;
 	-webkit-backdrop-filter: none !important;
+	filter: none !important;
 }
 
-/* Disable hover transforms */
-[data-reduce-motion="true"] .dashboard-card:hover {
-	transform: none !important;
-}
-
-[data-reduce-motion="true"] .dashboard-card:hover .card-icon {
-	transform: none !important;
-}
-
-[data-reduce-motion="true"] .mini-card:hover {
-	transform: none !important;
-}
-
-[data-reduce-motion="true"] .btn-primary:hover {
+/* Disable hover/focus/active transforms */
+[data-reduce-motion="true"] *:hover,
+[data-reduce-motion="true"] *:focus,
+[data-reduce-motion="true"] *:focus-visible,
+[data-reduce-motion="true"] *:active {
 	transform: none !important;
 }
 

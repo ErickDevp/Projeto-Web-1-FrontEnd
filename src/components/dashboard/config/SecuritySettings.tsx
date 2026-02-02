@@ -1,24 +1,51 @@
-import React, { useState, useCallback } from 'react'
+import { useCallback, useState, type FormEvent } from 'react'
 import { notify } from '../../../utils/notify'
+import { usuarioService } from '../../../services/usuario/usuario.service'
+import { useAuth } from '../../../hooks/useAuth'
 
 export function SecuritySettings() {
+    const { logout } = useAuth()
     const [passwordForm, setPasswordForm] = useState({
-        currentPassword: '',
         newPassword: '',
         confirmPassword: '',
     })
     const [changingPassword, setChangingPassword] = useState(false)
 
-    const handlePasswordChange = useCallback(async (e: React.FormEvent) => {
+    const passwordStrength = (() => {
+        const value = passwordForm.newPassword
+        if (!value) {
+            return { score: 0, label: 'Digite uma senha', color: 'bg-white/10', text: 'text-fg-secondary' }
+        }
+
+        const rules = [
+            value.length >= 8,
+            /[a-z]/.test(value),
+            /[A-Z]/.test(value),
+            /\d/.test(value),
+            /[^A-Za-z0-9]/.test(value),
+        ]
+
+        const score = rules.filter(Boolean).length
+
+        if (score <= 2) {
+            return { score, label: 'Fraca', color: 'bg-red-500/70', text: 'text-red-400' }
+        }
+        if (score <= 4) {
+            return { score, label: 'Média', color: 'bg-yellow-400/80', text: 'text-yellow-300' }
+        }
+        return { score, label: 'Forte', color: 'bg-emerald-400/80', text: 'text-emerald-300' }
+    })()
+
+    const handlePasswordChange = useCallback(async (e: FormEvent) => {
         e.preventDefault()
 
-        if (!passwordForm.currentPassword) {
-            notify.error('Informe a senha atual.')
+        if (!passwordForm.newPassword) {
+            notify.error('Informe a nova senha.')
             return
         }
 
-        if (passwordForm.newPassword.length < 6) {
-            notify.error('A nova senha deve ter pelo menos 6 caracteres.')
+        if (passwordForm.newPassword.length < 8) {
+            notify.error('A nova senha deve ter pelo menos 8 caracteres.')
             return
         }
 
@@ -29,10 +56,10 @@ export function SecuritySettings() {
 
         setChangingPassword(true)
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000))
+            await usuarioService.updateMe({ novaSenha: passwordForm.newPassword })
             notify.success('Senha alterada com sucesso!')
-            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+            setPasswordForm({ newPassword: '', confirmPassword: '' })
+            logout()
         } catch (error) {
             notify.apiError(error, { fallback: 'Não foi possível alterar a senha.' })
         } finally {
@@ -56,21 +83,6 @@ export function SecuritySettings() {
                 </div>
 
                 <form onSubmit={handlePasswordChange} className="mt-6 space-y-4">
-                    {/* Current Password */}
-                    <div className="space-y-2">
-                        <label htmlFor="currentPassword" className="block text-sm font-medium text-fg-primary">
-                            Senha atual
-                        </label>
-                        <input
-                            id="currentPassword"
-                            type="password"
-                            value={passwordForm.currentPassword}
-                            onChange={(e) => setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))}
-                            placeholder="Digite sua senha atual"
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
-                        />
-                    </div>
-
                     {/* New Password */}
                     <div className="space-y-2">
                         <label htmlFor="newPassword" className="block text-sm font-medium text-fg-primary">
@@ -84,6 +96,25 @@ export function SecuritySettings() {
                             placeholder="Digite a nova senha"
                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                         />
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                                <span className={passwordStrength.text}>Força: {passwordStrength.label}</span>
+                                <span className="text-fg-secondary">Mínimo 8 caracteres</span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
+                                <div
+                                    className={`h-full transition-all duration-300 ${passwordStrength.color}`}
+                                    style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                                />
+                            </div>
+                            <ul className="grid gap-1 text-xs text-fg-secondary sm:grid-cols-2">
+                                <li className={passwordForm.newPassword.length >= 8 ? 'text-emerald-300' : undefined}>• 8+ caracteres</li>
+                                <li className={/[A-Z]/.test(passwordForm.newPassword) ? 'text-emerald-300' : undefined}>• letra maiúscula</li>
+                                <li className={/[a-z]/.test(passwordForm.newPassword) ? 'text-emerald-300' : undefined}>• letra minúscula</li>
+                                <li className={/\d/.test(passwordForm.newPassword) ? 'text-emerald-300' : undefined}>• número</li>
+                                <li className={/[^A-Za-z0-9]/.test(passwordForm.newPassword) ? 'text-emerald-300' : undefined}>• caractere especial</li>
+                            </ul>
+                        </div>
                     </div>
 
                     {/* Confirm Password */}

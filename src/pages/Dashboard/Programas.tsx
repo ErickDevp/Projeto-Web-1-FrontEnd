@@ -54,7 +54,6 @@ export default function Programas() {
                 nome: p.nome,
                 descricao: p.descricao,
                 categoria: p.categoria,
-                multiplicadorPontos: p.multiplicadorPontos,
                 promocoes: p.promocoes
             })) : [])
             setSaldos(Array.isArray(saldosData) ? saldosData.map(s => ({
@@ -145,7 +144,7 @@ export default function Programas() {
         setSelectedPrograma(null)
     }, [])
 
-    const handleFormSubmit = useCallback(async (data: { nome: string; descricao: string; categoria?: CategoriaPrograma; multiplicadorPontos?: number }) => {
+    const handleFormSubmit = useCallback(async (data: { nome: string; descricao: string; categoria?: CategoriaPrograma }) => {
         if (!isAdmin) {
             notify.error('Apenas administradores podem gerenciar programas.')
             return

@@ -170,6 +170,10 @@ function App() {
         closeOnClick
         pauseOnHover
         draggable
+        closeButton
+        style={{ pointerEvents: 'auto', zIndex: 99999 }}
+        toastStyle={{ pointerEvents: 'auto' }}
+        bodyClassName="pointer-events-auto"
       />
     </>
   )

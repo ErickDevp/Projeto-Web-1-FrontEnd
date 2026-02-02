@@ -19,6 +19,9 @@ export default function ProgramCard({
     const category = inferCategory(programa.nome, programa.categoria)
     const activePromotions = getActivePromotions(programa.promocoes)
     const hasEndingSoon = activePromotions.some(isPromotionEndingSoon)
+    const maxMultiplicador = activePromotions.length > 0
+        ? Math.max(...activePromotions.map((promo) => promo.pontosPorReal))
+        : null
 
     const handleCardClick = (e: React.MouseEvent) => {
         // Previne navegação se clicar em botões ou links
@@ -102,12 +105,12 @@ export default function ProgramCard({
                     <h3 className="font-semibold text-fg-primary truncate">{programa.nome}</h3>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                         {category && <CategoryBadge category={category} />}
-                        {programa.multiplicadorPontos !== undefined && programa.multiplicadorPontos !== null && (
+                        {maxMultiplicador !== null && (
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${brandConfig.bgColor} ${brandConfig.textColor}`}>
                                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m9-9H3" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
-                                {programa.multiplicadorPontos}x
+                                {maxMultiplicador}x
                             </span>
                         )}
                         {activePromotions.length > 0 && (

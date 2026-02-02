@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { notificacaoService } from '../../services/notificacao/notificacao.service'
 import { usuarioService } from '../../services/usuario/usuario.service'
+import { usePreferences } from '../../hooks/usePreferences'
 import { notify } from '../../utils/notify'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import PageHeader from '../../components/ui/PageHeader'
@@ -34,6 +35,7 @@ const TIPO_COLORS: Record<string, { bg: string; border: string; icon: string }> 
 }
 
 export default function Notificacoes() {
+  const { preferences } = usePreferences()
   const [items, setItems] = useState<Notificacao[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<UsuarioDTO | null>(null)
@@ -45,6 +47,7 @@ export default function Notificacoes() {
     titulo: '',
     mensagem: '',
     tipo: 'INFO',
+    prazoDia: 7,
   })
 
   const isAdmin = user?.role === 'ADMIN'
@@ -100,32 +103,34 @@ export default function Notificacoes() {
 
   // Mark all as read
   const handleMarkAllAsRead = useCallback(async () => {
-    const unread = items.filter((n) => !n.lida)
+    const unread = filteredItems.filter((n) => !n.lida)
     if (unread.length === 0) return
 
     try {
       await Promise.all(unread.map((n) => notificacaoService.markAsRead(n.id)))
-      setItems((prev) => prev.map((item) => ({ ...item, lida: true })))
+      setItems((prev) =>
+        prev.map((item) => (unread.some((n) => n.id === item.id) ? { ...item, lida: true } : item))
+      )
       window.dispatchEvent(new CustomEvent('notifications-all-read'))
       notify.success('Todas marcadas como lidas.')
     } catch (error) {
       notify.apiError(error, { fallback: 'Não foi possível marcar todas.' })
     }
-  }, [items])
+  }, [filteredItems])
 
   // Delete all notifications (dismiss for user)
   const handleDeleteAll = useCallback(async () => {
-    if (items.length === 0) return
+    if (filteredItems.length === 0) return
 
     try {
-      await Promise.all(items.map((n) => notificacaoService.dismiss(n.id)))
-      setItems([])
+      await Promise.all(filteredItems.map((n) => notificacaoService.dismiss(n.id)))
+      setItems((prev) => prev.filter((item) => !filteredItems.some((n) => n.id === item.id)))
       window.dispatchEvent(new CustomEvent('notifications-all-deleted'))
       notify.success('Todas as notificações removidas.')
     } catch (error) {
       notify.apiError(error, { fallback: 'Não foi possível remover todas.' })
     }
-  }, [items])
+  }, [filteredItems])
 
   // Admin: Permanently delete notification for all users
   const handleAdminDelete = useCallback(async (id: number, e: React.MouseEvent) => {
@@ -144,18 +149,18 @@ export default function Notificacoes() {
 
   // Admin: Permanently delete all notifications
   const handleAdminDeleteAll = useCallback(async () => {
-    if (items.length === 0) return
+    if (filteredItems.length === 0) return
     if (!confirm('Excluir TODAS as notificações permanentemente para TODOS os usuários?')) return
 
     try {
-      await Promise.all(items.map((n) => notificacaoService.removeForAll(n.id)))
-      setItems([])
+      await Promise.all(filteredItems.map((n) => notificacaoService.removeForAll(n.id)))
+      setItems((prev) => prev.filter((item) => !filteredItems.some((n) => n.id === item.id)))
       window.dispatchEvent(new CustomEvent('notifications-all-deleted'))
       notify.success('Todas as notificações excluídas permanentemente.')
     } catch (error) {
       notify.apiError(error, { fallback: 'Não foi possível excluir todas.' })
     }
-  }, [items])
+  }, [filteredItems])
 
   // Create notification (admin only)
   const handleCreate = useCallback(async (e: React.FormEvent) => {
@@ -169,7 +174,7 @@ export default function Notificacoes() {
     try {
       await notificacaoService.create(formData)
       notify.success('Notificação criada com sucesso!')
-      setFormData({ titulo: '', mensagem: '', tipo: 'INFO' })
+      setFormData({ titulo: '', mensagem: '', tipo: 'INFO', prazoDia: 7 })
       setShowCreateForm(false)
 
       // Reload list
@@ -184,22 +189,37 @@ export default function Notificacoes() {
     }
   }, [formData])
 
-  const unreadCount = items.filter((n) => !n.lida).length
+  const filteredItems = useMemo(() => {
+    const matchesWeeklySummary = (item: Notificacao) => {
+      if (item.tipo === 'RESUMO' || item.tipo === 'RESUMO_SEMANAL') return true
+      const text = `${item.titulo} ${item.mensagem}`.toLowerCase()
+      return text.includes('resumo semanal') || text.includes('resumo da semana') || text.includes('semanal')
+    }
+
+    return items.filter((item) => {
+      if (item.tipo === 'EXPIRACAO') return preferences.notifications.expirationAlerts
+      if (item.tipo === 'PROMOCAO') return preferences.notifications.newPromotions
+      if (matchesWeeklySummary(item)) return preferences.notifications.weeklySummary
+      return true
+    })
+  }, [items, preferences.notifications.expirationAlerts, preferences.notifications.newPromotions, preferences.notifications.weeklySummary])
+
+  const unreadFilteredCount = filteredItems.filter((n) => !n.lida).length
 
   return (
     <section className="space-y-6">
       <PageHeader
         title="Notificações"
         description={
-          unreadCount > 0
-            ? `Você tem ${unreadCount} ${unreadCount > 1 ? 'notificações não lidas' : 'notificação não lida'}.`
+          unreadFilteredCount > 0
+            ? `Você tem ${unreadFilteredCount} ${unreadFilteredCount > 1 ? 'notificações não lidas' : 'notificação não lida'}.`
             : 'Todas as notificações foram lidas.'
         }
       >
         <div className="flex flex-wrap items-center gap-2">
-          {items.length > 0 && (
+          {filteredItems.length > 0 && (
             <>
-              {unreadCount > 0 && (
+              {unreadFilteredCount > 0 && (
                 <button
                   type="button"
                   onClick={handleMarkAllAsRead}
@@ -223,7 +243,7 @@ export default function Notificacoes() {
               </button>
             </>
           )}
-          {isAdmin && items.length > 0 && (
+          {isAdmin && filteredItems.length > 0 && (
             <button
               type="button"
               onClick={handleAdminDeleteAll}
@@ -258,6 +278,24 @@ export default function Notificacoes() {
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="prazoDia" className="block text-xs font-medium text-fg-primary">
+                Prazo (dias)
+              </label>
+              <TextInput
+                id="prazoDia"
+                type="number"
+                min={1}
+                value={formData.prazoDia}
+                onChange={(e) => {
+                  const value = Math.max(1, Number(e.target.value) || 1)
+                  setFormData((prev) => ({ ...prev, prazoDia: value }))
+                }}
+                placeholder="Ex: 7"
+                className="px-3 py-2.5"
+              />
             </div>
             <div className="flex-1">
               <h2 className="section-title text-base">Criar notificação</h2>
@@ -344,14 +382,14 @@ export default function Notificacoes() {
           <div className="flex-1">
             <h2 className="section-title text-base">Histórico</h2>
           </div>
-          {unreadCount > 0 && (
-            <span className="badge">{unreadCount} nova{unreadCount > 1 ? 's' : ''}</span>
+          {unreadFilteredCount > 0 && (
+            <span className="badge">{unreadFilteredCount} nova{unreadFilteredCount > 1 ? 's' : ''}</span>
           )}
         </div>
 
         {loading ? (
           <LoadingSpinner message="Carregando notificações..." />
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <EmptyState
             className="gap-4"
             icon={(
@@ -360,11 +398,11 @@ export default function Notificacoes() {
               </svg>
             )}
             title=""
-            description="Nenhuma notificação encontrada."
+            description="Nenhuma notificação encontrada para as preferências atuais."
           />
         ) : (
           <div className="space-y-3">
-            {items.map((item) => {
+            {filteredItems.map((item) => {
               const tipoStyle = TIPO_COLORS[item.tipo] ?? TIPO_COLORS.INFO
               const isUnread = !item.lida
 
