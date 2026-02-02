@@ -1,4 +1,6 @@
 import { useMovimentacoes } from '../../hooks/useMovimentacoes'
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import EmptyState from '../../components/ui/EmptyState'
 import MovimentacoesHeader from '../../components/dashboard/movimentacoes/MovimentacoesHeader'
 import MovimentacoesStats from '../../components/dashboard/movimentacoes/MovimentacoesStats'
 import MovimentacoesTable from '../../components/dashboard/movimentacoes/MovimentacoesTable'
@@ -45,22 +47,18 @@ export default function Movimentacoes() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-4 py-12">
-            <div className="relative">
-              <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
-              <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
-            </div>
-            <span className="text-sm text-fg-secondary">Carregando movimentações...</span>
-          </div>
+          <LoadingSpinner message="Carregando movimentações..." />
         ) : movimentacoes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-            <div className="rounded-full bg-white/5 p-6">
+          <EmptyState
+            className="gap-4"
+            icon={(
               <svg className="h-12 w-12 text-fg-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-            </div>
-            <p className="text-sm text-fg-secondary">Nenhuma movimentação registrada.</p>
-          </div>
+            )}
+            title=""
+            description="Nenhuma movimentação registrada."
+          />
         ) : (
           <>
             <MovimentacoesTable

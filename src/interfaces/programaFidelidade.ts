@@ -1,9 +1,11 @@
 import type { ValidoEnum } from './enums'
+import type { CategoriaPrograma } from './programa'
 
 /** DTO para requisição de programa */
 export interface ProgramaRequestDTO {
   nome: string
   descricao: string
+  categoria?: CategoriaPrograma
 }
 
 /** DTO de resposta do programa */
@@ -11,6 +13,7 @@ export interface ProgramaResponseDTO {
   id: number
   nome: string
   descricao: string
+  categoria?: CategoriaPrograma
 }
 
 /** DTO de promoção aninhada no programa */
@@ -29,5 +32,6 @@ export interface ProgramaComPromocoesResponseDTO {
   id: number
   nome: string
   descricao: string
+  categoria?: CategoriaPrograma
   promocoes: PromocaoProgramaResponseDTO[]
 }

@@ -18,7 +18,6 @@ export function NotificationSettings() {
                         <h2 className="section-title">Preferências de Notificação</h2>
                         <p className="text-xs text-fg-secondary">Escolha quais alertas deseja receber</p>
                     </div>
-                    <span className="badge">Simulação</span>
                 </div>
 
                 <div className="mt-4 divide-y divide-white/10">

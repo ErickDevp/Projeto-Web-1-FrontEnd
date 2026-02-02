@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { notify } from '../../../utils/notify'
-import type { ProgramFormModalProps } from '../../../interfaces/programa'
+import type { CategoriaPrograma, ProgramFormModalProps } from '../../../interfaces/programa'
 
 export default function ProgramFormModal({
     isOpen,
@@ -13,6 +13,7 @@ export default function ProgramFormModal({
     const [form, setForm] = useState({
         nome: '',
         descricao: '',
+        categoria: 'OUTRO' as CategoriaPrograma,
     })
 
     // Sincroniza formulário com programa quando em modo de edição
@@ -25,12 +26,13 @@ export default function ProgramFormModal({
                 return {
                     nome: programa.nome || '',
                     descricao: programa.descricao || '',
+                    categoria: (programa.categoria || 'OUTRO') as CategoriaPrograma,
                 }
             })
         } else if (mode === 'create') {
             setForm(prev => {
-                if (prev.nome === '' && prev.descricao === '') return prev
-                return { nome: '', descricao: '' }
+                if (prev.nome === '' && prev.descricao === '' && prev.categoria === 'OUTRO') return prev
+                return { nome: '', descricao: '', categoria: 'OUTRO' }
             })
         }
     }, [mode, programa])
@@ -58,11 +60,17 @@ export default function ProgramFormModal({
             return
         }
 
-        await onSubmit(form)
+        const categoriaValue = (form.categoria || 'OUTRO') as CategoriaPrograma
+
+        await onSubmit({
+            nome: form.nome,
+            descricao: form.descricao,
+            categoria: categoriaValue,
+        })
 
         // Reseta o formulário apenas após sucesso na criação
         if (mode === 'create') {
-            setForm({ nome: '', descricao: '' })
+            setForm({ nome: '', descricao: '', categoria: 'OUTRO' })
         }
     }
 
@@ -110,6 +118,24 @@ export default function ProgramFormModal({
                             placeholder="Ex: Smiles, Livelo, Esfera"
                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20"
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor={`${inputIdPrefix}categoria`} className="block text-sm font-medium text-fg-primary">
+                            Categoria *
+                        </label>
+                        <select
+                            id={`${inputIdPrefix}categoria`}
+                            value={form.categoria}
+                            onChange={(e) => setForm((prev) => ({ ...prev, categoria: e.target.value as CategoriaPrograma }))}
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20"
+                        >
+                            <option value="AEREA" className="bg-bg-secondary">Aérea</option>
+                            <option value="BANCO" className="bg-bg-secondary">Banco</option>
+                            <option value="VAREJO" className="bg-bg-secondary">Varejo</option>
+                            <option value="FINANCEIRO" className="bg-bg-secondary">Financeiro</option>
+                            <option value="OUTRO" className="bg-bg-secondary">Outro</option>
+                        </select>
                     </div>
 
                     <div className="space-y-2">

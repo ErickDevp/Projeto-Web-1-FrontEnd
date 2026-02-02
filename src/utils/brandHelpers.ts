@@ -41,14 +41,16 @@ const BANCO_KEYWORDS = ['livelo', 'esfera', 'iupp', 'átomos', 'curtaí', 'c6', 
 
 /** Infere categoria do programa baseado no nome */
 export function inferCategory(nome: string, currentCategory?: string): CategoryType | null {
+    // Prioriza a categoria já selecionada pelo usuário
+    if (currentCategory && currentCategory.trim() !== '') {
+        return currentCategory as CategoryType
+    }
+
+    // Só infere automaticamente se não há categoria definida
     const lower = nome.toLowerCase()
 
     if (AEREA_KEYWORDS.some(kw => lower.includes(kw))) return 'AEREA'
     if (BANCO_KEYWORDS.some(kw => lower.includes(kw))) return 'BANCO'
-
-    if (currentCategory && currentCategory !== 'Outro' && currentCategory.trim() !== '') {
-        return currentCategory as CategoryType
-    }
 
     return null
 }

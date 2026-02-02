@@ -9,7 +9,6 @@ import type { MovimentacaoRequestDTO } from '../interfaces/movimentacaoPontos'
 import type { ComprovanteResponseDTO } from '../interfaces/comprovante'
 import type { StatusResponseDTO } from '../interfaces/statusMovimentacao'
 import { endpoints } from '../services/endpoints'
-import { getStatusString, STATUS_CONFIG } from '../components/ui/StatusBadge'
 
 // Types
 export type Cartao = {
@@ -100,7 +99,12 @@ export const useMovimentacoes = () => {
                 dataOcorrencia: m.dataOcorrencia,
                 status: m.status,
                 comprovantes: m.comprovantes,
-            })) : [])
+            })).sort((a, b) => {
+                // Sort by dataOcorrencia descending (most recent first)
+                const dateA = a.dataOcorrencia ? new Date(a.dataOcorrencia).getTime() : 0
+                const dateB = b.dataOcorrencia ? new Date(b.dataOcorrencia).getTime() : 0
+                return dateB - dateA
+            }) : [])
             setSaldoGlobal(relatorioData?.saldoGlobal ? Number(relatorioData.saldoGlobal) : 0)
         } catch (error) {
             notify.apiError(error, { fallback: 'Não foi possível carregar as movimentações.' })

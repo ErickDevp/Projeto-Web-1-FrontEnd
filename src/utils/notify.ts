@@ -4,6 +4,7 @@ import { getApiErrorMessage } from '../services/http/httpError'
 const DEFAULT_TOAST_OPTIONS: ToastOptions = {
   position: 'top-right',
   autoClose: 3000,
+  closeButton: true,
   closeOnClick: true,
   pauseOnHover: true,
   draggable: true,

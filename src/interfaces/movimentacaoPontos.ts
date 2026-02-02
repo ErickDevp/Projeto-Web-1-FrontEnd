@@ -3,10 +3,11 @@ import type { ComprovanteResponseDTO } from './comprovante'
 
 /** DTO para requisição de movimentação */
 export interface MovimentacaoRequestDTO {
-  cartaoId: number
+  cartaoId?: number
   programaId: number
   promocaoId?: number
-  valor: number | string
+  valor?: number | string
+  quantidadePontos?: number
   data: string
 }
 

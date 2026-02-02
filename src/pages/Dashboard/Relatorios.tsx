@@ -1,4 +1,6 @@
 import { useRelatoriosDashboard } from '../../hooks/useRelatoriosDashboard'
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import PageHeader from '../../components/ui/PageHeader'
 import { LineChart, DonutChart } from '../../components/dashboard/relatorios/RelatorioCharts'
 import { RelatorioSummary } from '../../components/dashboard/relatorios/RelatorioSummary'
 import { RelatorioHistory } from '../../components/dashboard/relatorios/RelatorioHistory'
@@ -21,12 +23,8 @@ export default function Relatorios() {
           <h1 className="titulo-grafico text-2xl font-bold">Relatórios de Desempenho</h1>
           <p className="mt-1 text-sm text-fg-secondary">Analise a evolução dos seus pontos.</p>
         </header>
-        <div className="dashboard-card flex items-center justify-center gap-4 py-12">
-          <div className="relative">
-            <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
-            <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
-          </div>
-          <span className="text-sm text-fg-secondary">Carregando relatórios...</span>
+        <div className="dashboard-card">
+          <LoadingSpinner message="Carregando relatórios..." />
         </div>
       </section>
     )
@@ -35,11 +33,10 @@ export default function Relatorios() {
   return (
     <section className="space-y-6">
       {/* Header */}
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="titulo-grafico text-2xl font-bold">Relatórios de Desempenho</h1>
-          <p className="mt-1 text-sm text-fg-secondary">Analise a evolução dos seus pontos e cartões.</p>
-        </div>
+      <PageHeader
+        title="Relatórios de Desempenho"
+        description="Analise a evolução dos seus pontos e cartões."
+      >
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -72,7 +69,7 @@ export default function Relatorios() {
             Baixar CSV
           </button>
         </div>
-      </header>
+      </PageHeader>
 
       {/* Summary Stats */}
       {stats && <RelatorioSummary stats={stats} />}

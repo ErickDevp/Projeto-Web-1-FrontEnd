@@ -61,7 +61,7 @@ export function RelatorioHistory({ historico }: RelatorioHistoryProps) {
                                             {item.programa}
                                         </td>
                                         <td className="py-3 px-4">
-                                            <StatusBadge status={item.status || (isPositive ? 'CREDITADO' : 'CANCELADO')} />
+                                            <StatusBadge status={item.status || (isPositive ? 'CREDITADO' : 'CANCELADO')} pontosCalculados={item.pontosCalculados} />
                                         </td>
                                         <td className={`py-3 px-4 text-right font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'
                                             }`}>

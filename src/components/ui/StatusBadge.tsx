@@ -62,6 +62,8 @@ type StatusBadgeProps = {
     className?: string
     /** Variante de tamanho */
     size?: 'sm' | 'md'
+    /** Pontos calculados - quando negativo e status CREDITADO, mostra vermelho */
+    pontosCalculados?: number
 }
 
 /**
@@ -75,9 +77,20 @@ type StatusBadgeProps = {
  * // Com status objeto
  * <StatusBadge status={{ status: 'PENDENTE' }} />
  */
-export default function StatusBadge({ status, className = '', size = 'sm' }: StatusBadgeProps) {
+export default function StatusBadge({ status, className = '', size = 'sm', pontosCalculados }: StatusBadgeProps) {
     const statusKey = getStatusString(status)
-    const config = STATUS_CONFIG[statusKey] ?? DEFAULT_STATUS
+    let config = STATUS_CONFIG[statusKey] ?? DEFAULT_STATUS
+
+    // When CREDITADO but points are negative (redemption), use red styling
+    if (statusKey === 'CREDITADO' && pontosCalculados !== undefined && pontosCalculados < 0) {
+        config = {
+            ...config,
+            bg: 'bg-red-500/10',
+            text: 'text-red-400',
+            border: 'border-red-500/30',
+            dot: 'bg-red-400',
+        }
+    }
 
     const sizeClasses = {
         sm: 'px-2 py-0.5 text-[0.625rem]',

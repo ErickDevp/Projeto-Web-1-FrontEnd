@@ -1,4 +1,4 @@
-type CategoryType = 'AEREA' | 'AÉREA' | 'BANCO' | 'FINANCEIRA' | 'VAREJO' | string
+type CategoryType = 'AEREA' | 'BANCO' | 'FINANCEIRO' | 'FINANCEIRA' | 'VAREJO' | 'OUTRO' | string
 
 type CategoryConfig = {
     label: string
@@ -12,13 +12,13 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
         bg: 'bg-sky-500/10',
         text: 'text-sky-400',
     },
-    AÉREA: {
-        label: 'Aérea',
-        bg: 'bg-sky-500/10',
-        text: 'text-sky-400',
-    },
     BANCO: {
         label: 'Banco',
+        bg: 'bg-violet-500/10',
+        text: 'text-violet-400',
+    },
+    FINANCEIRO: {
+        label: 'Financeiro',
         bg: 'bg-violet-500/10',
         text: 'text-violet-400',
     },
@@ -31,6 +31,11 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
         label: 'Varejo',
         bg: 'bg-emerald-500/10',
         text: 'text-emerald-400',
+    },
+    OUTRO: {
+        label: 'Outro',
+        bg: 'bg-white/5',
+        text: 'text-fg-secondary',
     },
 }
 

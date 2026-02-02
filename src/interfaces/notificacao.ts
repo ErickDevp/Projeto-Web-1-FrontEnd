@@ -3,6 +3,7 @@ export interface NotificacaoRequestDTO {
   titulo: string
   mensagem: string
   tipo: string
+  prazoDia: number
 }
 
 /** DTO de resposta da notificação */

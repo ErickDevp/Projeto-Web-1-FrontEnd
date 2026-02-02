@@ -109,24 +109,30 @@ export function RelatorioSummary({ stats }: RelatorioSummaryProps) {
                             </div>
                         </div>
 
-                        {/* Visual Progress Bar */}
-                        <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden relative flex">
-                            {stats.totalEntradas > 0 && (
-                                <div
-                                    className="h-full bg-green-500/20 relative"
-                                    style={{ width: '100%' }}
-                                >
-                                    <div className="absolute inset-y-0 left-0 bg-green-500/40" style={{ width: '100%' }}></div>
-                                    {/* Overlay for Saídas (assuming saídas reduce from entries visually) */}
-                                    <div
-                                        className="absolute inset-y-0 left-0 bg-red-500/50"
-                                        style={{ width: `${Math.min((stats.totalSaidas / (stats.totalEntradas || 1)) * 100, 100)}%` }}
-                                    />
-                                </div>
-                            )}
-                            {stats.totalEntradas === 0 && stats.totalSaidas > 0 && (
-                                <div className="h-full w-full bg-red-500/50" />
-                            )}
+                        {/* Visual Progress Bar - Side by side */}
+                        <div className="h-4 w-full bg-white/5 rounded-full overflow-hidden flex">
+                            {(() => {
+                                const total = stats.totalEntradas + stats.totalSaidas
+                                if (total === 0) return null
+                                const greenPercent = (stats.totalEntradas / total) * 100
+                                const redPercent = (stats.totalSaidas / total) * 100
+                                return (
+                                    <>
+                                        {stats.totalEntradas > 0 && (
+                                            <div
+                                                className="h-full bg-gradient-to-r from-green-500/60 to-green-500/40 transition-all duration-500"
+                                                style={{ width: `${greenPercent}%` }}
+                                            />
+                                        )}
+                                        {stats.totalSaidas > 0 && (
+                                            <div
+                                                className="h-full bg-gradient-to-r from-red-500/40 to-red-500/60 transition-all duration-500"
+                                                style={{ width: `${redPercent}%` }}
+                                            />
+                                        )}
+                                    </>
+                                )
+                            })()}
                         </div>
                         <p className="text-xs text-fg-secondary text-center">
                             {stats.totalEntradas > 0

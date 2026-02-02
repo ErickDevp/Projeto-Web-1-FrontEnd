@@ -3,6 +3,10 @@ import { promocaoService } from '../../services/promocao/promocao.service'
 import { programaFidelidadeService } from '../../services/programaFidelidade/programaFidelidade.service'
 import { usuarioService } from '../../services/usuario/usuario.service'
 import { notify } from '../../utils/notify'
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import PageHeader from '../../components/ui/PageHeader'
+import EmptyState from '../../components/ui/EmptyState'
+import TextInput from '../../components/ui/TextInput'
 import type { PromocaoRequestDTO } from '../../interfaces/promocao'
 import type { Programa } from '../../interfaces/cardTypes'
 import type { UsuarioDTO } from '../../interfaces/auth'
@@ -208,13 +212,23 @@ export default function Promocoes() {
         }
 
         setSaving(true)
+        const multiplicadorValue = form.pontosPorReal.trim()
+            ? Number(form.pontosPorReal.replace(',', '.'))
+            : 1
+
+        if (Number.isNaN(multiplicadorValue) || multiplicadorValue <= 0) {
+            notify.warn('Informe um multiplicador válido (maior que 0).')
+            setSaving(false)
+            return
+        }
+
         const payload: PromocaoRequestDTO = {
             titulo: form.titulo.trim(),
             descricao: form.descricao.trim(),
             programaId: Number(form.programaId),
             dataInicio: form.dataInicio,
             dataFim: form.dataFim,
-            pontosPorReal: Number(form.pontosPorReal) || 1,
+            pontosPorReal: multiplicadorValue,
         }
 
         try {
@@ -266,15 +280,14 @@ export default function Promocoes() {
 
     return (
         <section className="space-y-6">
-            <header className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <h1 className="titulo-grafico text-2xl font-bold">Promoções</h1>
-                    <p className="mt-1 text-sm text-fg-secondary">
-                        {activeCount > 0
-                            ? `${activeCount} ${activeCount === 1 ? 'promoção ativa' : 'promoções ativas'} disponíveis.`
-                            : 'Nenhuma promoção ativa no momento.'}
-                    </p>
-                </div>
+            <PageHeader
+                title="Promoções"
+                description={
+                    activeCount > 0
+                        ? `${activeCount} ${activeCount === 1 ? 'promoção ativa' : 'promoções ativas'} disponíveis.`
+                        : 'Nenhuma promoção ativa no momento.'
+                }
+            >
                 {isAdmin && (
                     <button
                         type="button"
@@ -290,7 +303,7 @@ export default function Promocoes() {
                         Nova promoção
                     </button>
                 )}
-            </header>
+            </PageHeader>
 
             {/* Form Modal/Panel - Admin only */}
             {isAdmin && showForm && (
@@ -319,15 +332,12 @@ export default function Promocoes() {
                         <div className="grid gap-5 md:grid-cols-2">
                             {/* Título */}
                             <div className="space-y-2">
-                                <label htmlFor="promo-titulo" className="block text-sm font-medium text-fg-primary">
-                                    Título
-                                </label>
-                                <input
+                                <TextInput
                                     id="promo-titulo"
+                                    label="Título"
                                     value={form.titulo}
                                     onChange={(e) => setForm((prev) => ({ ...prev, titulo: e.target.value }))}
                                     placeholder="Ex: Bônus de 50% em transferências"
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
 
@@ -368,30 +378,37 @@ export default function Promocoes() {
 
                             {/* Data Início */}
                             <div className="space-y-2">
-                                <label htmlFor="promo-inicio" className="block text-sm font-medium text-fg-primary">
-                                    Data de início
-                                </label>
-                                <input
+                                <TextInput
                                     id="promo-inicio"
+                                    label="Data de início"
                                     type="date"
                                     value={form.dataInicio}
                                     onChange={(e) => setForm((prev) => ({ ...prev, dataInicio: e.target.value }))}
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
 
                             {/* Data Fim */}
                             <div className="space-y-2">
-                                <label htmlFor="promo-fim" className="block text-sm font-medium text-fg-primary">
-                                    Data de validade
-                                </label>
-                                <input
+                                <TextInput
                                     id="promo-fim"
+                                    label="Data de validade"
                                     type="date"
                                     value={form.dataFim}
                                     onChange={(e) => setForm((prev) => ({ ...prev, dataFim: e.target.value }))}
                                     min={form.dataInicio}
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                                />
+                            </div>
+
+                            {/* Multiplicador */}
+                            <div className="space-y-2">
+                                <TextInput
+                                    id="promo-multiplicador"
+                                    label="Multiplicador de pontos"
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={form.pontosPorReal}
+                                    onChange={(e) => setForm((prev) => ({ ...prev, pontosPorReal: e.target.value }))}
+                                    placeholder="Ex: 1,5"
                                 />
                             </div>
                         </div>
@@ -437,39 +454,34 @@ export default function Promocoes() {
 
             {/* Promotions Grid */}
             {loading ? (
-                <div className="dashboard-card flex items-center justify-center gap-4 py-12">
-                    <div className="relative">
-                        <div className="h-10 w-10 rounded-full border-2 border-accent-pool/20" />
-                        <div className="absolute inset-0 h-10 w-10 rounded-full border-2 border-transparent border-t-accent-pool animate-spin" />
-                    </div>
-                    <span className="text-sm text-fg-secondary">Carregando promoções...</span>
+                <div className="dashboard-card">
+                    <LoadingSpinner message="Carregando promoções..." />
                 </div>
             ) : promocoes.length === 0 ? (
-                <div className="dashboard-card flex flex-col items-center justify-center gap-4 py-12">
-                    <div className="rounded-full bg-white/5 p-6">
+                <EmptyState
+                    className="dashboard-card gap-4"
+                    icon={(
                         <svg className="h-12 w-12 text-fg-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                         </svg>
-                    </div>
-                    <div className="text-center">
-                        <p className="font-medium text-fg-primary">Nenhuma promoção disponível</p>
-                        <p className="mt-1 text-sm text-fg-secondary">
-                            {isAdmin ? 'Cadastre a primeira promoção.' : 'Volte mais tarde para conferir novas ofertas.'}
-                        </p>
-                    </div>
-                    {isAdmin && (
-                        <button
-                            type="button"
-                            onClick={() => setShowForm(true)}
-                            className="btn-primary mt-2"
-                        >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Criar promoção
-                        </button>
                     )}
-                </div>
+                    title="Nenhuma promoção disponível"
+                    description={isAdmin ? 'Cadastre a primeira promoção.' : 'Volte mais tarde para conferir novas ofertas.'}
+                    action={
+                        isAdmin ? (
+                            <button
+                                type="button"
+                                onClick={() => setShowForm(true)}
+                                className="btn-primary mt-2"
+                            >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Criar promoção
+                            </button>
+                        ) : null
+                    }
+                />
             ) : (
                 <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(20rem,1fr))]">
                     {promocoes.map((promo) => {
