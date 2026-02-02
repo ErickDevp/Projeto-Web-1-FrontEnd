@@ -11,6 +11,7 @@ import { getTipoLabel } from '../../utils/cardConstants'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import PageHeader from '../../components/ui/PageHeader'
 import EmptyState from '../../components/ui/EmptyState'
+import TextInput from '../../components/ui/TextInput'
 import TabButton from '../../components/ui/TabButton'
 import CreditCardPreview, { type CardVariant } from '../../components/dashboard/cartoes/CreditCardPreview'
 import type { CartaoResponseDTO } from '../../interfaces/cartaoUsuario'
@@ -461,13 +462,13 @@ export default function RegistrarPontos() {
                   <label htmlFor="data" className="block text-xs font-medium text-fg-primary">
                     {isResgate ? 'Data do resgate' : 'Data da compra'}
                   </label>
-                  <input
+                  <TextInput
                     id="data"
                     type="date"
                     value={data}
                     onChange={(e) => setData(e.target.value)}
                     max={new Date().toISOString().split('T')[0]}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                    className="px-3 py-2.5"
                   />
                 </div>
 
@@ -479,7 +480,7 @@ export default function RegistrarPontos() {
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-red-400 text-sm">pts</span>
-                      <input
+                      <TextInput
                         id="quantidadePontos"
                         type="text"
                         inputMode="numeric"
@@ -490,7 +491,7 @@ export default function RegistrarPontos() {
                           setQuantidadePontos(val)
                         }}
                         placeholder="0"
-                        className="w-full rounded-xl border border-red-500/30 bg-red-500/5 pl-10 pr-4 py-2.5 text-sm text-fg-primary focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all font-medium"
+                        className="border-red-500/30 bg-red-500/5 pl-10 pr-4 py-2.5 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 font-medium"
                       />
                     </div>
                   </div>
@@ -501,7 +502,7 @@ export default function RegistrarPontos() {
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-secondary text-sm">R$</span>
-                      <input
+                      <TextInput
                         id="valor"
                         type="text"
                         inputMode="decimal"
@@ -512,7 +513,7 @@ export default function RegistrarPontos() {
                           setValor(val)
                         }}
                         placeholder="0,00"
-                        className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2.5 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all font-medium"
+                        className="pl-10 pr-4 py-2.5 font-medium"
                       />
                     </div>
                   </div>

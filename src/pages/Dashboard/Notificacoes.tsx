@@ -5,6 +5,7 @@ import { notify } from '../../utils/notify'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import PageHeader from '../../components/ui/PageHeader'
 import EmptyState from '../../components/ui/EmptyState'
+import TextInput from '../../components/ui/TextInput'
 import type { Notificacao, NotificacaoRequestDTO } from '../../interfaces/notificacao'
 import type { UsuarioDTO } from '../../interfaces/auth'
 
@@ -270,13 +271,13 @@ export default function Notificacoes() {
                 <label htmlFor="titulo" className="block text-xs font-medium text-fg-primary">
                   Título
                 </label>
-                <input
+                <TextInput
                   id="titulo"
                   type="text"
                   value={formData.titulo}
                   onChange={(e) => setFormData((prev) => ({ ...prev, titulo: e.target.value }))}
                   placeholder="Ex: Pontos expirando"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
+                  className="px-3 py-2.5"
                 />
               </div>
 

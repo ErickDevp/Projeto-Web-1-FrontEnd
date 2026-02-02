@@ -6,6 +6,7 @@ import { notify } from '../../utils/notify'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import PageHeader from '../../components/ui/PageHeader'
 import EmptyState from '../../components/ui/EmptyState'
+import TextInput from '../../components/ui/TextInput'
 import type { PromocaoRequestDTO } from '../../interfaces/promocao'
 import type { Programa } from '../../interfaces/cardTypes'
 import type { UsuarioDTO } from '../../interfaces/auth'
@@ -321,15 +322,12 @@ export default function Promocoes() {
                         <div className="grid gap-5 md:grid-cols-2">
                             {/* Título */}
                             <div className="space-y-2">
-                                <label htmlFor="promo-titulo" className="block text-sm font-medium text-fg-primary">
-                                    Título
-                                </label>
-                                <input
+                                <TextInput
                                     id="promo-titulo"
+                                    label="Título"
                                     value={form.titulo}
                                     onChange={(e) => setForm((prev) => ({ ...prev, titulo: e.target.value }))}
                                     placeholder="Ex: Bônus de 50% em transferências"
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
 
@@ -370,30 +368,24 @@ export default function Promocoes() {
 
                             {/* Data Início */}
                             <div className="space-y-2">
-                                <label htmlFor="promo-inicio" className="block text-sm font-medium text-fg-primary">
-                                    Data de início
-                                </label>
-                                <input
+                                <TextInput
                                     id="promo-inicio"
+                                    label="Data de início"
                                     type="date"
                                     value={form.dataInicio}
                                     onChange={(e) => setForm((prev) => ({ ...prev, dataInicio: e.target.value }))}
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
 
                             {/* Data Fim */}
                             <div className="space-y-2">
-                                <label htmlFor="promo-fim" className="block text-sm font-medium text-fg-primary">
-                                    Data de validade
-                                </label>
-                                <input
+                                <TextInput
                                     id="promo-fim"
+                                    label="Data de validade"
                                     type="date"
                                     value={form.dataFim}
                                     onChange={(e) => setForm((prev) => ({ ...prev, dataFim: e.target.value }))}
                                     min={form.dataInicio}
-                                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
                                 />
                             </div>
                         </div>

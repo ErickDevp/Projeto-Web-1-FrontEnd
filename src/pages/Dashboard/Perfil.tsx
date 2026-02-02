@@ -4,6 +4,7 @@ import { usuarioService } from '../../services/usuario/usuario.service'
 import { useAuth } from '../../hooks/useAuth'
 import { notify } from '../../utils/notify'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import TextInput from '../../components/ui/TextInput'
 
 type UserData = {
   id: number
@@ -267,31 +268,25 @@ export default function Perfil() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             {/* Nome field */}
             <div className="space-y-2">
-              <label htmlFor="nome" className="block text-sm font-medium text-fg-primary">
-                Nome completo
-              </label>
-              <input
+              <TextInput
                 id="nome"
+                label="Nome completo"
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Seu nome completo"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
               />
             </div>
 
             {/* Email field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-fg-primary">
-                E-mail
-              </label>
-              <input
+              <TextInput
                 id="email"
+                label="E-mail"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-accent-pool focus:outline-none focus:ring-2 focus:ring-accent-pool/20 transition-all"
               />
             </div>
 
@@ -364,12 +359,12 @@ export default function Perfil() {
                 abaixo:
               </p>
 
-              <input
+              <TextInput
                 type="text"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="Digite EXCLUIR para confirmar"
-                className="mt-4 w-full rounded-xl border border-red-500/30 bg-bg-primary px-4 py-3 text-sm text-fg-primary placeholder:text-fg-secondary/60 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                className="mt-4 border-red-500/30 bg-bg-primary focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
               />
 
               <div className="mt-4 flex gap-3">
