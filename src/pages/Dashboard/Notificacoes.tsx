@@ -50,6 +50,21 @@ export default function Notificacoes() {
     prazoDia: 7,
   })
 
+  const filteredItems = useMemo(() => {
+    const matchesWeeklySummary = (item: Notificacao) => {
+      if (item.tipo === 'RESUMO' || item.tipo === 'RESUMO_SEMANAL') return true
+      const text = `${item.titulo} ${item.mensagem}`.toLowerCase()
+      return text.includes('resumo semanal') || text.includes('resumo da semana') || text.includes('semanal')
+    }
+
+    return items.filter((item) => {
+      if (item.tipo === 'EXPIRACAO') return preferences.notifications.expirationAlerts
+      if (item.tipo === 'PROMOCAO') return preferences.notifications.newPromotions
+      if (matchesWeeklySummary(item)) return preferences.notifications.weeklySummary
+      return true
+    })
+  }, [items, preferences.notifications.expirationAlerts, preferences.notifications.newPromotions, preferences.notifications.weeklySummary])
+
   const isAdmin = user?.role === 'ADMIN'
 
   // Load notifications and user data
@@ -188,21 +203,6 @@ export default function Notificacoes() {
       setFormLoading(false)
     }
   }, [formData])
-
-  const filteredItems = useMemo(() => {
-    const matchesWeeklySummary = (item: Notificacao) => {
-      if (item.tipo === 'RESUMO' || item.tipo === 'RESUMO_SEMANAL') return true
-      const text = `${item.titulo} ${item.mensagem}`.toLowerCase()
-      return text.includes('resumo semanal') || text.includes('resumo da semana') || text.includes('semanal')
-    }
-
-    return items.filter((item) => {
-      if (item.tipo === 'EXPIRACAO') return preferences.notifications.expirationAlerts
-      if (item.tipo === 'PROMOCAO') return preferences.notifications.newPromotions
-      if (matchesWeeklySummary(item)) return preferences.notifications.weeklySummary
-      return true
-    })
-  }, [items, preferences.notifications.expirationAlerts, preferences.notifications.newPromotions, preferences.notifications.weeklySummary])
 
   const unreadFilteredCount = filteredItems.filter((n) => !n.lida).length
 
