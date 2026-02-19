@@ -173,7 +173,7 @@ function App() {
         closeButton
         style={{ pointerEvents: 'auto', zIndex: 99999 }}
         toastStyle={{ pointerEvents: 'auto' }}
-        bodyClassName="pointer-events-auto"
+        className="pointer-events-auto"
       />
     </>
   )

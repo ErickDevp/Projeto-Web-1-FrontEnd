@@ -186,6 +186,7 @@ export default function TopBar({
     }
   }, [])
 
+  /*
   // Handler para marcar como lida no dropdown da TopBar
   const handleMarkAsRead = useCallback(async (id: number) => {
     try {
@@ -197,6 +198,7 @@ export default function TopBar({
       // Falha silenciosa na TopBar
     }
   }, [])
+  */
 
   const handleDismissForUser = useCallback(async (id: number) => {
     try {
